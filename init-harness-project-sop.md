@@ -121,7 +121,7 @@ sources/agent_adapters/cursor/.cursor/rules/harness.mdc
 | --- | --- |
 | `--target` | 目标仓库绝对路径 |
 | `--project-name` | 目标项目名称 |
-| `--stack` | `go` / `python` / `go-node` / `python-node` |
+| `--stack` | `go` / `python` / `java` / `c` / `go-node` / `python-node` / `java-node` / `c-node` / `java-c` / `java-c-node` |
 | `--provider` | `neutral` / `github` / `gitlab` |
 | `--issue-prefix` | Issue 前缀，例如 `APP` |
 | `--force` | 允许覆盖模板管理的目标文件 |
@@ -141,6 +141,8 @@ sources/agent_adapters/cursor/.cursor/rules/harness.mdc
 - `sources/gitignore/base.gitignore`
 - `sources/gitignore/go.gitignore`
 - `sources/gitignore/python.gitignore`
+- `sources/gitignore/java.gitignore`
+- `sources/gitignore/c.gitignore`
 - `sources/gitignore/node-frontend.gitignore`
 
 ### 5.1 公共规则
@@ -161,8 +163,14 @@ sources/agent_adapters/cursor/.cursor/rules/harness.mdc
 | --- | --- |
 | `go` | Base + Go |
 | `python` | Base + Python |
+| `java` | Base + Java |
+| `c` | Base + C / C++ |
 | `go-node` | Base + Go + Node |
 | `python-node` | Base + Python + Node |
+| `java-node` | Base + Java + Node |
+| `c-node` | Base + C / C++ + Node |
+| `java-c` | Base + Java + C / C++ |
+| `java-c-node` | Base + Java + C / C++ + Node |
 
 ### 5.3 默认不提交
 

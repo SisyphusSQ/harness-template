@@ -1,0 +1,17 @@
+# C / C++
+build/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+Makefile.in
+compile_commands.json
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+*.exe
+*.out
+*.dSYM/

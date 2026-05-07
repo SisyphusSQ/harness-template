@@ -20,7 +20,7 @@ usage() {
 Usage: bash scripts/init_harness_project.sh \
   --target /abs/path/to/repo \
   --project-name NAME \
-  --stack go|python|go-node|python-node \
+  --stack go|python|java|c|go-node|python-node|java-node|c-node|java-c|java-c-node \
   [--provider neutral|github|gitlab] \
   [--issue-prefix PREFIX] \
   [--force] \
@@ -51,7 +51,7 @@ require_arg() {
 
 validate_stack() {
   case "$stack" in
-    go|python|go-node|python-node) ;;
+    go|python|java|c|go-node|python-node|java-node|c-node|java-c|java-c-node) ;;
     *)
       echo "unsupported stack: $stack" >&2
       exit 2
@@ -138,12 +138,31 @@ build_gitignore() {
   case "$stack" in
     go) parts+=("$shared_gitignore_dir/go.gitignore") ;;
     python) parts+=("$shared_gitignore_dir/python.gitignore") ;;
+    java) parts+=("$shared_gitignore_dir/java.gitignore") ;;
+    c) parts+=("$shared_gitignore_dir/c.gitignore") ;;
     go-node)
       parts+=("$shared_gitignore_dir/go.gitignore")
       parts+=("$shared_gitignore_dir/node-frontend.gitignore")
       ;;
     python-node)
       parts+=("$shared_gitignore_dir/python.gitignore")
+      parts+=("$shared_gitignore_dir/node-frontend.gitignore")
+      ;;
+    java-node)
+      parts+=("$shared_gitignore_dir/java.gitignore")
+      parts+=("$shared_gitignore_dir/node-frontend.gitignore")
+      ;;
+    c-node)
+      parts+=("$shared_gitignore_dir/c.gitignore")
+      parts+=("$shared_gitignore_dir/node-frontend.gitignore")
+      ;;
+    java-c)
+      parts+=("$shared_gitignore_dir/java.gitignore")
+      parts+=("$shared_gitignore_dir/c.gitignore")
+      ;;
+    java-c-node)
+      parts+=("$shared_gitignore_dir/java.gitignore")
+      parts+=("$shared_gitignore_dir/c.gitignore")
       parts+=("$shared_gitignore_dir/node-frontend.gitignore")
       ;;
   esac

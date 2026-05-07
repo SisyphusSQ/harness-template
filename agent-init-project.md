@@ -24,7 +24,7 @@
 - 当前 harness 维护源绝对路径（下文记作 `<HARNESS_ROOT>`）
 - 目标仓库绝对路径
 - 项目名称
-- 技术栈：`go` / `python` / `go-node` / `python-node`
+- 技术栈：`go` / `python` / `java` / `c` / `go-node` / `python-node` / `java-node` / `c-node` / `java-c` / `java-c-node`
 - provider：`neutral` / `github` / `gitlab`
 - issue prefix
 - 初始化 agent 类型：`codex` / `cursor` / `other`
@@ -46,7 +46,7 @@
    bash <HARNESS_ROOT>/scripts/init_harness_project.sh \
      --target /abs/path/to/repo \
      --project-name NAME \
-     --stack go|python|go-node|python-node \
+     --stack go|python|java|c|go-node|python-node|java-node|c-node|java-c|java-c-node \
      --provider neutral|github|gitlab \
      --issue-prefix PREFIX
    ```
@@ -179,7 +179,7 @@
 3. 初始化前先确认这些输入：
    - 目标仓库绝对路径
    - 项目名称
-   - 技术栈：go / python / go-node / python-node
+   - 技术栈：go / python / java / c / go-node / python-node / java-node / c-node / java-c / java-c-node
    - provider：neutral / github / gitlab
    - issue prefix
    - 初始化 agent 类型：codex / cursor / other

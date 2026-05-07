@@ -7,6 +7,8 @@
 - `base.gitignore`：公共规则
 - `go.gitignore`：Go 规则
 - `python.gitignore`：Python 规则
+- `java.gitignore`：Java / JVM 构建规则
+- `c.gitignore`：C / C++ 构建规则
 - `node-frontend.gitignore`：Node / 前端规则
 
 这些文件不是给目标项目直接保留的目录结构，而是初始化脚本拼装最终根 `.gitignore` 的内部来源。

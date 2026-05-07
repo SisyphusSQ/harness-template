@@ -1,0 +1,11 @@
+# Java
+.gradle/
+target/
+build/
+out/
+*.class
+*.jar
+*.war
+*.ear
+hs_err_pid*
+replay_pid*
