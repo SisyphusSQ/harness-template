@@ -11,6 +11,7 @@ target=""
 project_name=""
 stack=""
 provider="neutral"
+issue_provider="linear"
 issue_prefix=""
 force=0
 dry_run=0
@@ -22,6 +23,7 @@ Usage: bash scripts/init_harness_project.sh \
   --project-name NAME \
   --stack go|python|java|c|go-node|python-node|java-node|c-node|java-c|java-c-node \
   [--provider neutral|github|gitlab] \
+  [--issue-provider linear|github|gitlab|repo|other] \
   [--issue-prefix PREFIX] \
   [--force] \
   [--dry-run]
@@ -64,6 +66,16 @@ validate_provider() {
     neutral|github|gitlab) ;;
     *)
       echo "unsupported provider: $provider" >&2
+      exit 2
+      ;;
+  esac
+}
+
+validate_issue_provider() {
+  case "$issue_provider" in
+    linear|github|gitlab|repo|other) ;;
+    *)
+      echo "unsupported issue provider: $issue_provider" >&2
       exit 2
       ;;
   esac
@@ -187,12 +199,14 @@ replace_placeholders() {
   local project_escaped
   local prefix_escaped
   local provider_escaped
+  local issue_provider_escaped
 
   project_escaped="$(escape_replacement "$project_name")"
   prefix_escaped="$(escape_replacement "$issue_prefix")"
   provider_escaped="$(escape_replacement "$provider")"
+  issue_provider_escaped="$(escape_replacement "$issue_provider")"
 
-  perl -0pi -e "s/__PROJECT_NAME__/$project_escaped/g; s/__ISSUE_PREFIX__/$prefix_escaped/g; s/__PROVIDER__/$provider_escaped/g" "$file"
+  perl -0pi -e "s/__PROJECT_NAME__/$project_escaped/g; s/__ISSUE_PREFIX__/$prefix_escaped/g; s/__PROVIDER__/$provider_escaped/g; s/__ISSUE_PROVIDER__/$issue_provider_escaped/g" "$file"
 }
 
 postprocess_text_files() {
@@ -200,8 +214,14 @@ postprocess_text_files() {
     "$target/AGENTS.md"
     "$target/README.md"
     "$target/.agent/PLANS.md"
+    "$target/.agent/plans/TEMPLATE.md"
+    "$target/.agent/state/TEMPLATE.md"
+    "$target/.agent/runs/TEMPLATE.md"
     "$target/docs/harness/control-plane.md"
+    "$target/docs/harness/issue-workflow.md"
     "$target/docs/harness/linear.md"
+    "$target/docs/issues/README.md"
+    "$target/docs/issues/TEMPLATE.md"
   )
 
   if [[ "$dry_run" -eq 1 ]]; then
@@ -254,6 +274,11 @@ while [[ $# -gt 0 ]]; do
       provider="$2"
       shift 2
       ;;
+    --issue-provider)
+      require_arg "$1" "${2:-}"
+      issue_provider="$2"
+      shift 2
+      ;;
     --issue-prefix)
       require_arg "$1" "${2:-}"
       issue_prefix="$2"
@@ -286,6 +311,7 @@ fi
 
 validate_stack
 validate_provider
+validate_issue_provider
 validate_target
 
 if [[ "$dry_run" -eq 0 ]]; then
@@ -302,8 +328,11 @@ managed_files=(
   ".agent/state/TEMPLATE.md"
   ".agent/runs/TEMPLATE.md"
   "docs/harness/control-plane.md"
+  "docs/harness/issue-workflow.md"
   "docs/harness/linear.md"
   "docs/harness/project-constraints.md"
+  "docs/issues/README.md"
+  "docs/issues/TEMPLATE.md"
   "docs/test/RUNBOOK_TEMPLATE.md"
   "scripts/harness/check.sh"
   "scripts/harness/common.sh"
@@ -336,9 +365,10 @@ run_post_check
 log "initialized harness into: $target"
 log "stack: $stack"
 log "provider: $provider"
+log "issue provider: $issue_provider"
 log "next steps:"
 log "  1. inspect .gitignore and add repo-specific local files"
-log "  2. read docs/harness/ and docs/test/RUNBOOK_TEMPLATE.md"
+log "  2. read docs/harness/, docs/issues/, and docs/test/RUNBOOK_TEMPLATE.md"
 log "  3. fill docs/harness/project-constraints.md with repo-specific mechanical constraints"
 log "  4. update README and AGENTS with real project context"
 log "  5. create the first plan in .agent/plans/"

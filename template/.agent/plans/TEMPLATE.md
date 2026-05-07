@@ -241,16 +241,17 @@ sequenceDiagram
 - `mode`:
 - `master_issue`:
 - `execution_issue`:
-- `linear_project`:
-- `current_linear_state`:
+- `issue_provider`: __ISSUE_PROVIDER__
+- `issue_project`:
+- `current_issue_state`:
 - `branch`:
 - `pr`:
 - `state_ref`:
 - `latest_run_ref`:
 - `master_run_ref`:
-- `truth_split`: `Linear primary / repo execution / PR-MR narrative`
+- `truth_split`: `Issue Tracker primary / repo execution / PR-MR narrative`
 
-## Linear Actions
+## Issue Actions
 - `issue_targets`:
 - `state_transitions`:
 - `comment_actions`:
@@ -271,7 +272,7 @@ sequenceDiagram
 
 ## Writeback Summary
 - `targets`:
-- `linear_feedback_location`:
+- `issue_feedback_location`:
 - `status`:
 - `notes`:
 

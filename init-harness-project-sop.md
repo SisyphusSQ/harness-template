@@ -12,14 +12,15 @@
 
 truth split 默认采用：
 
-- `Linear = 主协作真相`
+- `Issue Tracker = 主协作真相`
 - `repo = 主执行真相`
 - `PR / MR = 次级代码叙事面`
 
 base harness 需要完整具备：
 
 - 仓库控制面规则
-- Linear 工作流与 issue / comment 模板
+- 工具中立 Issue Workflow 与 issue / comment 模板
+- `issue-provider=repo` 时的仓库内 issue 存储模板
 - 项目级机械约束登记与接入协议
 - `.gitignore` 基线
 - `.agent` 最小计划模板与本地辅助运行面模板
@@ -40,8 +41,12 @@ target-repo/
 ├── docs/
 │   ├── harness/
 │   │   ├── control-plane.md
+│   │   ├── issue-workflow.md
 │   │   ├── linear.md
 │   │   └── project-constraints.md
+│   ├── issues/
+│   │   ├── README.md
+│   │   └── TEMPLATE.md
 │   └── test/
 │       └── RUNBOOK_TEMPLATE.md
 ├── .agent/
@@ -61,7 +66,8 @@ target-repo/
 - 不再在目标项目里生成 `docs/linear/`
 - 不再在目标项目里生成 `docs/linear/prompts/`
 - 不再在目标项目里生成 `docs/harness/prompt-templates.md`
-- `docs/harness/` 只承载控制面真相文档、Linear 模板和项目级机械约束登记
+- `docs/harness/` 只承载控制面真相文档、Issue Workflow、Issue Tracker profile 和项目级机械约束登记
+- `docs/issues/` 是 `issue-provider=repo` 时的仓库内 issue 存储
 - `docs/test/RUNBOOK_TEMPLATE.md` 属于 base harness，承载通用测试 runbook 与脱敏结果摘要模板
 - 不再默认生成没有消费链路的 `.agent/mappings/`
 - 不默认生成 `.agent/skills/`，只在项目有稳定复用的专门流程时作为可选 repo-local 扩展补充
@@ -123,6 +129,7 @@ sources/agent_adapters/cursor/.cursor/rules/harness.mdc
 | `--project-name` | 目标项目名称 |
 | `--stack` | `go` / `python` / `java` / `c` / `go-node` / `python-node` / `java-node` / `c-node` / `java-c` / `java-c-node` |
 | `--provider` | `neutral` / `github` / `gitlab` |
+| `--issue-provider` | `linear` / `github` / `gitlab` / `repo` / `other`，默认 `linear` |
 | `--issue-prefix` | Issue 前缀，例如 `APP` |
 | `--force` | 允许覆盖模板管理的目标文件 |
 | `--dry-run` | 只打印动作，不落盘 |
@@ -198,6 +205,7 @@ sources/agent_adapters/cursor/.cursor/rules/harness.mdc
 固定规则：
 
 - `docs/harness/*.md` 默认应提交
+- `docs/issues/*.md` 默认应提交
 - `docs/test/RUNBOOK_TEMPLATE.md` 默认应提交
 - `.cursor/rules/*.mdc` 默认可提交，其它 `.cursor/*` 默认不提交
 - `.agent/plans/TEMPLATE.md` 默认应提交
@@ -213,7 +221,7 @@ sources/agent_adapters/cursor/.cursor/rules/harness.mdc
 2. 校验目标路径是绝对路径且可初始化
 3. 复制 `template/` 基础文件到目标项目
 4. 按 `--stack` 生成最终根 `.gitignore`
-5. 替换 `__PROJECT_NAME__`、`__ISSUE_PREFIX__`、`__PROVIDER__`
+5. 替换 `__PROJECT_NAME__`、`__ISSUE_PREFIX__`、`__PROVIDER__`、`__ISSUE_PROVIDER__`
 6. 赋予 `scripts/harness/*.sh` 可执行权限
 7. 执行 `scripts/harness/check.sh`
 8. 打印下一步人工动作
@@ -227,7 +235,7 @@ sources/agent_adapters/cursor/.cursor/rules/harness.mdc
 - agent 扩展层只在 agent 驱动初始化时补充
 - 根目录 `agent-init-project.md` 是 agent 初始化整个项目的推荐入口
 
-## 7. `docs/harness/` 三文件分工
+## 7. `docs/harness/` 与 `docs/issues/` 分工
 
 ### `control-plane.md`
 
@@ -239,7 +247,7 @@ sources/agent_adapters/cursor/.cursor/rules/harness.mdc
 - `.gitignore` 约束
 - provider-neutral 默认策略
 
-### `linear.md`
+### `issue-workflow.md`
 
 必须完整覆盖：
 
@@ -251,6 +259,23 @@ sources/agent_adapters/cursor/.cursor/rules/harness.mdc
 - codex handoff 模板
 - 4 类评论模板
 - master done checklist
+- Issue Store Profiles
+- repo issue 与外部 issue provider 的映射
+
+### `linear.md`
+
+必须完整覆盖：
+
+- Linear profile 定位
+- 从旧 Linear-first 入口到 `issue-workflow.md` 的迁移说明
+- 通用字段到 Linear issue body / comment / state / project 的映射
+
+### `docs/issues/`
+
+必须完整覆盖：
+
+- `README.md`：仓库内 issue 存储规则
+- `TEMPLATE.md`：`issue_id`、`status`、`kind`、`goal`、`included`、`excluded`、`acceptance_matrix`、`stop_when`、`write_scope_limit`、`verification_commands`、`recovery_point`、`next_action`、`writeback_log`
 
 ### `project-constraints.md`
 
@@ -271,7 +296,7 @@ sources/agent_adapters/cursor/.cursor/rules/harness.mdc
 - maintenance loop 会扫描 `project-constraints.md`，但发现 `documented` 长期未机械化时只能报告或建议建 issue
 - `docs/test/` 默认承载可执行测试 runbook 和提交版脱敏结果摘要
 - 所有 prompt 模板统一归口 `.agent/prompts/`
-- `Linear` 默认承接任务范围、状态、运行反馈、结果回写
+- `Issue Tracker` 默认承接任务范围、状态、运行反馈、结果回写
 - `repo` 默认承接执行命令、代码路径、设计入口、Prompt / Guide
 
 ### `docs/test/RUNBOOK_TEMPLATE.md`
@@ -307,7 +332,7 @@ sources/agent_adapters/cursor/.cursor/rules/harness.mdc
 固定要求：
 
 - `state` / `runs` 默认作为本地辅助运行面保留
-- 它们服务中断恢复、批次结果与本地审计，不替代 Linear
+- 它们服务中断恢复、批次结果与本地审计，不替代 Issue Tracker
 - `.agent/PLANS.md` 与 `.agent/plans/TEMPLATE.md` 必须明确：
   - `PLANS.md` 是协议，`TEMPLATE.md` 是主模板，`EXAMPLE-implementation.md` 是质量标杆
   - frontmatter 推荐但不强制，固定字段为 `name`、`overview`、`todos`、`isProject`
@@ -319,7 +344,7 @@ sources/agent_adapters/cursor/.cursor/rules/harness.mdc
 - `Reference Snippets` 不能是空块或纯占位内容
 - `组件职责与代码落点` 至少要有一条真实模块 / 路径 / 类型记录
 - `.agent/prompts/` 与 `.agent/guides/` 由 agent 驱动初始化时补充
-- 若仓库同时使用 Linear 和本地运行面，则协作状态以 Linear 为准，本地恢复细节以 `.agent/state` / `.agent/runs` 为准
+- 若仓库同时使用 Issue Tracker 和本地运行面，则协作状态以 Issue Tracker 为准，本地恢复细节以 `.agent/state` / `.agent/runs` 为准
 - `.agent/skills/` 不属于 base harness 输出；只有当项目存在稳定复用的专门流程时，才由 repo-local 文档或 agent 扩展层另行补充
 
 ## 9. Agent 扩展维护源
@@ -405,7 +430,10 @@ sources/agent_extensions/
 | --- | --- |
 | `git status` 是否出现真实配置 | 不应出现 |
 | `docs/harness/control-plane.md` 是否存在 | 应存在 |
-| `docs/harness/linear.md` 是否存在 | 应存在 |
+| `docs/harness/issue-workflow.md` 是否存在 | 应存在 |
+| `docs/harness/linear.md` 是否存在兼容 profile | 应存在 |
+| `docs/issues/README.md` 是否存在 | 应存在 |
+| `docs/issues/TEMPLATE.md` 是否存在 | 应存在 |
 | `docs/harness/project-constraints.md` 是否存在 | 应存在 |
 | `docs/harness/prompt-templates.md` 是否不存在 | 应不存在 |
 | `.agent/plans/EXAMPLE-implementation.md` 是否存在 | 应存在 |
@@ -422,7 +450,7 @@ sources/agent_extensions/
 
 ## 12. 常见误区
 
-1. 继续把 Linear 模板散放到 `docs/linear/`
+1. 继续把 issue 模板散放到 `docs/linear/`
 2. 继续把 prompt 模板塞回 `docs/harness/`
 3. `.gitignore` 只做了 Base，没叠加技术栈规则
 4. 预先初始化一堆没有消费链路的 `.agent` 空壳目录

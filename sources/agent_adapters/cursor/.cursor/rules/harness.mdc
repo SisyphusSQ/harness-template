@@ -12,12 +12,14 @@ alwaysApply: true
 1. `AGENTS.md`
 2. 当前修改目录就近的目录级 `AGENTS.md`（如果存在）
 3. `docs/harness/control-plane.md`
-4. `docs/harness/linear.md`
-5. `docs/harness/project-constraints.md`
-6. `.agent/PLANS.md`
-7. `.agent/plans/TEMPLATE.md`
-8. `.agent/plans/EXAMPLE-implementation.md`
-9. `docs/test/RUNBOOK_TEMPLATE.md`
+4. `docs/harness/issue-workflow.md`
+5. `docs/harness/linear.md`（Linear profile，如适用）
+6. `docs/issues/README.md`
+7. `docs/harness/project-constraints.md`
+8. `.agent/PLANS.md`
+9. `.agent/plans/TEMPLATE.md`
+10. `.agent/plans/EXAMPLE-implementation.md`
+11. `docs/test/RUNBOOK_TEMPLATE.md`
 
 ## 执行约束
 
@@ -30,8 +32,8 @@ alwaysApply: true
 
 ## 真相边界
 
-- Linear 是主协作真相。
+- Issue Tracker 是主协作真相。
 - repo 是主执行真相。
 - PR / MR 是次级代码叙事面。
-- `.agent/state` 与 `.agent/runs` 是本地辅助运行面，不替代 Linear。
+- `.agent/state` 与 `.agent/runs` 是本地辅助运行面，不替代 Issue Tracker。
 - `.agent/skills` 是可选 repo-local 扩展，不是 base harness 必备输出。

@@ -5,7 +5,7 @@
 | 文档定位 | 复杂任务的计划协议 |
 | 适用范围 | 跨模块、带风险、需多轮验证、需中断恢复的任务 |
 | 计划实例位置 | `.agent/plans/` |
-| 关联文档 | `docs/harness/control-plane.md`、`docs/harness/linear.md`、`.agent/prompts/README.md`（如存在） |
+| 关联文档 | `docs/harness/control-plane.md`、`docs/harness/issue-workflow.md`、`docs/harness/linear.md`、`.agent/prompts/README.md`（如存在） |
 
 本文件只定义“什么时候要写 plan、plan 怎么写、执行中怎么维护”。
 具体计划实例统一写入 `.agent/plans/`，不再新增第二套计划目录。
@@ -16,7 +16,7 @@
 
 | 场景 | 说明 |
 | --- | --- |
-| 跨目录或跨模块边界 | 例如同时改代码、文档、配置、 Prompt 或 Linear 约束 |
+| 跨目录或跨模块边界 | 例如同时改代码、文档、配置、 Prompt 或 Issue Workflow 约束 |
 | 涉及配置、接口、兼容性 | 会影响外部输入输出或运行边界 |
 | 涉及 schema / migration / 数据变更 | 需要提前写清恢复路径与验收口径 |
 | 涉及鉴权、权限、风控、命令消费 | 这类任务天然有较高回归风险 |
@@ -71,7 +71,7 @@
 - `Validation and Acceptance`
 - `Idempotence and Recovery`
 - `Harness Control Plane`
-- `Linear Actions`
+- `Issue Actions`
 - `Verify Summary`
 - `Review Summary`
 - `Writeback Summary`
@@ -81,7 +81,7 @@
 
 固定规则：
 
-- 若任务进入完整控制面 loop，不得省略 `Harness Control Plane / Linear Actions / Summary` 系列结构块
+- 若任务进入完整控制面 loop，不得省略 `Harness Control Plane / Issue Actions / Summary` 系列结构块
 - 若任务仍在 plan-only 阶段，可先写最小可执行版本，但不能省略范围冻结和验证方式
 - `Architecture / Data Flow` 默认至少拆成以下 5 个实现子块：
   - `### 真实入口与触发`
@@ -239,10 +239,11 @@ isProject: false
   - 回滚方式：误伤时如何临时关闭、降级为 `partial` 或回退检查
 - maintenance plan 的结果面必须保留：`Maintenance Findings / Classification / Verification Plan / Writeback Plan / Residual Risks / Next Action`。
 
-## 8. Linear-first 默认约定
+## 8. Issue Tracker 默认约定
 
 固定规则：
 
-- 若仓库不启用本地 `state / runs`，则 `recovery_point` 与 `next_action` 默认写回 Linear
-- 计划里出现的 `Verify Summary / Review Summary / Writeback Summary` 默认都应可直接整理成 Linear 反馈结构
-- repo 负责执行真相，Linear 负责协作真相
+- 若仓库不启用本地 `state / runs`，则 `recovery_point` 与 `next_action` 默认写回 Issue Tracker
+- 计划里出现的 `Verify Summary / Review Summary / Writeback Summary` 默认都应可直接整理成 Issue Tracker 反馈结构
+- repo 负责执行真相，Issue Tracker 负责协作真相
+- Linear、GitHub、GitLab、repo issue 或其它工具只是 Issue Tracker profile

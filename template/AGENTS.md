@@ -15,7 +15,9 @@
 | --- | --- |
 | 仓库说明 | `README.md` |
 | 主流程、gate、计划 contract | `docs/harness/control-plane.md` |
-| Linear 工作流与模板 | `docs/harness/linear.md` |
+| Issue Workflow 与模板 | `docs/harness/issue-workflow.md` |
+| Linear 兼容 profile | `docs/harness/linear.md` |
+| 仓库内 issue 存储 | `docs/issues/` |
 | 项目级机械约束登记 | `docs/harness/project-constraints.md` |
 | 计划协议 | `.agent/PLANS.md` |
 | 计划主模板 | `.agent/plans/TEMPLATE.md` |
@@ -30,7 +32,8 @@
 
 | 路径 | 负责内容 |
 | --- | --- |
-| `docs/harness/` | 控制面规则、Linear 模板与项目级机械约束登记 |
+| `docs/harness/` | 控制面规则、Issue Workflow、Issue Tracker profile 与项目级机械约束登记 |
+| `docs/issues/` | `issue-provider=repo` 时的仓库 issue 存储 |
 | `.agent/PLANS.md` + `.agent/plans/` | 计划协议、计划主模板和实现型示例 |
 | `.agent/state/` + `.agent/runs/` | repo-local 恢复点与结果摘要面 |
 | `.agent/prompts/` | 可选 Prompt 模板，仅 agent 驱动初始化时补充 |
@@ -40,10 +43,10 @@
 
 固定解释：
 
-- `Linear 是主协作真相`
+- `Issue Tracker 是主协作真相`
 - `repo 是主执行真相`
 - `PR / MR 是次级代码叙事面`
-- `.agent/state/` 与 `.agent/runs/` 只补充本地恢复和结果细节，不替代 Linear
+- `.agent/state/` 与 `.agent/runs/` 只补充本地恢复和结果细节，不替代 Issue Tracker
 
 ## 协作约束
 
@@ -59,6 +62,7 @@
 - 模板配置可提交，真实环境配置不提交
 - 若需要环境配置，优先提交 `.env.example`、`settings.example.yaml` 这类示例文件
 - `docs/test/*` 默认提交可复用 runbook 与脱敏后的当前 / 本次验证结果摘要
+- `docs/issues/*` 默认提交工具中立 issue 与脱敏后的 writeback log
 - 原始命令输出、真实凭据、数据库主机、临时目录、完整下载 URL、token、行主键、本机路径等敏感或机器本地痕迹不提交
 - 已写入 `docs/test/*` 的脱敏验证结果摘要是提交版测试真相，后续同步或 closeout 不得因为避免敏感信息而删成空模板
 - `.agent/state/*` 与 `.agent/runs/*` 的真实运行文件默认不提交
@@ -80,4 +84,5 @@
 ## Provider 默认值
 
 - 当前 provider：`__PROVIDER__`
+- 当前 issue provider：`__ISSUE_PROVIDER__`
 - 若后续锁定 GitHub 或 GitLab，只调整 merge 说明，不改变目录结构

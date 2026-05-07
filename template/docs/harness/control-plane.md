@@ -17,7 +17,7 @@
 | `implement` | 实施当前 slice | 代码 / 文档 / 计划更新 |
 | `verify` | 执行验证矩阵 | Verify Summary |
 | `review` | findings-first review | Review Summary |
-| `writeback` | 回写 Linear、必要 repo 文档与代码叙事面 | Writeback Summary |
+| `writeback` | 回写 Issue Tracker、必要 repo 文档与代码叙事面 | Writeback Summary |
 | `pr_prep` | 准备 PR / MR 叙事 | PR Prep Summary |
 | `merge` | 自动或手动 merge 收口 | merge 结论 |
 | `notify` | 输出当前轮结果 | Notify Summary |
@@ -33,7 +33,7 @@
 
 固定规则：
 
-- `Linear 是主协作真相`
+- `Issue Tracker 是主协作真相`
 - `repo 是主执行真相`
 - `PR / MR 是次级代码叙事面`
 
@@ -41,23 +41,27 @@
 
 | 面 | 默认负责内容 |
 | --- | --- |
-| `Linear` | 任务范围、当前状态、blockers、follow-up、当前 slice、运行反馈、结果回写、`recovery_point`、`next_action` |
+| `Issue Tracker` | 任务范围、当前状态、blockers、follow-up、当前 slice、运行反馈、结果回写、`recovery_point`、`next_action` |
 | `repo` | 执行命令、代码路径、设计文档入口、Prompt / Guide、repo-local 边界与约束、本地辅助运行面 |
 | `PR / MR` | diff narrative、review thread、merge state |
 
-### 执行护栏
+### Issue Store Profiles
 
-| 面 | 默认负责内容 |
+| Provider | 默认 Issue Store |
 | --- | --- |
-| `Linear` | 流程护栏、状态机、Done gate、当前 run 的协作状态 |
-| `repo` | 命令护栏、write scope、stop 条件、实现与验证边界、本地恢复细节 |
+| `linear` | Linear issue body / project / state / comment |
+| `github` | GitHub Issue body / label / milestone / comment |
+| `gitlab` | GitLab Issue description / label / milestone / note |
+| `repo` | `docs/issues/*.md` |
+| `other` | 项目约定的外部 issue 系统 |
 
 固定解释：
 
 - `共享真相源` 默认按上述分层工作，不要求单一载体承载全部真相。
-- `执行护栏` 也是双层：Linear 负责流程，repo 负责执行。
-- 当两层发生冲突时，协作状态以 Linear 为准，执行约束以 repo 为准。
-- `.agent/state` / `.agent/runs` 属于本地辅助运行面；它们补充恢复和审计细节，但不替代 Linear。
+- `执行护栏` 也是双层：Issue Tracker 负责流程，repo 负责执行。
+- 当两层发生冲突时，协作状态以 Issue Tracker 为准，执行约束以 repo 为准。
+- `.agent/state` / `.agent/runs` 属于本地辅助运行面；它们补充恢复和审计细节，但不替代 Issue Tracker。
+- Linear 只是一个 Issue Tracker profile，兼容说明在 `docs/harness/linear.md`。
 
 ### 跨仓 truth split（按需）
 
@@ -101,7 +105,7 @@
 | Mode | 行为 | 允许副作用 |
 | --- | --- | --- |
 | `report-only` | 扫描、分类、输出维护 findings | 无文件修改、无外部系统写入 |
-| `issue-create` | 在 `report-only` 输出基础上，按用户确认创建或更新维护 issue | 只允许 issue / comment 写入 |
+| `issue-create` | 在 `report-only` 输出基础上，按用户确认创建或更新维护 issue | 只允许 issue / comment / writeback log 写入 |
 | `safe-fix` | 只修低风险文档维护项 | 低风险文档索引、旧路径引用、prompt README 引用 |
 | `rule-promotion` | 把重复 review finding 升级为机械规则候选 | 可更新 plan / project constraints；真正新增检查需按计划实施和验证 |
 
@@ -179,20 +183,20 @@ Maintenance loop 的输出必须包含：
 
 固定规则：
 
-- `运行反馈默认回写到 Linear`
-- `结果回写默认写回 Linear`
+- `运行反馈默认写回 Issue Tracker`
+- `结果回写默认写回 Issue Tracker`
 
 最小要求：
 
-- 每一轮至少要把 `verification_summary`、`review_summary`、`writeback_summary`、`residual_risks`、`recovery_point`、`next_action` 写回 Linear
+- 每一轮至少要把 `verification_summary`、`review_summary`、`writeback_summary`、`residual_risks`、`recovery_point`、`next_action` 写回 Issue Tracker
 - 若仓库启用了 PR / MR，再把代码叙事和 review thread 写到 PR / MR
 - 若本轮修改了设计或运行说明，再把必要事实回写到 repo 文档
 - 若仓库启用了 `.agent/state` / `.agent/runs`，可同步记录本地恢复点与批次结果面
 
 默认解释：
 
-- 不启用本地 `state / runs` 时，`recovery_point` 与 `next_action` 默认留在 Linear
-- 启用本地 `state / runs` 时，协作状态仍以 Linear 为准，本地文件只补充恢复与审计细节
+- 不启用本地 `state / runs` 时，`recovery_point` 与 `next_action` 默认留在 Issue Tracker
+- 启用本地 `state / runs` 时，协作状态仍以 Issue Tracker 为准，本地文件只补充恢复与审计细节
 - `writeback` 不要求单独本地运行面才能成立
 
 ## 测试 runbook
@@ -206,14 +210,19 @@ Maintenance loop 的输出必须包含：
 
 ## provider-neutral 默认策略
 
-当前 provider：
+当前 merge provider：
 
 - `__PROVIDER__`
+
+当前 issue provider：
+
+- `__ISSUE_PROVIDER__`
 
 默认解释：
 
 - `neutral`：只要求 agent 能给出 `manual` 或 `blocked` 结论，不假装自动 merge
 - `github` / `gitlab`：只调整默认说明，不改变当前控制面目录结构
+- issue provider 只影响 Issue Tracker profile，不影响 PR / MR merge provider
 
 ## `.agent` 计划 contract
 
@@ -227,11 +236,12 @@ Maintenance loop 的输出必须包含：
 | `.agent/state/TEMPLATE.md` | 本地辅助恢复面模板 |
 | `.agent/runs/TEMPLATE.md` | 本地辅助结果面模板 |
 | `.agent/skills/` | 可选 repo-local skill 目录 |
+| `docs/issues/` | `issue-provider=repo` 时的仓库 issue 存储 |
 
 固定要求：
 
 - 默认初始化计划协议、计划主模板、实现型 exemplar 和本地辅助运行面模板
-- `.agent/state` / `.agent/runs` 服务本地恢复与结果审计，不替代 Linear
+- `.agent/state` / `.agent/runs` 服务本地恢复与结果审计，不替代 Issue Tracker
 - `.agent/skills` 只在项目有稳定复用的专门流程时补充，不属于 base harness 必备输出
 - `review_gate` 的输入真相来自 plan 文件，不依赖额外状态目录
 
@@ -259,6 +269,7 @@ Maintenance loop 的输出必须包含：
 固定要求：
 
 - `docs/harness/*.md` 默认应提交
+- `docs/issues/*.md` 默认应提交
 - `.agent/plans/TEMPLATE.md` 默认应提交
 - `.agent/plans/EXAMPLE-implementation.md` 默认应提交
 - 若后续补了 `.agent/prompts/` 与 `.agent/guides/`，这些文档默认也应提交

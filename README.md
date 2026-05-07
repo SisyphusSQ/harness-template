@@ -25,8 +25,12 @@ repo/
 ├── docs/
 │   ├── harness/
 │   │   ├── control-plane.md
+│   │   ├── issue-workflow.md
 │   │   ├── linear.md
 │   │   └── project-constraints.md
+│   ├── issues/
+│   │   ├── README.md
+│   │   └── TEMPLATE.md
 │   └── test/
 │       └── RUNBOOK_TEMPLATE.md
 ├── .agent/
@@ -69,15 +73,16 @@ repo/
 
 ## 当前原则
 
-- `docs/harness/` 只承载控制面真相、Linear 模板与项目级机械约束登记，不再承载 prompt 模板
+- `docs/harness/` 只承载控制面真相、Issue Workflow、Issue Tracker profile 与项目级机械约束登记，不再承载 prompt 模板
+- `docs/issues/` 是 `issue-provider=repo` 时的仓库内 issue 存储
 - `docs/harness/project-constraints.md` 是项目级机械约束登记入口，初始化后需要按真实项目补齐
 - prompt 模板统一放在 `.agent/prompts/`
 - `maintenance-loop.md` 属于 agent 扩展 prompt，默认 `report-only`，不新增自动修复脚本；只有用户显式指定才进入 `issue-create / safe-fix / rule-promotion`
 - code-review 与 linter 说明统一放在 `.agent/guides/`
-- `Linear = 主协作真相`
+- `Issue Tracker = 主协作真相`
 - `repo = 主执行真相`
 - `.agent/` 的 base 输出默认初始化计划协议、计划模板、实现型 exemplar，以及本地辅助运行面模板
-- `.agent/state` / `.agent/runs` 是本地辅助运行面，不替代 Linear
+- `.agent/state` / `.agent/runs` 是本地辅助运行面，不替代 Issue Tracker
 - `.cursor/rules/harness.mdc` 只作为 Cursor adapter，负责把 Cursor 导向仓库内 harness 真相文件
 - `.gitignore` 必须在第一次提交前就完成初始化
 - `scripts/harness/` 中的 gate 脚本初始化后必须能真实执行，不能只靠关键字检查过关
@@ -90,10 +95,11 @@ repo/
 2. 跑 `scripts/init_harness_project.sh`
 3. 若初始化 agent 是 Cursor，再从 `sources/agent_adapters/cursor/` 补 `.cursor/rules/harness.mdc`
 4. 若是 agent 驱动初始化，再从 `sources/agent_extensions/shared/` 与 `sources/agent_extensions/{placeholder|full}/` 补 `.agent/prompts/` 和 `.agent/guides/`
-5. 阅读并补齐 `docs/harness/project-constraints.md` 中的项目级机械约束登记表
-6. 若存在 `.agent/prompts/maintenance-loop.md`，确认默认 mode 仍是 `report-only`
-7. 优先阅读 `.agent/PLANS.md`、`.agent/plans/TEMPLATE.md`、`.agent/plans/EXAMPLE-implementation.md`
-8. 最后执行 `make harness-verify`
+5. 阅读 `docs/harness/issue-workflow.md`；若无外部 issue 工具，使用 `docs/issues/TEMPLATE.md`
+6. 阅读并补齐 `docs/harness/project-constraints.md` 中的项目级机械约束登记表
+7. 若存在 `.agent/prompts/maintenance-loop.md`，确认默认 mode 仍是 `report-only`
+8. 优先阅读 `.agent/PLANS.md`、`.agent/plans/TEMPLATE.md`、`.agent/plans/EXAMPLE-implementation.md`
+9. 最后执行 `make harness-verify`
 
 更推荐的 agent 用法是：
 

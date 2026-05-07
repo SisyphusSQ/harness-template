@@ -10,8 +10,11 @@ required_files=(
   "AGENTS.md"
   "README.md"
   "docs/harness/control-plane.md"
+  "docs/harness/issue-workflow.md"
   "docs/harness/linear.md"
   "docs/harness/project-constraints.md"
+  "docs/issues/README.md"
+  "docs/issues/TEMPLATE.md"
   "docs/test/RUNBOOK_TEMPLATE.md"
   ".agent/PLANS.md"
   ".agent/plans/TEMPLATE.md"
@@ -96,8 +99,10 @@ if [[ -f ".cursor/rules/harness.mdc" ]]; then
     "AGENTS.md"
     '目录级 `AGENTS.md`'
     "docs/harness/control-plane.md"
+    "docs/harness/issue-workflow.md"
     "docs/harness/linear.md"
     "docs/harness/project-constraints.md"
+    "docs/issues/README.md"
     ".agent/PLANS.md"
     ".agent/plans/TEMPLATE.md"
     ".agent/plans/EXAMPLE-implementation.md"
@@ -115,8 +120,10 @@ fi
 
 required_control_plane_patterns=(
   "collect -> gate -> freeze -> slice -> implement -> verify -> review -> writeback -> pr_prep -> merge -> notify"
-  "Linear 是主协作真相"
+  "Issue Tracker 是主协作真相"
   "repo 是主执行真相"
+  "Issue Store Profiles"
+  "docs/issues/"
   "provider 仓"
   "consumer 仓"
   "project-constraints.md"
@@ -126,8 +133,8 @@ required_control_plane_patterns=(
   "rule-promotion"
   "目录级 AGENTS"
   ".agent/skills"
-  "运行反馈默认回写到 Linear"
-  "结果回写默认写回 Linear"
+  "运行反馈默认写回 Issue Tracker"
+  "结果回写默认写回 Issue Tracker"
   "review_gate"
   "merge"
   "escalation"
@@ -138,6 +145,54 @@ required_control_plane_patterns=(
 for pattern in "${required_control_plane_patterns[@]}"; do
   if ! rg -Fq "$pattern" docs/harness/control-plane.md; then
     echo "docs/harness/control-plane.md missing required pattern: $pattern" >&2
+    exit 1
+  fi
+done
+
+required_issue_workflow_patterns=(
+  "Issue Workflow"
+  "Issue Tracker 是主协作真相"
+  "Issue Store Profiles"
+  "Requirement Clarification"
+  "Master Issue"
+  "Execution Issue"
+  "Codex Handoff"
+  "运行反馈 Comment Contract"
+  "结果回写 Contract"
+  "recovery_point"
+  "next_action"
+  "current_issue_state"
+  "Master 是否可置 Done"
+)
+
+for pattern in "${required_issue_workflow_patterns[@]}"; do
+  if ! rg -Fq "$pattern" docs/harness/issue-workflow.md; then
+    echo "docs/harness/issue-workflow.md missing required pattern: $pattern" >&2
+    exit 1
+  fi
+done
+
+required_repo_issue_patterns=(
+  "Repo Issues"
+  "issue-provider=repo"
+  "issue_id"
+  "status"
+  "kind"
+  "goal"
+  "included"
+  "excluded"
+  "acceptance_matrix"
+  "stop_when"
+  "write_scope_limit"
+  "verification_commands"
+  "recovery_point"
+  "next_action"
+  "writeback_log"
+)
+
+for pattern in "${required_repo_issue_patterns[@]}"; do
+  if ! rg -Fq "$pattern" docs/issues/README.md docs/issues/TEMPLATE.md; then
+    echo "docs/issues templates missing required pattern: $pattern" >&2
     exit 1
   fi
 done
@@ -198,19 +253,17 @@ for pattern in "${required_test_runbook_patterns[@]}"; do
   fi
 done
 
-required_linear_patterns=(
-  "Requirement Clarification"
-  "Master Issue"
-  "Execution Issue"
-  "Codex Handoff"
-  "运行反馈 Comment Contract"
-  "结果回写 Contract"
+required_linear_profile_patterns=(
+  "Linear Profile"
+  "issue-workflow.md"
+  "Linear 字段映射"
+  "current_issue_state"
   "recovery_point"
   "next_action"
-  "Master 是否可置 Done"
+  "Issue Tracker 是主协作真相"
 )
 
-for pattern in "${required_linear_patterns[@]}"; do
+for pattern in "${required_linear_profile_patterns[@]}"; do
   if ! rg -Fq "$pattern" docs/harness/linear.md; then
     echo "docs/harness/linear.md missing required pattern: $pattern" >&2
     exit 1
@@ -255,7 +308,7 @@ required_plans_patterns=(
   "Maintenance Loop 计划要求"
   "rule-promotion"
   "Maintenance Findings"
-  "Linear-first 默认约定"
+  "Issue Tracker 默认约定"
 )
 
 for pattern in "${required_plans_patterns[@]}"; do
@@ -265,7 +318,7 @@ for pattern in "${required_plans_patterns[@]}"; do
   fi
 done
 
-for required in "linear_project" "current_linear_state" "recovery_point" "next_action" "state_ref" "latest_run_ref" "master_run_ref"; do
+for required in "issue_provider" "issue_project" "current_issue_state" "recovery_point" "next_action" "state_ref" "latest_run_ref" "master_run_ref"; do
   if ! rg -Fq "$required" .agent/plans/TEMPLATE.md; then
     echo ".agent/plans/TEMPLATE.md missing required field: $required" >&2
     exit 1
@@ -343,7 +396,7 @@ done
 required_state_run_patterns=(
   "State Snapshot Template"
   "Run Summary Template"
-  "Linear"
+  "Issue Tracker"
   "recovery_point"
 )
 

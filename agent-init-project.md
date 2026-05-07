@@ -26,6 +26,7 @@
 - 项目名称
 - 技术栈：`go` / `python` / `java` / `c` / `go-node` / `python-node` / `java-node` / `c-node` / `java-c` / `java-c-node`
 - provider：`neutral` / `github` / `gitlab`
+- issue provider：`linear` / `github` / `gitlab` / `repo` / `other`，默认 `linear`
 - issue prefix
 - 初始化 agent 类型：`codex` / `cursor` / `other`
 - agent 扩展层模式：
@@ -48,14 +49,18 @@
      --project-name NAME \
      --stack go|python|java|c|go-node|python-node|java-node|c-node|java-c|java-c-node \
      --provider neutral|github|gitlab \
+     --issue-provider linear|github|gitlab|repo|other \
      --issue-prefix PREFIX
    ```
 
 2. 确认 base harness 初始化成功，至少包含：
 
    - `docs/harness/control-plane.md`
+   - `docs/harness/issue-workflow.md`
    - `docs/harness/linear.md`
    - `docs/harness/project-constraints.md`
+   - `docs/issues/README.md`
+   - `docs/issues/TEMPLATE.md`
    - `docs/test/RUNBOOK_TEMPLATE.md`
    - `.agent/PLANS.md`
    - `.agent/plans/TEMPLATE.md`
@@ -116,11 +121,13 @@
 7. 额外确认控制面文档里已经能看出 truth split：
 
    - `docs/harness/control-plane.md` 能读出：
-     - `Linear 是主协作真相`
+     - `Issue Tracker 是主协作真相`
      - `repo 是主执行真相`
-   - `docs/harness/linear.md` 能读出：
-     - 运行反馈默认写回 Linear
-     - `recovery_point` / `next_action` 默认落 Linear
+   - `docs/harness/issue-workflow.md` 能读出：
+     - 运行反馈默认写回 Issue Tracker
+     - `recovery_point` / `next_action` 默认落 Issue Tracker
+   - `docs/harness/linear.md` 能读出它只是 Linear profile / migration note
+   - `docs/issues/TEMPLATE.md` 能读出 repo issue 固定字段和 `writeback_log`
    - `docs/harness/project-constraints.md` 能读出：
      - 状态枚举和分类枚举
      - `maintenance_candidate`、`rule_promotion_candidate`、`human_decision_required`
@@ -132,7 +139,7 @@
      - API contract、schema、安全策略和业务行为不能自动修
    - `.agent/state/TEMPLATE.md` 与 `.agent/runs/TEMPLATE.md` 能读出：
      - 它们是本地辅助运行面
-     - 不替代 Linear
+     - 不替代 Issue Tracker
    - `docs/test/RUNBOOK_TEMPLATE.md` 能读出：
      - 测试文档默认是可执行 runbook
      - 提交版文档只保留脱敏结果摘要
@@ -181,6 +188,7 @@
    - 项目名称
    - 技术栈：go / python / java / c / go-node / python-node / java-node / c-node / java-c / java-c-node
    - provider：neutral / github / gitlab
+   - issue provider：linear / github / gitlab / repo / other
    - issue prefix
    - 初始化 agent 类型：codex / cursor / other
 4. base harness 完成后，按初始化 agent 类型补充 adapter：
@@ -213,9 +221,11 @@
    - 都带 `Mode: placeholder` 或 `Mode: full`
    - mode 必须一致
 9. 额外确认：
-   - `docs/harness/control-plane.md` 已明确 `Linear 是主协作真相`
+   - `docs/harness/control-plane.md` 已明确 `Issue Tracker 是主协作真相`
    - `docs/harness/control-plane.md` 已明确 `repo 是主执行真相`
-   - `docs/harness/linear.md` 已明确运行反馈与结果回写默认写回 Linear
+   - `docs/harness/issue-workflow.md` 已明确运行反馈与结果回写默认写回 Issue Tracker
+   - `docs/harness/linear.md` 已明确它是 Linear profile / migration note
+   - `docs/issues/TEMPLATE.md` 已存在，可作为 repo issue 和 `writeback_log` 模板
    - `docs/harness/project-constraints.md` 已存在，且明确项目级机械约束登记、状态枚举、分类枚举、`project-check` 挂载协议和不得假装 `enforced`
    - `.agent/prompts/maintenance-loop.md` 已存在，默认 `report-only`，且只有用户显式指定时才进入 `issue-create / safe-fix / rule-promotion`
    - `.agent/PLANS.md` 与 `.agent/plans/TEMPLATE.md` 已明确
@@ -240,7 +250,7 @@
    - `PLANS.md / TEMPLATE.md / EXAMPLE-implementation.md` 三层关系是否已经可读
    - `docs/test/RUNBOOK_TEMPLATE.md` 是否已经就位
    - `docs/harness/project-constraints.md` 是否已经就位并提醒使用者后续按项目真实规则补齐
-   - truth split 是否已经在 control-plane / linear 中可读
+   - truth split 是否已经在 control-plane / issue-workflow 中可读
    - 最终验证是否通过
 4. 若失败，明确指出失败步骤、报错和下一步建议
 ```
