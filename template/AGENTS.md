@@ -51,6 +51,9 @@
 ## 协作约束
 
 - 复杂任务默认先写 plan，再进入实现
+- macOS / Linux / Git Bash 默认用 `make harness-verify` 验证 base harness
+- Windows PowerShell 默认用 `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\harness\check.ps1` 验证 base harness
+- Bash / Git Bash 命令示例使用 POSIX 路径；PowerShell 命令示例使用 `C:\path\to\repo` 或 UNC 路径，不自动互转
 - `docs/harness/*.md` 默认应提交
 - 初始化后应在 `docs/harness/project-constraints.md` 中登记项目级机械约束；没有可执行命令或 gate 的规则不得标记为 `enforced`
 - `.agent/plans/TEMPLATE.md` 默认应提交

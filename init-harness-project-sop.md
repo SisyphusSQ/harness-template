@@ -58,7 +58,10 @@ target-repo/
 └── scripts/harness/
     ├── check.sh
     ├── common.sh
-    └── review_gate.sh
+    ├── review_gate.sh
+    ├── check.ps1
+    ├── common.ps1
+    └── review_gate.ps1
 ```
 
 固定规则：
@@ -111,7 +114,7 @@ sources/agent_adapters/cursor/.cursor/rules/harness.mdc
 固定规则：
 
 - Cursor adapter 不属于 base harness
-- `init_harness_project.sh` 不负责生成 Cursor adapter，也不增加 `--agent` 参数
+- `init_harness_project.sh` 与 `init_harness_project.ps1` 不负责生成 Cursor adapter，也不增加 `--agent` 参数
 - `.cursor/rules/harness.mdc` 必须使用 Cursor project rule 格式
 - frontmatter 字段名保持英文，必须包含 `alwaysApply: true`
 - `description` 与正文使用中文
@@ -123,16 +126,22 @@ sources/agent_adapters/cursor/.cursor/rules/harness.mdc
 
 初始化脚本固定接收：
 
-| 参数 | 说明 |
+| Bash 参数 | PowerShell 参数 | 说明 |
 | --- | --- |
-| `--target` | 目标仓库绝对路径 |
-| `--project-name` | 目标项目名称 |
-| `--stack` | `go` / `python` / `java` / `c` / `go-node` / `python-node` / `java-node` / `c-node` / `java-c` / `java-c-node` |
-| `--provider` | `neutral` / `github` / `gitlab` |
-| `--issue-provider` | `linear` / `github` / `gitlab` / `repo` / `other`，默认 `linear` |
-| `--issue-prefix` | Issue 前缀，例如 `APP` |
-| `--force` | 允许覆盖模板管理的目标文件 |
-| `--dry-run` | 只打印动作，不落盘 |
+| `--target` | `-Target` | 目标仓库绝对路径 |
+| `--project-name` | `-ProjectName` | 目标项目名称 |
+| `--stack` | `-Stack` | `go` / `python` / `java` / `c` / `go-node` / `python-node` / `java-node` / `c-node` / `java-c` / `java-c-node` |
+| `--provider` | `-Provider` | `neutral` / `github` / `gitlab` |
+| `--issue-provider` | `-IssueProvider` | `linear` / `github` / `gitlab` / `repo` / `other`，默认 `linear` |
+| `--issue-prefix` | `-IssuePrefix` | Issue 前缀，例如 `APP` |
+| `--force` | `-Force` | 允许覆盖模板管理的目标文件 |
+| `--dry-run` | `-DryRun` | 只打印动作，不落盘 |
+
+路径规则固定：
+
+- Bash / Git Bash 入口只使用 POSIX 路径，例如 `/abs/path/to/repo` 或 `/c/path/to/repo`
+- PowerShell 入口只使用 Windows 原生路径，例如 `C:\path\to\repo` 或 `\\server\share\repo`
+- 两个入口不做自动路径转换；路径格式由调用方按入口类型传入
 
 ## 5. 初始化第 0 步：先定 `.gitignore`
 
@@ -222,8 +231,8 @@ sources/agent_adapters/cursor/.cursor/rules/harness.mdc
 3. 复制 `template/` 基础文件到目标项目
 4. 按 `--stack` 生成最终根 `.gitignore`
 5. 替换 `__PROJECT_NAME__`、`__ISSUE_PREFIX__`、`__PROVIDER__`、`__ISSUE_PROVIDER__`
-6. 赋予 `scripts/harness/*.sh` 可执行权限
-7. 执行 `scripts/harness/check.sh`
+6. Bash 入口赋予 `scripts/harness/*.sh` 可执行权限；PowerShell 入口不要求可执行位
+7. Bash 入口执行 `scripts/harness/check.sh`；PowerShell 入口执行 `scripts/harness/check.ps1`
 8. 打印下一步人工动作
 
 固定规则：
@@ -234,6 +243,7 @@ sources/agent_adapters/cursor/.cursor/rules/harness.mdc
 - agent adapter 只在 agent 驱动初始化流程中按 agent 类型决定
 - agent 扩展层只在 agent 驱动初始化时补充
 - 根目录 `agent-init-project.md` 是 agent 初始化整个项目的推荐入口
+- Windows 用户不需要安装 Git Bash / WSL / make 即可完成 base harness 初始化和 PowerShell gate 验证
 
 ## 7. `docs/harness/` 与 `docs/issues/` 分工
 
@@ -340,7 +350,7 @@ sources/agent_adapters/cursor/.cursor/rules/harness.mdc
   - `真实入口与触发 / 输入装配与边界校验 / 组件职责与代码落点 / 关键执行时序 / 停止 / 错误 / 恢复` 是默认必填子块
   - `Concrete Steps` 需要拆成 `### 实现步骤` 与 `### 验证与收口步骤`
   - `TEMPLATE.md` 默认采用“实现优先”结构：`0. 现有架构回顾与核心设计决策 -> 1..N 改动面 -> 数据流可视化 -> 关键设计决策摘要 -> 与现有代码的关系`
-- `scripts/harness/review_gate.sh` 除了读取 `blocking_findings`，还要对 plan 做结构型轻量 lint，拒绝缺少实现骨架或仍保留明显占位内容的计划
+- `scripts/harness/review_gate.sh` 与 `scripts/harness/review_gate.ps1` 除了读取 `blocking_findings`，还要对 plan 做结构型轻量 lint，拒绝缺少实现骨架或仍保留明显占位内容的计划
 - `Reference Snippets` 不能是空块或纯占位内容
 - `组件职责与代码落点` 至少要有一条真实模块 / 路径 / 类型记录
 - `.agent/prompts/` 与 `.agent/guides/` 由 agent 驱动初始化时补充
@@ -404,21 +414,24 @@ sources/agent_extensions/
 
 ## 10. gate 脚本
 
-目标项目固定保留三个脚本：
+目标项目固定保留两套 gate 入口：
 
 - `check.sh`
 - `common.sh`
 - `review_gate.sh`
+- `check.ps1`
+- `common.ps1`
+- `review_gate.ps1`
 
 固定要求：
 
-- 保持 gate 入口脚本独立，公共解析逻辑收口到 `common.sh`
-- `check.sh` 不只看关键字，还要做 gate smoke test
-- `review_gate.sh` 默认同时校验 `blocking_findings` 和 plan 的实现骨架
-- `check.sh` 不要求 `.agent/prompts/` 与 `.agent/guides/` 存在
+- 保持 gate 入口脚本独立，公共解析逻辑收口到 `common.sh` / `common.ps1`
+- `check.sh` 与 `check.ps1` 不只看关键字，还要做 gate smoke test
+- `review_gate.sh` 与 `review_gate.ps1` 默认同时校验 `blocking_findings` 和 plan 的实现骨架
+- `check.sh` 与 `check.ps1` 不要求 `.agent/prompts/` 与 `.agent/guides/` 存在
 - 若这些可选文件存在，只允许检查其 `Mode:` 标记是否合法
 - optional bundle 一旦存在，`.agent/prompts/maintenance-loop.md` 也必须存在并带合法 `Mode: placeholder|full`
-- `check.sh` 不要求 `.cursor/rules/harness.mdc` 存在
+- `check.sh` 与 `check.ps1` 不要求 `.cursor/rules/harness.mdc` 存在
 - 若 Cursor rule 存在，必须检查中文描述、`alwaysApply: true`、关键 harness 导航入口和 `make harness-verify`
 - `merge` / `escalation` 仍然是控制面阶段，但默认由 agent 根据仓库真相判断，不再作为 base harness 自带 shell gate
 
@@ -442,9 +455,12 @@ sources/agent_extensions/
 | `docs/test/RUNBOOK_TEMPLATE.md` 是否存在 | 应存在 |
 | `scripts/harness/common.sh` 是否存在 | 应存在 |
 | `scripts/harness/review_gate.sh` 是否存在 | 应存在 |
+| `scripts/harness/common.ps1` 是否存在 | 应存在 |
+| `scripts/harness/review_gate.ps1` 是否存在 | 应存在 |
 | `scripts/harness/merge_gate.sh` 是否不存在 | 应不存在 |
 | `scripts/harness/escalation_gate.sh` 是否不存在 | 应不存在 |
 | `bash scripts/harness/check.sh` 是否通过 | 应通过 |
+| `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\harness\check.ps1` 是否通过 | Windows / PowerShell 环境应通过 |
 | 若初始化 agent 是 Cursor，`.cursor/rules/harness.mdc` 是否存在且 `alwaysApply: true` | 应正确 |
 | 若是 agent 驱动初始化，`.agent/prompts/*.md` 是否带正确 `Mode:` 标记 | 应正确 |
 
@@ -454,7 +470,7 @@ sources/agent_extensions/
 2. 继续把 prompt 模板塞回 `docs/harness/`
 3. `.gitignore` 只做了 Base，没叠加技术栈规则
 4. 预先初始化一堆没有消费链路的 `.agent` 空壳目录
-5. 让 `check.sh` 依赖 prompts / guides 才能通过
+5. 让 `check.sh` / `check.ps1` 依赖 prompts / guides 才能通过
 6. 把 agent 扩展层做成脚本参数，而不是在 agent 初始化流程里决定
 7. 把 `merge` / `escalation` 继续实现成 initializer 自带 shell gate
 8. 把 `.agent/skills` 当成所有项目都必须初始化的 base 输出

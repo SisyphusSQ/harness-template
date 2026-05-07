@@ -10,7 +10,7 @@
 固定规则：
 
 - 本文件位于当前 harness 维护源根目录，不属于目标项目模板，不会被初始化脚本复制到目标仓库
-- `init_harness_project.sh` 只负责 base harness
+- `init_harness_project.sh` 与 `init_harness_project.ps1` 只负责 base harness
 - `sources/agent_adapters/` 是按 agent 类型补充的适配层，不属于 base harness
 - `.agent/prompts/` 与 `.agent/guides/` 由 agent 在 base harness 完成后补齐
 - `.agent/skills/` 不是 base harness 输出，只在项目需要稳定复用的 repo-local 专门流程时另行补充
@@ -41,7 +41,7 @@
 ### 1.2 固定执行顺序
 
 1. 先执行 base harness 初始化脚本  
-   命令形如：
+   macOS / Linux / Git Bash 命令形如：
 
    ```bash
    bash <HARNESS_ROOT>/scripts/init_harness_project.sh \
@@ -52,6 +52,20 @@
      --issue-provider linear|github|gitlab|repo|other \
      --issue-prefix PREFIX
    ```
+
+   Windows PowerShell 命令形如：
+
+   ```powershell
+   powershell -NoProfile -ExecutionPolicy Bypass -File <HARNESS_ROOT>\scripts\init_harness_project.ps1 `
+     -Target C:\path\to\repo `
+     -ProjectName NAME `
+     -Stack go|python|java|c|go-node|python-node|java-node|c-node|java-c|java-c-node `
+     -Provider neutral|github|gitlab `
+     -IssueProvider linear|github|gitlab|repo|other `
+     -IssuePrefix PREFIX
+   ```
+
+   路径规则固定：Bash / Git Bash 使用 `/abs/path` 或 `/c/path`；PowerShell 使用 `C:\path\to\repo` 或 `\\server\share\repo`；两个入口不互相转换路径。
 
 2. 确认 base harness 初始化成功，至少包含：
 
@@ -70,6 +84,9 @@
    - `scripts/harness/check.sh`
    - `scripts/harness/common.sh`
    - `scripts/harness/review_gate.sh`
+   - `scripts/harness/check.ps1`
+   - `scripts/harness/common.ps1`
+   - `scripts/harness/review_gate.ps1`
 
    同时确认当前 base harness 的计划 contract 已经可读出：
 
@@ -80,7 +97,7 @@
    - 实现骨架需要补齐
      `真实入口与触发 / 输入装配与边界校验 / 组件职责与代码落点 / 关键执行时序 / 停止 / 错误 / 恢复`
    - `Concrete Steps` 需要拆成 `### 实现步骤` 与 `### 验证与收口步骤`
-   - `review_gate.sh` 会对 plan 做结构型轻量 lint，而不只检查 `blocking_findings`
+   - `review_gate.sh` / `review_gate.ps1` 会对 plan 做结构型轻量 lint，而不只检查 `blocking_findings`
    - `Reference Snippets` 不能是空块或纯占位内容
    - `组件职责与代码落点` 至少要有一条真实模块 / 路径 / 类型记录
    - `docs/harness/project-constraints.md` 是项目级机械约束登记入口，不能把只有文档约束的规则写成 `enforced`
@@ -155,6 +172,12 @@
    make harness-verify
    ```
 
+   Windows PowerShell 环境不要求安装 `make`，可执行：
+
+   ```powershell
+   powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\harness\check.ps1
+   ```
+
 ### 1.3 何时应停止并报告
 
 遇到以下情况应先停下，不要继续硬做：
@@ -183,6 +206,7 @@
 1. 先只做 base harness 初始化，不要直接补 prompts / guides。
 2. 使用：
    - `<HARNESS_ROOT>/scripts/init_harness_project.sh`
+   - Windows PowerShell 可改用 `<HARNESS_ROOT>\scripts\init_harness_project.ps1`
 3. 初始化前先确认这些输入：
    - 目标仓库绝对路径
    - 项目名称
@@ -232,12 +256,12 @@
      `真实入口与触发 / 输入装配与边界校验 / 组件职责与代码落点 / 关键执行时序 / 停止 / 错误 / 恢复`
    - `.agent/plans/EXAMPLE-implementation.md` 已存在，可作为质量标杆
    - `docs/test/RUNBOOK_TEMPLATE.md` 已存在，可作为测试 runbook 和脱敏结果回写模板
-   - `review_gate.sh` 已明确会拒绝只有 harness 流程、没有实现骨架的 plan
-   - `review_gate.sh` 已明确会拒绝空的 `Reference Snippets` 和空的组件职责记录
+   - `review_gate.sh` / `review_gate.ps1` 已明确会拒绝只有 harness 流程、没有实现骨架的 plan
+   - `review_gate.sh` / `review_gate.ps1` 已明确会拒绝空的 `Reference Snippets` 和空的组件职责记录
    - `.agent/state/TEMPLATE.md` 与 `.agent/runs/TEMPLATE.md` 已明确它们只是本地辅助运行面
    - `.agent/skills` 未作为 base 必备输出；如项目需要 repo-local skill，应单独说明来源和使用边界
    - 如果生成了 `.cursor/rules/harness.mdc`，它已明确读取 harness 入口并要求 `make harness-verify`
-10. 最后在目标仓库执行 `make harness-verify`
+10. 最后在目标仓库执行 `make harness-verify`；Windows PowerShell 可执行 `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\harness\check.ps1`
 
 输出要求：
 1. 先说明当前在做 base harness、agent adapter 还是 agent 扩展层

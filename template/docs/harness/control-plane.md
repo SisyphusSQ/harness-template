@@ -168,12 +168,15 @@ Maintenance loop 的输出必须包含：
 | 基线检查 | `make harness-check` |
 | 总入口 | `make harness-verify` |
 | review gate | `make harness-review-gate PLAN=path/to/plan.md` |
+| Windows 基线检查 | `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\harness\check.ps1` |
+| Windows review gate | `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\harness\review_gate.ps1 -Plan .\.agent\plans\example.md` |
 | merge | 默认由 agent 根据仓库真相给出 `manual / blocked / merged` 结论 |
 | escalation | 默认由 agent 根据风险和阻塞项给出 `continue / degraded / escalated` 结论 |
 
 固定要求：
 
 - `harness-check` 除了检查关键文件、关键字段、`.gitignore` contract，还必须做 gate smoke test
+- `check.ps1` 与 `review_gate.ps1` 对齐 Bash gate 行为，但不要求 Windows 用户安装 `make`、Git Bash 或 WSL
 - `review_gate` 只根据 `blocking_findings` 判定 pass / fail
 - `merge` 虽然仍是控制面阶段，但 base harness 默认不内置 shell evaluator
 - `escalation` 虽然仍是控制面阶段，但 base harness 默认不内置 shell evaluator

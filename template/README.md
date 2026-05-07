@@ -8,7 +8,7 @@
 - 控制面文档统一收口到 `docs/harness/`
 - 初始化后应先确认 `.gitignore`、`.agent/`、`docs/harness/project-constraints.md`、`docs/test/RUNBOOK_TEMPLATE.md`、`scripts/harness/` 是否就位并可执行
 - 若通过 agent 驱动初始化，默认再补齐 `.agent/prompts/` 与 `.agent/guides/`
-- base harness 默认只带 `check + review_gate`
+- base harness 默认只带 Bash 与 PowerShell 两套 `check + review_gate`
 - `.agent/state/` 与 `.agent/runs/` 默认作为本地辅助运行面存在
 
 ## 推荐阅读顺序
@@ -55,4 +55,5 @@
 8. 阅读 `.agent/PLANS.md`、`.agent/plans/TEMPLATE.md`、`.agent/plans/EXAMPLE-implementation.md`
 9. 若是 agent 驱动初始化，再补齐 `.agent/prompts/` 与 `.agent/guides/`，并选择 `placeholder / full` 模式
 10. 若存在 `.agent/prompts/maintenance-loop.md`，确认默认 mode 是 `report-only`
-11. 执行 `make harness-verify`
+11. macOS / Linux / Git Bash 执行 `make harness-verify`
+12. Windows PowerShell 执行 `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\harness\check.ps1`

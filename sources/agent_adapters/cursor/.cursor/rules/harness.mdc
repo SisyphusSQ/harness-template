@@ -28,7 +28,8 @@ alwaysApply: true
 - 不要用 harness 控制流替代业务实现架构或数据流说明。
 - 项目级机械约束需要登记到 `docs/harness/project-constraints.md`；没有可执行命令或 gate 时，不要标记为 `enforced`。
 - 测试或自测文档使用 `docs/test/RUNBOOK_TEMPLATE.md`，只把脱敏结果摘要写入提交版文档。
-- 收口前优先执行 `make harness-verify`；如果无法执行，说明阻塞原因和替代验证。
+- 收口前 macOS / Linux / Git Bash 优先执行 `make harness-verify`；Windows PowerShell 执行 `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\harness\check.ps1`。
+- Bash / Git Bash 示例使用 POSIX 路径；PowerShell 示例使用 `C:\path\to\repo` 或 UNC 路径，不自动互转。
 
 ## 真相边界
 

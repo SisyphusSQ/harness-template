@@ -24,6 +24,9 @@ required_files=(
   "scripts/harness/check.sh"
   "scripts/harness/common.sh"
   "scripts/harness/review_gate.sh"
+  "scripts/harness/check.ps1"
+  "scripts/harness/common.ps1"
+  "scripts/harness/review_gate.ps1"
 )
 
 for path in "${required_files[@]}"; do
@@ -108,6 +111,7 @@ if [[ -f ".cursor/rules/harness.mdc" ]]; then
     ".agent/plans/EXAMPLE-implementation.md"
     "docs/test/RUNBOOK_TEMPLATE.md"
     "make harness-verify"
+    "check.ps1"
   )
 
   for pattern in "${required_cursor_rule_patterns[@]}"; do
@@ -136,6 +140,7 @@ required_control_plane_patterns=(
   "运行反馈默认写回 Issue Tracker"
   "结果回写默认写回 Issue Tracker"
   "review_gate"
+  "check.ps1"
   "merge"
   "escalation"
   ".agent/PLANS.md"
@@ -403,6 +408,24 @@ required_state_run_patterns=(
 for pattern in "${required_state_run_patterns[@]}"; do
   if ! rg -Fq "$pattern" .agent/state/TEMPLATE.md .agent/runs/TEMPLATE.md; then
     echo "state/run templates missing required pattern: $pattern" >&2
+    exit 1
+  fi
+done
+
+required_powershell_gate_patterns=(
+  "Get-PlanImplementationSkeletonErrors"
+  "Resolve-PlanImplementationSection"
+  "Reference Snippets"
+  "组件职责与代码落点"
+  "blocking_findings"
+  "result=pass"
+  "result=fail"
+  "harness check passed"
+)
+
+for pattern in "${required_powershell_gate_patterns[@]}"; do
+  if ! rg -Fq "$pattern" scripts/harness/common.ps1 scripts/harness/review_gate.ps1 scripts/harness/check.ps1; then
+    echo "PowerShell harness gates missing required pattern: $pattern" >&2
     exit 1
   fi
 done

@@ -3,7 +3,7 @@
 这个目录当前包含 5 类维护源：
 
 - [template/](template/)：初始化到目标项目时的 base harness 输出源
-- [scripts/init_harness_project.sh](scripts/init_harness_project.sh)：只负责 base harness 落盘的初始化脚本
+- `scripts/init_harness_project.sh` / `scripts/init_harness_project.ps1`：Bash 与 Windows PowerShell base harness 初始化脚本
 - [sources/gitignore/](sources/gitignore/)：`.gitignore` 拼装片段
 - `sources/agent_adapters/`：按 agent 类型补充的适配层，例如 Cursor project rules
 - `sources/agent_extensions/`：仅供 agent 驱动初始化时补充 `.agent/prompts/` 与 `.agent/guides/` 的维护源
@@ -40,6 +40,12 @@ repo/
 │   ├── state/TEMPLATE.md
 │   └── runs/TEMPLATE.md
 └── scripts/harness/
+    ├── check.sh
+    ├── common.sh
+    ├── review_gate.sh
+    ├── check.ps1
+    ├── common.ps1
+    └── review_gate.ps1
 ```
 
 其中 plan 相关的三层关系固定为：
@@ -86,20 +92,24 @@ repo/
 - `.cursor/rules/harness.mdc` 只作为 Cursor adapter，负责把 Cursor 导向仓库内 harness 真相文件
 - `.gitignore` 必须在第一次提交前就完成初始化
 - `scripts/harness/` 中的 gate 脚本初始化后必须能真实执行，不能只靠关键字检查过关
-- `sources/agent_adapters/` 只给特定 agent 使用，不进入 `init_harness_project.sh` 的 managed files
-- `sources/agent_extensions/` 只给 agent 使用，不进入 `init_harness_project.sh` 的 managed files
+- Bash 入口使用 POSIX 路径，例如 `/abs/path/to/repo` 或 Git Bash 的 `/c/path/to/repo`
+- PowerShell 入口使用 Windows 原生路径，例如 `C:\path\to\repo` 或 `\\server\share\repo`
+- Bash 与 PowerShell 入口不互相转换路径格式
+- `sources/agent_adapters/` 只给特定 agent 使用，不进入 `init_harness_project.sh` / `init_harness_project.ps1` 的 managed files
+- `sources/agent_extensions/` 只给 agent 使用，不进入 `init_harness_project.sh` / `init_harness_project.ps1` 的 managed files
 
 ## 推荐用法
 
 1. 先读 [init-harness-project-sop.md](init-harness-project-sop.md)
-2. 跑 `scripts/init_harness_project.sh`
-3. 若初始化 agent 是 Cursor，再从 `sources/agent_adapters/cursor/` 补 `.cursor/rules/harness.mdc`
-4. 若是 agent 驱动初始化，再从 `sources/agent_extensions/shared/` 与 `sources/agent_extensions/{placeholder|full}/` 补 `.agent/prompts/` 和 `.agent/guides/`
-5. 阅读 `docs/harness/issue-workflow.md`；若无外部 issue 工具，使用 `docs/issues/TEMPLATE.md`
-6. 阅读并补齐 `docs/harness/project-constraints.md` 中的项目级机械约束登记表
-7. 若存在 `.agent/prompts/maintenance-loop.md`，确认默认 mode 仍是 `report-only`
-8. 优先阅读 `.agent/PLANS.md`、`.agent/plans/TEMPLATE.md`、`.agent/plans/EXAMPLE-implementation.md`
-9. 最后执行 `make harness-verify`
+2. macOS / Linux / Git Bash 跑 `bash scripts/init_harness_project.sh --target /abs/path/to/repo --project-name NAME --stack go --provider neutral --issue-provider linear`
+3. Windows PowerShell 跑 `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\init_harness_project.ps1 -Target C:\path\to\repo -ProjectName NAME -Stack go -Provider neutral -IssueProvider linear`
+4. 若初始化 agent 是 Cursor，再从 `sources/agent_adapters/cursor/` 补 `.cursor/rules/harness.mdc`
+5. 若是 agent 驱动初始化，再从 `sources/agent_extensions/shared/` 与 `sources/agent_extensions/{placeholder|full}/` 补 `.agent/prompts/` 和 `.agent/guides/`
+6. 阅读 `docs/harness/issue-workflow.md`；若无外部 issue 工具，使用 `docs/issues/TEMPLATE.md`
+7. 阅读并补齐 `docs/harness/project-constraints.md` 中的项目级机械约束登记表
+8. 若存在 `.agent/prompts/maintenance-loop.md`，确认默认 mode 仍是 `report-only`
+9. 优先阅读 `.agent/PLANS.md`、`.agent/plans/TEMPLATE.md`、`.agent/plans/EXAMPLE-implementation.md`
+10. macOS / Linux / Git Bash 执行 `make harness-verify`；Windows PowerShell 可执行 `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\harness\check.ps1`
 
 更推荐的 agent 用法是：
 
