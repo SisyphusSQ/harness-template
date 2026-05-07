@@ -1,0 +1,37 @@
+---
+description: 始终使用本仓库的 harness 控制面、计划模板、测试 runbook 和验证 gate
+alwaysApply: true
+---
+
+# Harness 协作规则
+
+在本仓库工作时，先进入仓库内的 harness 控制面，再开始分析、计划、修改或收口。
+
+## 必读顺序
+
+1. `AGENTS.md`
+2. 当前修改目录就近的目录级 `AGENTS.md`（如果存在）
+3. `docs/harness/control-plane.md`
+4. `docs/harness/linear.md`
+5. `docs/harness/project-constraints.md`
+6. `.agent/PLANS.md`
+7. `.agent/plans/TEMPLATE.md`
+8. `.agent/plans/EXAMPLE-implementation.md`
+9. `docs/test/RUNBOOK_TEMPLATE.md`
+
+## 执行约束
+
+- 非简单任务先按 `.agent/PLANS.md` 与 `.agent/plans/TEMPLATE.md` 创建或更新计划。
+- 实现型计划必须写真实代码入口、输入装配、组件职责、关键时序、错误处理和恢复路径。
+- 不要用 harness 控制流替代业务实现架构或数据流说明。
+- 项目级机械约束需要登记到 `docs/harness/project-constraints.md`；没有可执行命令或 gate 时，不要标记为 `enforced`。
+- 测试或自测文档使用 `docs/test/RUNBOOK_TEMPLATE.md`，只把脱敏结果摘要写入提交版文档。
+- 收口前优先执行 `make harness-verify`；如果无法执行，说明阻塞原因和替代验证。
+
+## 真相边界
+
+- Linear 是主协作真相。
+- repo 是主执行真相。
+- PR / MR 是次级代码叙事面。
+- `.agent/state` 与 `.agent/runs` 是本地辅助运行面，不替代 Linear。
+- `.agent/skills` 是可选 repo-local 扩展，不是 base harness 必备输出。

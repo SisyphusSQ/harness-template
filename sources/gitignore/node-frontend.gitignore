@@ -1,0 +1,6 @@
+# Node / Frontend
+node_modules/
+.vite/
+dist/
+dist-ssr/
+storybook-static/

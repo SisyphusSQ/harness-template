@@ -1,0 +1,7 @@
+# Go
+bin/
+build/
+*.test
+*.out
+coverage.out
+coverage.html

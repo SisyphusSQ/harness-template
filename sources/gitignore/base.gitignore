@@ -1,0 +1,22 @@
+# Base
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+*.log
+logs/
+tmp/
+temp/
+**/output/
+
+# Harness local auxiliary run surfaces
+.agent/state/*
+!.agent/state/TEMPLATE.md
+.agent/runs/*
+!.agent/runs/TEMPLATE.md
+
+# Cursor project rules are commit-safe; other Cursor files stay local by default.
+.cursor/*
+!.cursor/rules/
+!.cursor/rules/*.mdc
