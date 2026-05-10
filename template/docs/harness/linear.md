@@ -29,7 +29,7 @@
 - Linear project 可以承接项目级容器，但不能替代 repo 执行真相。
 - Linear issue body 应保留 `Goal / Included / Excluded / Acceptance Matrix / Stop When / Verification Commands`。
 - Linear comment 应保留 `verification_summary / review_summary / writeback_summary / residual_risks / recovery_point / next_action`。
-- 如果 Linear API 或权限不可用，先把临时恢复点写入 `.agent/state/`，恢复后再回写 Linear。
+- 如果 Linear API 或权限不可用，先把临时恢复点写入 `.agents/state/`，恢复后再回写 Linear。
 
 ## 通用模板入口
 

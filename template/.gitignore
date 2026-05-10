@@ -14,10 +14,10 @@ temp/
 **/output/
 
 # Harness local auxiliary run surfaces
-.agent/state/*
-!.agent/state/TEMPLATE.md
-.agent/runs/*
-!.agent/runs/TEMPLATE.md
+.agents/state/*
+!.agents/state/TEMPLATE.md
+.agents/runs/*
+!.agents/runs/TEMPLATE.md
 
 # Cursor project rules are commit-safe; other Cursor files stay local by default.
 .cursor/*

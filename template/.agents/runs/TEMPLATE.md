@@ -5,7 +5,7 @@
 固定规则：
 
 - `Issue Tracker` 仍是主协作真相
-- `.agent/runs/` 只记录本地批次结果摘要，不替代 Issue Tracker 回写
+- `.agents/runs/` 只记录本地批次结果摘要，不替代 Issue Tracker 回写
 - 本地结果与协作状态冲突时，以 `Issue Tracker` 为准；本地文件用于补充执行细节
 
 - `run_id`:

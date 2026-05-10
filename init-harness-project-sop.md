@@ -23,7 +23,7 @@ base harness 需要完整具备：
 - `issue-provider=repo` 时的仓库内 issue 存储模板
 - 项目级机械约束登记与接入协议
 - `.gitignore` 基线
-- `.agent` 最小计划模板与本地辅助运行面模板
+- `.agents` 最小计划模板与本地辅助运行面模板
 - `docs/test` 通用 runbook 模板
 - 计划里“怎么实现”的固定骨架，而不只是 harness 流程骨架
 - repo-local 最小 gate 脚本和共享 helper
@@ -49,7 +49,7 @@ target-repo/
 │   │   └── TEMPLATE.md
 │   └── test/
 │       └── RUNBOOK_TEMPLATE.md
-├── .agent/
+├── .agents/
 │   ├── PLANS.md
 │   ├── plans/TEMPLATE.md
 │   ├── plans/EXAMPLE-implementation.md
@@ -72,21 +72,21 @@ target-repo/
 - `docs/harness/` 只承载控制面真相文档、Issue Workflow、Issue Tracker profile 和项目级机械约束登记
 - `docs/issues/` 是 `issue-provider=repo` 时的仓库内 issue 存储
 - `docs/test/RUNBOOK_TEMPLATE.md` 属于 base harness，承载通用测试 runbook 与脱敏结果摘要模板
-- 不再默认生成没有消费链路的 `.agent/mappings/`
-- 不默认生成 `.agent/skills/`，只在项目有稳定复用的专门流程时作为可选 repo-local 扩展补充
+- 不再默认生成没有消费链路的 `.agents/mappings/`
+- 不默认生成 `.agents/skills/`，只在项目有稳定复用的专门流程时作为可选 repo-local 扩展补充
 - 不默认生成 `.cursor/`；Cursor rules 只在初始化 agent 是 Cursor 时作为 adapter 补充
 
 ## 3. Agent 扩展层
 
 如果是 agent 驱动初始化，在 base harness 完成后，再补充：
 
-- `.agent/prompts/README.md`
-- `.agent/prompts/issue-standard-workflow.md`
-- `.agent/prompts/loop-codex.md`
-- `.agent/prompts/loop-automation.md`
-- `.agent/prompts/maintenance-loop.md`
-- `.agent/guides/code-review.md`
-- `.agent/guides/linter.md`
+- `.agents/prompts/README.md`
+- `.agents/prompts/issue-standard-workflow.md`
+- `.agents/prompts/loop-codex.md`
+- `.agents/prompts/loop-automation.md`
+- `.agents/prompts/maintenance-loop.md`
+- `.agents/guides/code-review.md`
+- `.agents/guides/linter.md`
 
 固定规则：
 
@@ -95,13 +95,13 @@ target-repo/
   - 生成占位文件
   - 或生成完整模板
 - 若用户没有明确要求完整模板，默认生成占位文件
-- `.agent/prompts/README.md` 是稳定目录说明，不区分模式
+- `.agents/prompts/README.md` 是稳定目录说明，不区分模式
 - 其他 6 个文件需要带 `Mode: placeholder|full`
 - 更推荐的入口是先读根目录 `agent-init-project.md`
 
 ### 3.1 Cursor Agent Adapter（按需）
 
-如果初始化执行 agent 是 Cursor，在 base harness 完成后、`.agent/prompts/` 与 `.agent/guides/` 扩展层之前，额外补充：
+如果初始化执行 agent 是 Cursor，在 base harness 完成后、`.agents/prompts/` 与 `.agents/guides/` 扩展层之前，额外补充：
 
 - `.cursor/rules/harness.mdc`
 
@@ -118,9 +118,9 @@ sources/agent_adapters/cursor/.cursor/rules/harness.mdc
 - `.cursor/rules/harness.mdc` 必须使用 Cursor project rule 格式
 - frontmatter 字段名保持英文，必须包含 `alwaysApply: true`
 - `description` 与正文使用中文
-- 正文只负责引导 Cursor 读取 `AGENTS.md`、就近目录级 `AGENTS.md`、`docs/harness/*`、`.agent/*` 和 `docs/test/RUNBOOK_TEMPLATE.md`
+- 正文只负责引导 Cursor 读取 `AGENTS.md`、就近目录级 `AGENTS.md`、`docs/harness/*`、`.agents/*` 和 `docs/test/RUNBOOK_TEMPLATE.md`
 - 不复制完整模板正文，避免和 harness 维护源漂移
-- Cursor adapter 不和 `.agent/prompts/` 的 `placeholder` / `full` 模式绑定
+- Cursor adapter 不和 `.agents/prompts/` 的 `placeholder` / `full` 模式绑定
 
 ## 4. 初始化输入
 
@@ -196,7 +196,7 @@ sources/agent_adapters/cursor/.cursor/rules/harness.mdc
 | --- | --- |
 | 真实环境配置 | `.env`、`settings.yaml`、`config.local.yml` |
 | 凭据和密钥 | token、cookie、DSN、账号密码 |
-| 本地辅助运行面 | `.agent/state/*`、`.agent/runs/*` 的真实运行文件 |
+| 本地辅助运行面 | `.agents/state/*`、`.agents/runs/*` 的真实运行文件 |
 | Cursor 私有配置 | `.cursor/*` 中除 `.cursor/rules/*.mdc` 外的本地文件 |
 | 日志和缓存 | `*.log`、`logs/`、缓存目录 |
 | 本地数据库 | `*.db`、`*.sqlite` |
@@ -217,9 +217,9 @@ sources/agent_adapters/cursor/.cursor/rules/harness.mdc
 - `docs/issues/*.md` 默认应提交
 - `docs/test/RUNBOOK_TEMPLATE.md` 默认应提交
 - `.cursor/rules/*.mdc` 默认可提交，其它 `.cursor/*` 默认不提交
-- `.agent/plans/TEMPLATE.md` 默认应提交
-- `.agent/state/TEMPLATE.md` 与 `.agent/runs/TEMPLATE.md` 默认应提交
-- 若 agent 后续补了 `.agent/prompts/` 或 `.agent/guides/`，这些文档默认也应提交
+- `.agents/plans/TEMPLATE.md` 默认应提交
+- `.agents/state/TEMPLATE.md` 与 `.agents/runs/TEMPLATE.md` 默认应提交
+- 若 agent 后续补了 `.agents/prompts/` 或 `.agents/guides/`，这些文档默认也应提交
 - 不允许因为懒得细化规则而用宽泛模式误伤源码或文档真相
 
 ## 6. 脚本初始化器做什么
@@ -253,7 +253,7 @@ sources/agent_adapters/cursor/.cursor/rules/harness.mdc
 
 - 主流程
 - review / verification / merge / escalation 阶段说明
-- `.agent` 计划 contract
+- `.agents` 计划 contract
 - `.gitignore` 约束
 - provider-neutral 默认策略
 
@@ -305,7 +305,7 @@ sources/agent_adapters/cursor/.cursor/rules/harness.mdc
 - `project-constraints.md` 属于 base harness managed file，初始化后必须由项目按真实规则补齐
 - maintenance loop 会扫描 `project-constraints.md`，但发现 `documented` 长期未机械化时只能报告或建议建 issue
 - `docs/test/` 默认承载可执行测试 runbook 和提交版脱敏结果摘要
-- 所有 prompt 模板统一归口 `.agent/prompts/`
+- 所有 prompt 模板统一归口 `.agents/prompts/`
 - `Issue Tracker` 默认承接任务范围、状态、运行反馈、结果回写
 - `repo` 默认承接执行命令、代码路径、设计入口、Prompt / Guide
 
@@ -329,7 +329,7 @@ sources/agent_adapters/cursor/.cursor/rules/harness.mdc
 - 未执行步骤必须写 `未执行` 或 `blocker`，不得伪装成 `通过`
 - 提交版文档只保留脱敏摘要，真实凭据、token、连接串、行主键、临时目录、完整下载 URL 和原始响应不写入仓库
 
-## 8. `.agent` Base 输出
+## 8. `.agents` Base 输出
 
 目标项目默认初始化这 4 类文件：
 
@@ -343,7 +343,7 @@ sources/agent_adapters/cursor/.cursor/rules/harness.mdc
 
 - `state` / `runs` 默认作为本地辅助运行面保留
 - 它们服务中断恢复、批次结果与本地审计，不替代 Issue Tracker
-- `.agent/PLANS.md` 与 `.agent/plans/TEMPLATE.md` 必须明确：
+- `.agents/PLANS.md` 与 `.agents/plans/TEMPLATE.md` 必须明确：
   - `PLANS.md` 是协议，`TEMPLATE.md` 是主模板，`EXAMPLE-implementation.md` 是质量标杆
   - frontmatter 推荐但不强制，固定字段为 `name`、`overview`、`todos`、`isProject`
   - `Architecture / Data Flow` 要写业务实现骨架
@@ -353,9 +353,9 @@ sources/agent_adapters/cursor/.cursor/rules/harness.mdc
 - `scripts/harness/review_gate.sh` 与 `scripts/harness/review_gate.ps1` 除了读取 `blocking_findings`，还要对 plan 做结构型轻量 lint，拒绝缺少实现骨架或仍保留明显占位内容的计划
 - `Reference Snippets` 不能是空块或纯占位内容
 - `组件职责与代码落点` 至少要有一条真实模块 / 路径 / 类型记录
-- `.agent/prompts/` 与 `.agent/guides/` 由 agent 驱动初始化时补充
-- 若仓库同时使用 Issue Tracker 和本地运行面，则协作状态以 Issue Tracker 为准，本地恢复细节以 `.agent/state` / `.agent/runs` 为准
-- `.agent/skills/` 不属于 base harness 输出；只有当项目存在稳定复用的专门流程时，才由 repo-local 文档或 agent 扩展层另行补充
+- `.agents/prompts/` 与 `.agents/guides/` 由 agent 驱动初始化时补充
+- 若仓库同时使用 Issue Tracker 和本地运行面，则协作状态以 Issue Tracker 为准，本地恢复细节以 `.agents/state` / `.agents/runs` 为准
+- `.agents/skills/` 不属于 base harness 输出；只有当项目存在稳定复用的专门流程时，才由 repo-local 文档或 agent 扩展层另行补充
 
 ## 9. Agent 扩展维护源
 
@@ -381,9 +381,9 @@ agent 扩展层维护源固定放在：
 ```text
 sources/agent_extensions/
 ├── shared/
-│   └── .agent/prompts/README.md
+│   └── .agents/prompts/README.md
 ├── placeholder/
-│   └── .agent/
+│   └── .agents/
 │       ├── prompts/
 │       │   ├── issue-standard-workflow.md
 │       │   ├── loop-codex.md
@@ -393,7 +393,7 @@ sources/agent_extensions/
 │           ├── code-review.md
 │           └── linter.md
 └── full/
-    └── .agent/
+    └── .agents/
         ├── prompts/
         │   ├── issue-standard-workflow.md
         │   ├── loop-codex.md
@@ -409,7 +409,7 @@ sources/agent_extensions/
 - `shared/` 只放不分模式的稳定文件
 - `placeholder/` 和 `full/` 的路径结构必须完全一致
 - mode-sensitive 文件必须带 `Mode: placeholder|full`
-- `full/` 与 `placeholder/` 生成执行计划时，都必须与 `.agent/PLANS.md` 的实现骨架 contract 保持一致
+- `full/` 与 `placeholder/` 生成执行计划时，都必须与 `.agents/PLANS.md` 的实现骨架 contract 保持一致
 - `maintenance-loop.md` 默认 `report-only`，不新增自动修复脚本；只有用户显式指定时才进入 `issue-create / safe-fix / rule-promotion`
 
 ## 10. gate 脚本
@@ -428,9 +428,9 @@ sources/agent_extensions/
 - 保持 gate 入口脚本独立，公共解析逻辑收口到 `common.sh` / `common.ps1`
 - `check.sh` 与 `check.ps1` 不只看关键字，还要做 gate smoke test
 - `review_gate.sh` 与 `review_gate.ps1` 默认同时校验 `blocking_findings` 和 plan 的实现骨架
-- `check.sh` 与 `check.ps1` 不要求 `.agent/prompts/` 与 `.agent/guides/` 存在
+- `check.sh` 与 `check.ps1` 不要求 `.agents/prompts/` 与 `.agents/guides/` 存在
 - 若这些可选文件存在，只允许检查其 `Mode:` 标记是否合法
-- optional bundle 一旦存在，`.agent/prompts/maintenance-loop.md` 也必须存在并带合法 `Mode: placeholder|full`
+- optional bundle 一旦存在，`.agents/prompts/maintenance-loop.md` 也必须存在并带合法 `Mode: placeholder|full`
 - `check.sh` 与 `check.ps1` 不要求 `.cursor/rules/harness.mdc` 存在
 - 若 Cursor rule 存在，必须检查中文描述、`alwaysApply: true`、关键 harness 导航入口和 `make harness-verify`
 - `merge` / `escalation` 仍然是控制面阶段，但默认由 agent 根据仓库真相判断，不再作为 base harness 自带 shell gate
@@ -449,9 +449,9 @@ sources/agent_extensions/
 | `docs/issues/TEMPLATE.md` 是否存在 | 应存在 |
 | `docs/harness/project-constraints.md` 是否存在 | 应存在 |
 | `docs/harness/prompt-templates.md` 是否不存在 | 应不存在 |
-| `.agent/plans/EXAMPLE-implementation.md` 是否存在 | 应存在 |
-| `.agent/state/TEMPLATE.md` 是否存在 | 应存在 |
-| `.agent/runs/TEMPLATE.md` 是否存在 | 应存在 |
+| `.agents/plans/EXAMPLE-implementation.md` 是否存在 | 应存在 |
+| `.agents/state/TEMPLATE.md` 是否存在 | 应存在 |
+| `.agents/runs/TEMPLATE.md` 是否存在 | 应存在 |
 | `docs/test/RUNBOOK_TEMPLATE.md` 是否存在 | 应存在 |
 | `scripts/harness/common.sh` 是否存在 | 应存在 |
 | `scripts/harness/review_gate.sh` 是否存在 | 应存在 |
@@ -462,18 +462,18 @@ sources/agent_extensions/
 | `bash scripts/harness/check.sh` 是否通过 | 应通过 |
 | `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\harness\check.ps1` 是否通过 | Windows / PowerShell 环境应通过 |
 | 若初始化 agent 是 Cursor，`.cursor/rules/harness.mdc` 是否存在且 `alwaysApply: true` | 应正确 |
-| 若是 agent 驱动初始化，`.agent/prompts/*.md` 是否带正确 `Mode:` 标记 | 应正确 |
+| 若是 agent 驱动初始化，`.agents/prompts/*.md` 是否带正确 `Mode:` 标记 | 应正确 |
 
 ## 12. 常见误区
 
 1. 继续把 issue 模板散放到 `docs/linear/`
 2. 继续把 prompt 模板塞回 `docs/harness/`
 3. `.gitignore` 只做了 Base，没叠加技术栈规则
-4. 预先初始化一堆没有消费链路的 `.agent` 空壳目录
+4. 预先初始化一堆没有消费链路的 `.agents` 空壳目录
 5. 让 `check.sh` / `check.ps1` 依赖 prompts / guides 才能通过
 6. 把 agent 扩展层做成脚本参数，而不是在 agent 初始化流程里决定
 7. 把 `merge` / `escalation` 继续实现成 initializer 自带 shell gate
-8. 把 `.agent/skills` 当成所有项目都必须初始化的 base 输出
+8. 把 `.agents/skills` 当成所有项目都必须初始化的 base 输出
 9. 把 Cursor rules 放进 base template，导致所有项目默认生成 `.cursor/`
 10. 把项目级机械约束只写在聊天或 README 里，不登记到 `docs/harness/project-constraints.md`
 11. 把 maintenance loop 理解成默认自动修复脚本，而不是默认 `report-only` 的维护 prompt

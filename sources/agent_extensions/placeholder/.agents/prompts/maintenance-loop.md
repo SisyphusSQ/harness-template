@@ -52,9 +52,9 @@ Mode: placeholder
 
 ## 使用约束
 
-- 先读取 `AGENTS.md`、`docs/harness/control-plane.md`、`docs/harness/project-constraints.md`、`docs/harness/linear.md`、`.agent/PLANS.md`
+- 先读取 `AGENTS.md`、`docs/harness/control-plane.md`、`docs/harness/project-constraints.md`、`docs/harness/linear.md`、`.agents/PLANS.md`
 - `report-only` 不修改文件、不写外部系统
 - `safe-fix` 只允许低风险文档维护项
 - `rule-promotion` 必须写 plan，并写清 evidence、`Rule ID`、执行命令、回归验证和回滚方式
-- 若 Superpowers skills 可用，只能参考 `.agent/prompts/README.md` 的 Optional Superpowers Skill Hooks；当前占位文件不冻结完整 maintenance skill hook contract
+- 若 Superpowers skills 可用，只能参考 `.agents/prompts/README.md` 的 Optional Superpowers Skill Hooks；当前占位文件不冻结完整 maintenance skill hook contract
 - API contract、schema、安全策略和业务行为默认 `human_decision_required`

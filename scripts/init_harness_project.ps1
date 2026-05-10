@@ -78,8 +78,8 @@ function Validate-TargetPath {
 $obsoleteManagedFiles = @(
     "docs/harness/README.md",
     "docs/harness/prompt-templates.md",
-    ".agent/mappings/reference-mapping.yaml",
-    ".agent/mappings/knowledge-writeback-mapping.example.yaml",
+    ".agents/mappings/reference-mapping.yaml",
+    ".agents/mappings/knowledge-writeback-mapping.example.yaml",
     "scripts/harness/merge_gate.sh",
     "scripts/harness/escalation_gate.sh"
 )
@@ -207,10 +207,10 @@ function Postprocess-TextFiles {
     $files = @(
         "AGENTS.md",
         "README.md",
-        ".agent/PLANS.md",
-        ".agent/plans/TEMPLATE.md",
-        ".agent/state/TEMPLATE.md",
-        ".agent/runs/TEMPLATE.md",
+        ".agents/PLANS.md",
+        ".agents/plans/TEMPLATE.md",
+        ".agents/state/TEMPLATE.md",
+        ".agents/runs/TEMPLATE.md",
         "docs/harness/control-plane.md",
         "docs/harness/issue-workflow.md",
         "docs/harness/linear.md",
@@ -267,11 +267,11 @@ $managedFiles = @(
     "AGENTS.md",
     "README.md",
     "Makefile",
-    ".agent/PLANS.md",
-    ".agent/plans/TEMPLATE.md",
-    ".agent/plans/EXAMPLE-implementation.md",
-    ".agent/state/TEMPLATE.md",
-    ".agent/runs/TEMPLATE.md",
+    ".agents/PLANS.md",
+    ".agents/plans/TEMPLATE.md",
+    ".agents/plans/EXAMPLE-implementation.md",
+    ".agents/state/TEMPLATE.md",
+    ".agents/runs/TEMPLATE.md",
     "docs/harness/control-plane.md",
     "docs/harness/issue-workflow.md",
     "docs/harness/linear.md",
@@ -322,6 +322,6 @@ Log "  1. inspect .gitignore and add repo-specific local files"
 Log "  2. read docs\harness\, docs\issues\, and docs\test\RUNBOOK_TEMPLATE.md"
 Log "  3. fill docs\harness\project-constraints.md with repo-specific mechanical constraints"
 Log "  4. update README and AGENTS with real project context"
-Log "  5. create the first plan in .agent\plans\"
+Log "  5. create the first plan in .agents\plans\"
 Log "  6. run powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\harness\check.ps1"
-Log "  7. if an agent is driving init, follow $harnessRoot\agent-init-project.md to add .agent\prompts\ + .agent\guides\"
+Log "  7. if an agent is driving init, follow $harnessRoot\agent-init-project.md to add .agents\prompts\ + .agents\guides\"

@@ -281,9 +281,9 @@ event_ingest:
 - `current_linear_state`: `Todo`
 - `branch`: `suqing/webhook-idempotent-retry`
 - `pr`: `N/A`
-- `state_ref`: `.agent/state/2026-04-21-webhook-ingest.md`
-- `latest_run_ref`: `.agent/runs/2026-04-21-webhook-ingest.md`
-- `master_run_ref`: `.agent/runs/master-webhook-reliability.md`
+- `state_ref`: `.agents/state/2026-04-21-webhook-ingest.md`
+- `latest_run_ref`: `.agents/runs/2026-04-21-webhook-ingest.md`
+- `master_run_ref`: `.agents/runs/master-webhook-reliability.md`
 - `truth_split`: `Linear primary / repo execution / PR-MR narrative`
 
 ## Linear Actions

@@ -6,13 +6,13 @@ Mode: full
 | --- | --- |
 | 文档定位 | 标准 issue workflow 手册与高频 Prompt 模板 |
 | 适用范围 | 当前仓库的单卡推进、开发前准备、verify / review / mr_prep / 收口场景 |
-| 主要载体 | `.agent/prompts/` + `docs/harness/` + `.agent/PLANS.md` + 仓库代码 |
-| 关联文档 | `AGENTS.md`、`docs/harness/control-plane.md`、`docs/harness/linear.md`、`.agent/prompts/loop-codex.md`、`.agent/prompts/loop-automation.md`、`.agent/guides/code-review.md`、`.agent/PLANS.md` |
+| 主要载体 | `.agents/prompts/` + `docs/harness/` + `.agents/PLANS.md` + 仓库代码 |
+| 关联文档 | `AGENTS.md`、`docs/harness/control-plane.md`、`docs/harness/linear.md`、`.agents/prompts/loop-codex.md`、`.agents/prompts/loop-automation.md`、`.agents/guides/code-review.md`、`.agents/PLANS.md` |
 
 固定规则：
 
-- 本文是 `.agent/prompts/` 的使用手册，不是新的控制面真相源。
-- 若本文与 `AGENTS.md`、`docs/harness/*`、`.agent/PLANS.md` 冲突，以后者为准。
+- 本文是 `.agents/prompts/` 的使用手册，不是新的控制面真相源。
+- 若本文与 `AGENTS.md`、`docs/harness/*`、`.agents/PLANS.md` 冲突，以后者为准。
 - `loop-codex.md` 负责交互式 loop 的短 contract；`loop-automation.md` 负责无人值守 loop 的自动化语义。
 - 能从仓库与 issue 真相自行定位的输入，先自行探索，不要反问用户。
 - 阶段反馈、收口结果、`recovery_point`、`next_action` 默认写回 Linear。
@@ -34,11 +34,11 @@ Mode: full
 
 ## 1. 固定执行约束
 
-1. 复杂任务默认先建或更新 `.agent/plans/*`，再进入实现。
+1. 复杂任务默认先建或更新 `.agents/plans/*`，再进入实现。
 2. 任何实现都必须先冻结 Included / Excluded / Acceptance Matrix / Write Scope Limit。
 3. `verify / review / mr_prep` 是独立 checkpoint，不属于 `implement` 的隐含附属动作。
 4. 发现当前卡过大、依赖未清或 write scope 失控时，先回到 plan-only，不继续硬做。
-5. 若存在 `.agent/guides/code-review.md`，review 口径先按其中要求执行。
+5. 若存在 `.agents/guides/code-review.md`，review 口径先按其中要求执行。
 6. 若仓库启用了 PR / MR，它是次级代码叙事面，不替代 Linear 的协作真相。
 7. 生成或更新 plan 时，`Architecture / Data Flow` 必须补齐以下 5 个实现子块：
    - `真实入口与触发`
@@ -71,15 +71,15 @@ Mode: full
 
 固定规则：
 
-- Superpowers 只作为阶段辅助，不替代本文、`.agent/PLANS.md`、`docs/harness/*` 或 Linear truth。
-- 实施计划统一写入 `.agent/plans/`；不采用 Superpowers 默认计划目录作为仓库计划真相。
+- Superpowers 只作为阶段辅助，不替代本文、`.agents/PLANS.md`、`docs/harness/*` 或 Linear truth。
+- 实施计划统一写入 `.agents/plans/`；不采用 Superpowers 默认计划目录作为仓库计划真相。
 - skill 输出必须折回当前计划或 issue 的 `Verify Summary`、`Review Summary`、`Writeback Summary`、`Linear Actions`。
 - 若 Superpowers 不可用，继续按本仓库 harness loop 执行。
 
 阶段提示：
 
 - `collect / gate`：需求未冻结、需要澄清设计或方案取舍时，可考虑 `superpowers:brainstorming`。
-- `freeze / slice`：写实施计划时，可考虑 `superpowers:writing-plans`，但路径与结构服从 `.agent/PLANS.md`。
+- `freeze / slice`：写实施计划时，可考虑 `superpowers:writing-plans`，但路径与结构服从 `.agents/PLANS.md`。
 - `implement`：行为变更、bugfix 或重构可考虑 `superpowers:test-driven-development`。
 - `implement`：任务独立且 subagent 可用时可考虑 `superpowers:subagent-driven-development`；否则使用普通 inline loop。
 - `verify`：声明完成、通过或可收口前，可考虑 `superpowers:verification-before-completion`。
@@ -111,7 +111,7 @@ Additional constraints: <CONSTRAINTS>
    - Excluded
    - Acceptance Matrix
    - Write Scope Limit
-3. 基于已冻结范围生成正式执行计划（写到 `.agent/plans/` 下），计划中至少写清：
+3. 基于已冻结范围生成正式执行计划（写到 `.agents/plans/` 下），计划中至少写清：
    - Goal
    - Scope and Non-Goals
    - Architecture / Data Flow 下的 5 个实现子块：
@@ -251,7 +251,7 @@ Additional constraints: <CONSTRAINTS>
    - 未执行的步骤显式写 `未执行` 或 `blocker`
    - 脱敏凭据、token、数据库主机、临时目录、完整下载 URL、本机路径等敏感或机器本地痕迹
    - 保留已脱敏的历史摘要；若有新结果，用新的脱敏摘要替换或追加，不要删成空模板
-   - 原始命令输出和敏感痕迹只写 issue comment、`.agent/runs` 或本地记录，不写入提交版文档
+   - 原始命令输出和敏感痕迹只写 issue comment、`.agents/runs` 或本地记录，不写入提交版文档
 
 固定要求：
 - 测试文档默认是 runbook，不是泛化 QA 说明
@@ -360,6 +360,6 @@ Additional constraints: <CONSTRAINTS>
 - 需要先只看 findings、不自动修改时，先用“Verify + Review Gate（只出结论与 findings，不修改）”，再按需要选择两个 findings follow-up 模板之一。
 - 需要生成或执行 `docs/test/*` runbook，优先用 `2.7 测试文档生成 / 执行 / 结果回写`。
 - 需要同步外部接口目录或外部系统条目，优先用 `2.8 外部接口目录 / 外部系统同步验收 (external-sync)`。
-- 需要交互式 loop 入口时，优先改用 `.agent/prompts/loop-codex.md`。
-- 需要无人值守 / 自动推进时，优先改用 `.agent/prompts/loop-automation.md`。
-- 做本地 review 前，默认先读取 `.agent/guides/code-review.md`（若存在）。
+- 需要交互式 loop 入口时，优先改用 `.agents/prompts/loop-codex.md`。
+- 需要无人值守 / 自动推进时，优先改用 `.agents/prompts/loop-automation.md`。
+- 做本地 review 前，默认先读取 `.agents/guides/code-review.md`（若存在）。

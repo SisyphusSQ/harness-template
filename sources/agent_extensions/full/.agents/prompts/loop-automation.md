@@ -6,12 +6,12 @@ Mode: full
 | --- | --- |
 | 文档定位 | 无人值守 / 自动化 loop 的规范页与 Prompt 模板 |
 | 适用范围 | 需要围绕 root issue 自动推进一轮受控 harness loop 的场景 |
-| 关联文档 | `.agent/prompts/issue-standard-workflow.md`、`.agent/prompts/loop-codex.md`、`AGENTS.md`、`docs/harness/control-plane.md`、`docs/harness/linear.md`、`.agent/guides/code-review.md`、`.agent/PLANS.md` |
+| 关联文档 | `.agents/prompts/issue-standard-workflow.md`、`.agents/prompts/loop-codex.md`、`AGENTS.md`、`docs/harness/control-plane.md`、`docs/harness/linear.md`、`.agents/guides/code-review.md`、`.agents/PLANS.md` |
 
 固定规则：
 
 - 本文用于 automation，不替代仓库级控制面真相。
-- 若本文与 `AGENTS.md`、`docs/harness/*`、`.agent/PLANS.md` 冲突，以后者为准。
+- 若本文与 `AGENTS.md`、`docs/harness/*`、`.agents/PLANS.md` 冲突，以后者为准。
 - 当前 automation 语义优先围绕 `root_issue_type=master|execution` 设计。
 - automation run 的结果面优先是 Linear，而不是本地 `state / runs`。
 
@@ -111,9 +111,9 @@ automation 至少要同步以下结果面：
 你必须优先读取以下真相源：
 - 根规则：AGENTS.md
 - 工程控制面：docs/harness/control-plane.md、docs/harness/linear.md
-- 计划协议：.agent/PLANS.md、.agent/plans/*
-- Prompt 合同：.agent/prompts/*
-- Review / Lint 说明：.agent/guides/*
+- 计划协议：.agents/PLANS.md、.agents/plans/*
+- Prompt 合同：.agents/prompts/*
+- Review / Lint 说明：.agents/guides/*
 
 固定主流程：
 collect -> gate -> freeze -> slice -> implement -> verify -> review -> writeback -> mr_prep -> merge -> notify

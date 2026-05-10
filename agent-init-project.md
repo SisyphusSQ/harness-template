@@ -12,8 +12,8 @@
 - 本文件位于当前 harness 维护源根目录，不属于目标项目模板，不会被初始化脚本复制到目标仓库
 - `init_harness_project.sh` 与 `init_harness_project.ps1` 只负责 base harness
 - `sources/agent_adapters/` 是按 agent 类型补充的适配层，不属于 base harness
-- `.agent/prompts/` 与 `.agent/guides/` 由 agent 在 base harness 完成后补齐
-- `.agent/skills/` 不是 base harness 输出，只在项目需要稳定复用的 repo-local 专门流程时另行补充
+- `.agents/prompts/` 与 `.agents/guides/` 由 agent 在 base harness 完成后补齐
+- `.agents/skills/` 不是 base harness 输出，只在项目需要稳定复用的 repo-local 专门流程时另行补充
 
 ## 1. 执行手册
 
@@ -76,11 +76,11 @@
    - `docs/issues/README.md`
    - `docs/issues/TEMPLATE.md`
    - `docs/test/RUNBOOK_TEMPLATE.md`
-   - `.agent/PLANS.md`
-   - `.agent/plans/TEMPLATE.md`
-   - `.agent/plans/EXAMPLE-implementation.md`
-   - `.agent/state/TEMPLATE.md`
-   - `.agent/runs/TEMPLATE.md`
+   - `.agents/PLANS.md`
+   - `.agents/plans/TEMPLATE.md`
+   - `.agents/plans/EXAMPLE-implementation.md`
+   - `.agents/state/TEMPLATE.md`
+   - `.agents/runs/TEMPLATE.md`
    - `scripts/harness/check.sh`
    - `scripts/harness/common.sh`
    - `scripts/harness/review_gate.sh`
@@ -90,7 +90,7 @@
 
    同时确认当前 base harness 的计划 contract 已经可读出：
 
-   - `.agent/PLANS.md` 明确 plan 可以继续使用 `## Architecture / Data Flow`，也可以使用推荐标题 `## 0. 现有架构回顾与核心设计决策`
+   - `.agents/PLANS.md` 明确 plan 可以继续使用 `## Architecture / Data Flow`，也可以使用推荐标题 `## 0. 现有架构回顾与核心设计决策`
    - `TEMPLATE.md` 已切到“实现优先”骨架，正文默认按
      `0. 现有架构回顾与核心设计决策 -> 1..N 改动面 -> 数据流可视化 -> 关键设计决策摘要 -> 与现有代码的关系`
    - `EXAMPLE-implementation.md` 是官方质量标杆，可直接对照风格和密度
@@ -110,7 +110,7 @@
    - 复制后确认目标仓库存在 `.cursor/rules/harness.mdc`
    - 确认 Cursor rule 使用中文 `description`、中文正文和 `alwaysApply: true`
    - 若 agent 类型是 `codex` 或 `other`，不生成 `.cursor/`
-   - Cursor adapter 不依赖 `.agent/prompts/` 的 `placeholder` / `full` 模式
+   - Cursor adapter 不依赖 `.agents/prompts/` 的 `placeholder` / `full` 模式
 
 4. 确定 agent 扩展层模式：
 
@@ -122,13 +122,13 @@
 
 5. 扩展层补齐后，确认目标仓库存在：
 
-   - `.agent/prompts/README.md`
-   - `.agent/prompts/issue-standard-workflow.md`
-   - `.agent/prompts/loop-codex.md`
-   - `.agent/prompts/loop-automation.md`
-   - `.agent/prompts/maintenance-loop.md`
-   - `.agent/guides/code-review.md`
-   - `.agent/guides/linter.md`
+   - `.agents/prompts/README.md`
+   - `.agents/prompts/issue-standard-workflow.md`
+   - `.agents/prompts/loop-codex.md`
+   - `.agents/prompts/loop-automation.md`
+   - `.agents/prompts/maintenance-loop.md`
+   - `.agents/guides/code-review.md`
+   - `.agents/guides/linter.md`
 
 6. 对 6 个 mode-sensitive 文件检查：
 
@@ -150,21 +150,21 @@
      - `maintenance_candidate`、`rule_promotion_candidate`、`human_decision_required`
      - `project-check` 挂载协议
      - 没有可执行命令或 gate 时不得假装 `enforced`
-   - `.agent/prompts/maintenance-loop.md` 能读出：
+   - `.agents/prompts/maintenance-loop.md` 能读出：
      - 默认 mode 是 `report-only`
      - 只有用户显式指定才进入 `issue-create / safe-fix / rule-promotion`
      - API contract、schema、安全策略和业务行为不能自动修
-   - `.agent/state/TEMPLATE.md` 与 `.agent/runs/TEMPLATE.md` 能读出：
+   - `.agents/state/TEMPLATE.md` 与 `.agents/runs/TEMPLATE.md` 能读出：
      - 它们是本地辅助运行面
      - 不替代 Issue Tracker
    - `docs/test/RUNBOOK_TEMPLATE.md` 能读出：
      - 测试文档默认是可执行 runbook
      - 提交版文档只保留脱敏结果摘要
      - 未执行步骤不得写成已通过
-   - `.agent/PLANS.md` 与 `.agent/plans/TEMPLATE.md` 能读出：
+   - `.agents/PLANS.md` 与 `.agents/plans/TEMPLATE.md` 能读出：
      - 计划必须显式写实现逻辑骨架
      - 不能用 harness 控制流替代 `Architecture / Data Flow`
-   - `.agent/plans/EXAMPLE-implementation.md` 能作为实现型 plan 的参考范式
+   - `.agents/plans/EXAMPLE-implementation.md` 能作为实现型 plan 的参考范式
 
 8. 最后进入目标仓库执行：
 
@@ -227,20 +227,20 @@
    - `<HARNESS_ROOT>/sources/agent_extensions/shared/.`
    - `<HARNESS_ROOT>/sources/agent_extensions/{placeholder|full}/.`
 7. 扩展层补齐后，必须确认以下文件全部存在：
-   - `.agent/prompts/README.md`
-   - `.agent/prompts/issue-standard-workflow.md`
-   - `.agent/prompts/loop-codex.md`
-   - `.agent/prompts/loop-automation.md`
-   - `.agent/prompts/maintenance-loop.md`
-   - `.agent/guides/code-review.md`
-   - `.agent/guides/linter.md`
+   - `.agents/prompts/README.md`
+   - `.agents/prompts/issue-standard-workflow.md`
+   - `.agents/prompts/loop-codex.md`
+   - `.agents/prompts/loop-automation.md`
+   - `.agents/prompts/maintenance-loop.md`
+   - `.agents/guides/code-review.md`
+   - `.agents/guides/linter.md`
 8. 对以下 6 个文件检查 mode：
-   - `.agent/prompts/issue-standard-workflow.md`
-   - `.agent/prompts/loop-codex.md`
-   - `.agent/prompts/loop-automation.md`
-   - `.agent/prompts/maintenance-loop.md`
-   - `.agent/guides/code-review.md`
-   - `.agent/guides/linter.md`
+   - `.agents/prompts/issue-standard-workflow.md`
+   - `.agents/prompts/loop-codex.md`
+   - `.agents/prompts/loop-automation.md`
+   - `.agents/prompts/maintenance-loop.md`
+   - `.agents/guides/code-review.md`
+   - `.agents/guides/linter.md`
    要求：
    - 都带 `Mode: placeholder` 或 `Mode: full`
    - mode 必须一致
@@ -251,15 +251,15 @@
    - `docs/harness/linear.md` 已明确它是 Linear profile / migration note
    - `docs/issues/TEMPLATE.md` 已存在，可作为 repo issue 和 `writeback_log` 模板
    - `docs/harness/project-constraints.md` 已存在，且明确项目级机械约束登记、状态枚举、分类枚举、`project-check` 挂载协议和不得假装 `enforced`
-   - `.agent/prompts/maintenance-loop.md` 已存在，默认 `report-only`，且只有用户显式指定时才进入 `issue-create / safe-fix / rule-promotion`
-   - `.agent/PLANS.md` 与 `.agent/plans/TEMPLATE.md` 已明确
+   - `.agents/prompts/maintenance-loop.md` 已存在，默认 `report-only`，且只有用户显式指定时才进入 `issue-create / safe-fix / rule-promotion`
+   - `.agents/PLANS.md` 与 `.agents/plans/TEMPLATE.md` 已明确
      `真实入口与触发 / 输入装配与边界校验 / 组件职责与代码落点 / 关键执行时序 / 停止 / 错误 / 恢复`
-   - `.agent/plans/EXAMPLE-implementation.md` 已存在，可作为质量标杆
+   - `.agents/plans/EXAMPLE-implementation.md` 已存在，可作为质量标杆
    - `docs/test/RUNBOOK_TEMPLATE.md` 已存在，可作为测试 runbook 和脱敏结果回写模板
    - `review_gate.sh` / `review_gate.ps1` 已明确会拒绝只有 harness 流程、没有实现骨架的 plan
    - `review_gate.sh` / `review_gate.ps1` 已明确会拒绝空的 `Reference Snippets` 和空的组件职责记录
-   - `.agent/state/TEMPLATE.md` 与 `.agent/runs/TEMPLATE.md` 已明确它们只是本地辅助运行面
-   - `.agent/skills` 未作为 base 必备输出；如项目需要 repo-local skill，应单独说明来源和使用边界
+   - `.agents/state/TEMPLATE.md` 与 `.agents/runs/TEMPLATE.md` 已明确它们只是本地辅助运行面
+   - `.agents/skills` 未作为 base 必备输出；如项目需要 repo-local skill，应单独说明来源和使用边界
    - 如果生成了 `.cursor/rules/harness.mdc`，它已明确读取 harness 入口并要求 `make harness-verify`
 10. 最后在目标仓库执行 `make harness-verify`；Windows PowerShell 可执行 `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\harness\check.ps1`
 

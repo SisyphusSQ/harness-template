@@ -16,14 +16,14 @@ alwaysApply: true
 5. `docs/harness/linear.md`（Linear profile，如适用）
 6. `docs/issues/README.md`
 7. `docs/harness/project-constraints.md`
-8. `.agent/PLANS.md`
-9. `.agent/plans/TEMPLATE.md`
-10. `.agent/plans/EXAMPLE-implementation.md`
+8. `.agents/PLANS.md`
+9. `.agents/plans/TEMPLATE.md`
+10. `.agents/plans/EXAMPLE-implementation.md`
 11. `docs/test/RUNBOOK_TEMPLATE.md`
 
 ## 执行约束
 
-- 非简单任务先按 `.agent/PLANS.md` 与 `.agent/plans/TEMPLATE.md` 创建或更新计划。
+- 非简单任务先按 `.agents/PLANS.md` 与 `.agents/plans/TEMPLATE.md` 创建或更新计划。
 - 实现型计划必须写真实代码入口、输入装配、组件职责、关键时序、错误处理和恢复路径。
 - 不要用 harness 控制流替代业务实现架构或数据流说明。
 - 项目级机械约束需要登记到 `docs/harness/project-constraints.md`；没有可执行命令或 gate 时，不要标记为 `enforced`。
@@ -36,5 +36,5 @@ alwaysApply: true
 - Issue Tracker 是主协作真相。
 - repo 是主执行真相。
 - PR / MR 是次级代码叙事面。
-- `.agent/state` 与 `.agent/runs` 是本地辅助运行面，不替代 Issue Tracker。
-- `.agent/skills` 是可选 repo-local 扩展，不是 base harness 必备输出。
+- `.agents/state` 与 `.agents/runs` 是本地辅助运行面，不替代 Issue Tracker。
+- `.agents/skills` 是可选 repo-local 扩展，不是 base harness 必备输出。

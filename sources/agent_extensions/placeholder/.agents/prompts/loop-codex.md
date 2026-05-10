@@ -49,6 +49,6 @@ Repo-local TODO: inventory 结构、下一张 execution issue 选择规则。
 ## 使用约束
 
 - 当前文件只服务交互式主对话
-- 若是无人值守 / 自动化场景，应优先补齐 `.agent/prompts/loop-automation.md`
+- 若是无人值守 / 自动化场景，应优先补齐 `.agents/prompts/loop-automation.md`
 - 补齐后默认应把当前状态、`recovery_point`、`next_action` 写回 Linear
 - 补齐前不要把这里的占位语义当作完整 loop contract

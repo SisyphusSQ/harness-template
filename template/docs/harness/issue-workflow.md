@@ -51,7 +51,7 @@
 
 - 每个 profile 必须能承载同一组任务真相字段。
 - 没有外部工具时，用 `docs/issues/TEMPLATE.md` 创建仓库内 issue。
-- 外部 issue 工具不可用时，允许临时把恢复点写入 `.agent/state/`，但最终协作状态仍要回写到 Issue Tracker。
+- 外部 issue 工具不可用时，允许临时把恢复点写入 `.agents/state/`，但最终协作状态仍要回写到 Issue Tracker。
 
 ## Master / Execution 模型
 

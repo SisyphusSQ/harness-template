@@ -4,11 +4,11 @@
 | --- | --- |
 | 文档定位 | 复杂任务的计划协议 |
 | 适用范围 | 跨模块、带风险、需多轮验证、需中断恢复的任务 |
-| 计划实例位置 | `.agent/plans/` |
-| 关联文档 | `docs/harness/control-plane.md`、`docs/harness/issue-workflow.md`、`docs/harness/linear.md`、`.agent/prompts/README.md`（如存在） |
+| 计划实例位置 | `.agents/plans/` |
+| 关联文档 | `docs/harness/control-plane.md`、`docs/harness/issue-workflow.md`、`docs/harness/linear.md`、`.agents/prompts/README.md`（如存在） |
 
 本文件只定义“什么时候要写 plan、plan 怎么写、执行中怎么维护”。
-具体计划实例统一写入 `.agent/plans/`，不再新增第二套计划目录。
+具体计划实例统一写入 `.agents/plans/`，不再新增第二套计划目录。
 
 ## 1. 何时必须写 plan
 
@@ -41,15 +41,15 @@
 
 | 项目 | 规则 |
 | --- | --- |
-| 存放位置 | `.agent/plans/` |
+| 存放位置 | `.agents/plans/` |
 | 命名格式 | `YYYY-MM-DD-<slug>.md` |
 | 标题格式 | `# ExecPlan: <任务名>` |
-| 真相来源 | 协议真相看本文件，计划实例真相看 `.agent/plans/` |
+| 真相来源 | 协议真相看本文件，计划实例真相看 `.agents/plans/` |
 
 固定规则：
 
-- 计划协议写在 `.agent/PLANS.md`
-- 计划实例写在 `.agent/plans/`
+- 计划协议写在 `.agents/PLANS.md`
+- 计划实例写在 `.agents/plans/`
 - 不新增第二套计划目录
 - 历史计划不做平行迁移
 
@@ -123,7 +123,7 @@ isProject: false
 - 主体优先写“实现如何落地”，控制面摘要统一留在尾部
 - 推荐用“按改动面展开”的结构讲清每个模块、接口、数据流和风险
 - `Architecture / Data Flow` 的业务实现 contract 不变，只是推荐用更贴近实施方案的章节顺序承载
-- `.agent/plans/EXAMPLE-implementation.md` 是官方示范文件，用来对齐质量和叙事密度，不替代模板
+- `.agents/plans/EXAMPLE-implementation.md` 是官方示范文件，用来对齐质量和叙事密度，不替代模板
 
 ## 4. 写法约束
 

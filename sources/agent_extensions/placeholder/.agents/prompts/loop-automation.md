@@ -46,9 +46,9 @@ Repo-local TODO:
 
 ## 使用约束
 
-- 先读取 `AGENTS.md`、`docs/harness/control-plane.md`、`docs/harness/linear.md`、`.agent/PLANS.md`
-- 若是交互式主对话，不要直接拿本文件替代 `.agent/prompts/loop-codex.md`
+- 先读取 `AGENTS.md`、`docs/harness/control-plane.md`、`docs/harness/linear.md`、`.agents/PLANS.md`
+- 若是交互式主对话，不要直接拿本文件替代 `.agents/prompts/loop-codex.md`
 - 补齐后默认应把 automation 结果面优先写回 Linear
 - 补齐后默认由 agent 给出 `merge / escalation` 结论
-- 若 Superpowers skills 可用，只能参考 `.agent/prompts/README.md` 的 Optional Superpowers Skill Hooks；当前占位文件不冻结完整 automation skill hook contract
+- 若 Superpowers skills 可用，只能参考 `.agents/prompts/README.md` 的 Optional Superpowers Skill Hooks；当前占位文件不冻结完整 automation skill hook contract
 - 补齐前不要把这里的占位语义当作完整 automation contract

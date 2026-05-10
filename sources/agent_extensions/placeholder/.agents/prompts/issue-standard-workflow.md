@@ -13,7 +13,7 @@ Mode: placeholder
 当前是占位文件，不代表仓库已经冻结完整 issue workflow contract。
 
 即使当前仍是占位版，凡是进入 plan-only 输出或执行计划编写，仍必须遵守
-`.agent/PLANS.md` 的计划骨架，尤其是：
+`.agents/PLANS.md` 的计划骨架，尤其是：
 
 - `Architecture / Data Flow` 下的：
   - `真实入口与触发`
@@ -67,7 +67,7 @@ Repo-local TODO: issue 状态、默认分支、回写位置。
 执行 <ISSUE-ID>，先分析并冻结范围，生成执行计划；
 本轮只做开发前准备，不开始开发。
 Repo-local TODO: 是否需要自动建分支、是否需要写回 issue 状态。
-输出的 plan 仍要按 `.agent/PLANS.md` 补齐 `真实入口与触发 / 输入装配与边界校验 / 组件职责与代码落点 / 关键执行时序 / 停止 / 错误 / 恢复`。
+输出的 plan 仍要按 `.agents/PLANS.md` 补齐 `真实入口与触发 / 输入装配与边界校验 / 组件职责与代码落点 / 关键执行时序 / 停止 / 错误 / 恢复`。
 ```
 
 ### 开始开发
@@ -93,9 +93,9 @@ Repo-local TODO: 合并动作、Linear/Issue writeback、ChangeLog 规则。
 
 ## 使用约束
 
-- 先读取 `AGENTS.md`、`docs/harness/control-plane.md`、`docs/harness/linear.md`、`.agent/PLANS.md`
-- 若存在 `.agent/guides/code-review.md`，先按其中的 review 口径执行
+- 先读取 `AGENTS.md`、`docs/harness/control-plane.md`、`docs/harness/linear.md`、`.agents/PLANS.md`
+- 若存在 `.agents/guides/code-review.md`，先按其中的 review 口径执行
 - 默认把阶段反馈、收口结果、`recovery_point`、`next_action` 写回 Linear
-- plan-only 输出即使来自占位 prompt，也不能退化成纯 harness 流程；仍要按 `.agent/PLANS.md` 写清实现逻辑骨架
-- 若 Superpowers skills 可用，只能参考 `.agent/prompts/README.md` 的 Optional Superpowers Skill Hooks；当前占位文件不冻结完整 skill hook contract
+- plan-only 输出即使来自占位 prompt，也不能退化成纯 harness 流程；仍要按 `.agents/PLANS.md` 写清实现逻辑骨架
+- 若 Superpowers skills 可用，只能参考 `.agents/prompts/README.md` 的 Optional Superpowers Skill Hooks；当前占位文件不冻结完整 skill hook contract
 - 当前文件只是占位 skeleton，补齐前不要把它当成可直接执行的完整仓库 contract

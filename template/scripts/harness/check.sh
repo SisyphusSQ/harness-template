@@ -16,11 +16,11 @@ required_files=(
   "docs/issues/README.md"
   "docs/issues/TEMPLATE.md"
   "docs/test/RUNBOOK_TEMPLATE.md"
-  ".agent/PLANS.md"
-  ".agent/plans/TEMPLATE.md"
-  ".agent/plans/EXAMPLE-implementation.md"
-  ".agent/state/TEMPLATE.md"
-  ".agent/runs/TEMPLATE.md"
+  ".agents/PLANS.md"
+  ".agents/plans/TEMPLATE.md"
+  ".agents/plans/EXAMPLE-implementation.md"
+  ".agents/state/TEMPLATE.md"
+  ".agents/runs/TEMPLATE.md"
   "scripts/harness/check.sh"
   "scripts/harness/common.sh"
   "scripts/harness/review_gate.sh"
@@ -62,10 +62,10 @@ required_gitignore_patterns=(
   "logs/"
   "tmp/"
   "temp/"
-  ".agent/state/*"
-  "!.agent/state/TEMPLATE.md"
-  ".agent/runs/*"
-  "!.agent/runs/TEMPLATE.md"
+  ".agents/state/*"
+  "!.agents/state/TEMPLATE.md"
+  ".agents/runs/*"
+  "!.agents/runs/TEMPLATE.md"
   ".cursor/*"
   "!.cursor/rules/"
   "!.cursor/rules/*.mdc"
@@ -106,9 +106,9 @@ if [[ -f ".cursor/rules/harness.mdc" ]]; then
     "docs/harness/linear.md"
     "docs/harness/project-constraints.md"
     "docs/issues/README.md"
-    ".agent/PLANS.md"
-    ".agent/plans/TEMPLATE.md"
-    ".agent/plans/EXAMPLE-implementation.md"
+    ".agents/PLANS.md"
+    ".agents/plans/TEMPLATE.md"
+    ".agents/plans/EXAMPLE-implementation.md"
     "docs/test/RUNBOOK_TEMPLATE.md"
     "make harness-verify"
     "check.ps1"
@@ -136,15 +136,15 @@ required_control_plane_patterns=(
   "report-only"
   "rule-promotion"
   "目录级 AGENTS"
-  ".agent/skills"
+  ".agents/skills"
   "运行反馈默认写回 Issue Tracker"
   "结果回写默认写回 Issue Tracker"
   "review_gate"
   "check.ps1"
   "merge"
   "escalation"
-  ".agent/PLANS.md"
-  ".agent/plans/TEMPLATE.md"
+  ".agents/PLANS.md"
+  ".agents/plans/TEMPLATE.md"
 )
 
 for pattern in "${required_control_plane_patterns[@]}"; do
@@ -275,8 +275,8 @@ for pattern in "${required_linear_profile_patterns[@]}"; do
   fi
 done
 
-if rg -Fq "docs/harness/prompt-templates.md" .agent/PLANS.md; then
-  echo ".agent/PLANS.md should not reference docs/harness/prompt-templates.md anymore" >&2
+if rg -Fq "docs/harness/prompt-templates.md" .agents/PLANS.md; then
+  echo ".agents/PLANS.md should not reference docs/harness/prompt-templates.md anymore" >&2
   exit 1
 fi
 
@@ -317,15 +317,15 @@ required_plans_patterns=(
 )
 
 for pattern in "${required_plans_patterns[@]}"; do
-  if ! rg -Fq "$pattern" .agent/PLANS.md; then
-    echo ".agent/PLANS.md missing required section or keyword: $pattern" >&2
+  if ! rg -Fq "$pattern" .agents/PLANS.md; then
+    echo ".agents/PLANS.md missing required section or keyword: $pattern" >&2
     exit 1
   fi
 done
 
 for required in "issue_provider" "issue_project" "current_issue_state" "recovery_point" "next_action" "state_ref" "latest_run_ref" "master_run_ref"; do
-  if ! rg -Fq "$required" .agent/plans/TEMPLATE.md; then
-    echo ".agent/plans/TEMPLATE.md missing required field: $required" >&2
+  if ! rg -Fq "$required" .agents/plans/TEMPLATE.md; then
+    echo ".agents/plans/TEMPLATE.md missing required field: $required" >&2
     exit 1
   fi
 done
@@ -370,8 +370,8 @@ required_plan_template_patterns=(
 )
 
 for pattern in "${required_plan_template_patterns[@]}"; do
-  if ! rg -Fq "$pattern" .agent/plans/TEMPLATE.md; then
-    echo ".agent/plans/TEMPLATE.md missing required pattern: $pattern" >&2
+  if ! rg -Fq "$pattern" .agents/plans/TEMPLATE.md; then
+    echo ".agents/plans/TEMPLATE.md missing required pattern: $pattern" >&2
     exit 1
   fi
 done
@@ -392,8 +392,8 @@ required_example_patterns=(
 )
 
 for pattern in "${required_example_patterns[@]}"; do
-  if ! rg -Fq "$pattern" .agent/plans/EXAMPLE-implementation.md; then
-    echo ".agent/plans/EXAMPLE-implementation.md missing required pattern: $pattern" >&2
+  if ! rg -Fq "$pattern" .agents/plans/EXAMPLE-implementation.md; then
+    echo ".agents/plans/EXAMPLE-implementation.md missing required pattern: $pattern" >&2
     exit 1
   fi
 done
@@ -406,7 +406,7 @@ required_state_run_patterns=(
 )
 
 for pattern in "${required_state_run_patterns[@]}"; do
-  if ! rg -Fq "$pattern" .agent/state/TEMPLATE.md .agent/runs/TEMPLATE.md; then
+  if ! rg -Fq "$pattern" .agents/state/TEMPLATE.md .agents/runs/TEMPLATE.md; then
     echo "state/run templates missing required pattern: $pattern" >&2
     exit 1
   fi
@@ -431,22 +431,22 @@ for pattern in "${required_powershell_gate_patterns[@]}"; do
 done
 
 optional_mode_files=(
-  ".agent/prompts/issue-standard-workflow.md"
-  ".agent/prompts/loop-codex.md"
-  ".agent/prompts/loop-automation.md"
-  ".agent/prompts/maintenance-loop.md"
-  ".agent/guides/code-review.md"
-  ".agent/guides/linter.md"
+  ".agents/prompts/issue-standard-workflow.md"
+  ".agents/prompts/loop-codex.md"
+  ".agents/prompts/loop-automation.md"
+  ".agents/prompts/maintenance-loop.md"
+  ".agents/guides/code-review.md"
+  ".agents/guides/linter.md"
 )
 
 optional_bundle_files=(
-  ".agent/prompts/README.md"
-  ".agent/prompts/issue-standard-workflow.md"
-  ".agent/prompts/loop-codex.md"
-  ".agent/prompts/loop-automation.md"
-  ".agent/prompts/maintenance-loop.md"
-  ".agent/guides/code-review.md"
-  ".agent/guides/linter.md"
+  ".agents/prompts/README.md"
+  ".agents/prompts/issue-standard-workflow.md"
+  ".agents/prompts/loop-codex.md"
+  ".agents/prompts/loop-automation.md"
+  ".agents/prompts/maintenance-loop.md"
+  ".agents/guides/code-review.md"
+  ".agents/guides/linter.md"
 )
 
 has_optional_bundle=0
@@ -483,14 +483,14 @@ if [[ "$has_optional_bundle" -eq 1 ]]; then
   done
 
   for pattern in "issue-standard-workflow.md" "loop-codex.md" "loop-automation.md" "maintenance-loop.md"; do
-    if ! rg -Fq "$pattern" ".agent/prompts/README.md"; then
-      echo ".agent/prompts/README.md missing prompt reference: $pattern" >&2
+    if ! rg -Fq "$pattern" ".agents/prompts/README.md"; then
+      echo ".agents/prompts/README.md missing prompt reference: $pattern" >&2
       exit 1
     fi
   done
 
-  if ! rg -Fq "docs/harness/project-constraints.md" ".agent/guides/linter.md"; then
-    echo ".agent/guides/linter.md should point project-level mechanical constraints back to docs/harness/project-constraints.md" >&2
+  if ! rg -Fq "docs/harness/project-constraints.md" ".agents/guides/linter.md"; then
+    echo ".agents/guides/linter.md should point project-level mechanical constraints back to docs/harness/project-constraints.md" >&2
     exit 1
   fi
 
@@ -517,8 +517,8 @@ if [[ "$has_optional_bundle" -eq 1 ]]; then
     )
 
     for pattern in "${required_issue_workflow_patterns[@]}"; do
-      if ! rg -Fq "$pattern" ".agent/prompts/issue-standard-workflow.md"; then
-        echo ".agent/prompts/issue-standard-workflow.md missing required pattern: $pattern" >&2
+      if ! rg -Fq "$pattern" ".agents/prompts/issue-standard-workflow.md"; then
+        echo ".agents/prompts/issue-standard-workflow.md missing required pattern: $pattern" >&2
         exit 1
       fi
     done
@@ -539,8 +539,8 @@ if [[ "$has_optional_bundle" -eq 1 ]]; then
     )
 
     for pattern in "${required_maintenance_patterns[@]}"; do
-      if ! rg -Fq "$pattern" ".agent/prompts/maintenance-loop.md"; then
-        echo ".agent/prompts/maintenance-loop.md missing required pattern: $pattern" >&2
+      if ! rg -Fq "$pattern" ".agents/prompts/maintenance-loop.md"; then
+        echo ".agents/prompts/maintenance-loop.md missing required pattern: $pattern" >&2
         exit 1
       fi
     done

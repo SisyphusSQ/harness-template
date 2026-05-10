@@ -5,7 +5,7 @@
 固定规则：
 
 - `Issue Tracker` 仍是主协作真相
-- `.agent/state/` 只记录本地恢复细节，不替代 Issue Tracker 状态
+- `.agents/state/` 只记录本地恢复细节，不替代 Issue Tracker 状态
 - 协作状态冲突时以 `Issue Tracker` 为准；本地恢复细节冲突时以最新 `state` 文件为准
 
 - `state_id`:

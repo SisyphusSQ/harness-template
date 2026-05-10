@@ -122,11 +122,11 @@ $requiredFiles = @(
     "docs/issues/README.md",
     "docs/issues/TEMPLATE.md",
     "docs/test/RUNBOOK_TEMPLATE.md",
-    ".agent/PLANS.md",
-    ".agent/plans/TEMPLATE.md",
-    ".agent/plans/EXAMPLE-implementation.md",
-    ".agent/state/TEMPLATE.md",
-    ".agent/runs/TEMPLATE.md",
+    ".agents/PLANS.md",
+    ".agents/plans/TEMPLATE.md",
+    ".agents/plans/EXAMPLE-implementation.md",
+    ".agents/state/TEMPLATE.md",
+    ".agents/runs/TEMPLATE.md",
     "scripts/harness/check.sh",
     "scripts/harness/common.sh",
     "scripts/harness/review_gate.sh",
@@ -157,10 +157,10 @@ foreach ($pattern in @(
     "logs/",
     "tmp/",
     "temp/",
-    ".agent/state/*",
-    "!.agent/state/TEMPLATE.md",
-    ".agent/runs/*",
-    "!.agent/runs/TEMPLATE.md",
+    ".agents/state/*",
+    "!.agents/state/TEMPLATE.md",
+    ".agents/runs/*",
+    "!.agents/runs/TEMPLATE.md",
     ".cursor/*",
     "!.cursor/rules/",
     "!.cursor/rules/*.mdc"
@@ -199,9 +199,9 @@ if (Test-Path -LiteralPath ".cursor/rules/harness.mdc" -PathType Leaf) {
         "docs/harness/linear.md",
         "docs/harness/project-constraints.md",
         "docs/issues/README.md",
-        ".agent/PLANS.md",
-        ".agent/plans/TEMPLATE.md",
-        ".agent/plans/EXAMPLE-implementation.md",
+        ".agents/PLANS.md",
+        ".agents/plans/TEMPLATE.md",
+        ".agents/plans/EXAMPLE-implementation.md",
         "docs/test/RUNBOOK_TEMPLATE.md",
         "make harness-verify",
         "check.ps1"
@@ -224,15 +224,15 @@ foreach ($pattern in @(
     "report-only",
     "rule-promotion",
     "目录级 AGENTS",
-    ".agent/skills",
+    ".agents/skills",
     "运行反馈默认写回 Issue Tracker",
     "结果回写默认写回 Issue Tracker",
     "review_gate",
     "check.ps1",
     "merge",
     "escalation",
-    ".agent/PLANS.md",
-    ".agent/plans/TEMPLATE.md"
+    ".agents/PLANS.md",
+    ".agents/plans/TEMPLATE.md"
 )) {
     Assert-FileContains -Path "docs/harness/control-plane.md" -Pattern $pattern -Message "docs/harness/control-plane.md missing required pattern: $pattern"
 }
@@ -333,8 +333,8 @@ foreach ($pattern in @(
     Assert-FileContains -Path "docs/harness/linear.md" -Pattern $pattern -Message "docs/harness/linear.md missing required pattern: $pattern"
 }
 
-if ((Get-FileText -Path ".agent/PLANS.md").IndexOf("docs/harness/prompt-templates.md", [System.StringComparison]::Ordinal) -ge 0) {
-    Fail ".agent/PLANS.md should not reference docs/harness/prompt-templates.md anymore"
+if ((Get-FileText -Path ".agents/PLANS.md").IndexOf("docs/harness/prompt-templates.md", [System.StringComparison]::Ordinal) -ge 0) {
+    Fail ".agents/PLANS.md should not reference docs/harness/prompt-templates.md anymore"
 }
 
 foreach ($pattern in @(
@@ -372,11 +372,11 @@ foreach ($pattern in @(
     "Maintenance Findings",
     "Issue Tracker 默认约定"
 )) {
-    Assert-FileContains -Path ".agent/PLANS.md" -Pattern $pattern -Message ".agent/PLANS.md missing required section or keyword: $pattern"
+    Assert-FileContains -Path ".agents/PLANS.md" -Pattern $pattern -Message ".agents/PLANS.md missing required section or keyword: $pattern"
 }
 
 foreach ($required in @("issue_provider", "issue_project", "current_issue_state", "recovery_point", "next_action", "state_ref", "latest_run_ref", "master_run_ref")) {
-    Assert-FileContains -Path ".agent/plans/TEMPLATE.md" -Pattern $required -Message ".agent/plans/TEMPLATE.md missing required field: $required"
+    Assert-FileContains -Path ".agents/plans/TEMPLATE.md" -Pattern $required -Message ".agents/plans/TEMPLATE.md missing required field: $required"
 }
 
 foreach ($pattern in @(
@@ -417,7 +417,7 @@ foreach ($pattern in @(
     "## Idempotence and Recovery",
     "## Outcomes & Retrospective"
 )) {
-    Assert-FileContains -Path ".agent/plans/TEMPLATE.md" -Pattern $pattern -Message ".agent/plans/TEMPLATE.md missing required pattern: $pattern"
+    Assert-FileContains -Path ".agents/plans/TEMPLATE.md" -Pattern $pattern -Message ".agents/plans/TEMPLATE.md missing required pattern: $pattern"
 }
 
 foreach ($pattern in @(
@@ -434,7 +434,7 @@ foreach ($pattern in @(
     "## Reference Snippets",
     "## Review Summary"
 )) {
-    Assert-FileContains -Path ".agent/plans/EXAMPLE-implementation.md" -Pattern $pattern -Message ".agent/plans/EXAMPLE-implementation.md missing required pattern: $pattern"
+    Assert-FileContains -Path ".agents/plans/EXAMPLE-implementation.md" -Pattern $pattern -Message ".agents/plans/EXAMPLE-implementation.md missing required pattern: $pattern"
 }
 
 foreach ($pattern in @(
@@ -443,7 +443,7 @@ foreach ($pattern in @(
     "Issue Tracker",
     "recovery_point"
 )) {
-    Assert-AnyFileContains -Paths @(".agent/state/TEMPLATE.md", ".agent/runs/TEMPLATE.md") -Pattern $pattern -Message "state/run templates missing required pattern: $pattern"
+    Assert-AnyFileContains -Paths @(".agents/state/TEMPLATE.md", ".agents/runs/TEMPLATE.md") -Pattern $pattern -Message "state/run templates missing required pattern: $pattern"
 }
 
 foreach ($pattern in @(
@@ -467,22 +467,22 @@ foreach ($pattern in @(
 Assert-FileContains -Path "scripts/harness/check.ps1" -Pattern "harness check passed" -Message "scripts/harness/check.ps1 missing smoke completion marker"
 
 $optionalModeFiles = @(
-    ".agent/prompts/issue-standard-workflow.md",
-    ".agent/prompts/loop-codex.md",
-    ".agent/prompts/loop-automation.md",
-    ".agent/prompts/maintenance-loop.md",
-    ".agent/guides/code-review.md",
-    ".agent/guides/linter.md"
+    ".agents/prompts/issue-standard-workflow.md",
+    ".agents/prompts/loop-codex.md",
+    ".agents/prompts/loop-automation.md",
+    ".agents/prompts/maintenance-loop.md",
+    ".agents/guides/code-review.md",
+    ".agents/guides/linter.md"
 )
 
 $optionalBundleFiles = @(
-    ".agent/prompts/README.md",
-    ".agent/prompts/issue-standard-workflow.md",
-    ".agent/prompts/loop-codex.md",
-    ".agent/prompts/loop-automation.md",
-    ".agent/prompts/maintenance-loop.md",
-    ".agent/guides/code-review.md",
-    ".agent/guides/linter.md"
+    ".agents/prompts/README.md",
+    ".agents/prompts/issue-standard-workflow.md",
+    ".agents/prompts/loop-codex.md",
+    ".agents/prompts/loop-automation.md",
+    ".agents/prompts/maintenance-loop.md",
+    ".agents/guides/code-review.md",
+    ".agents/guides/linter.md"
 )
 
 $hasOptionalBundle = $false
@@ -515,10 +515,10 @@ if ($hasOptionalBundle) {
     }
 
     foreach ($pattern in @("issue-standard-workflow.md", "loop-codex.md", "loop-automation.md", "maintenance-loop.md")) {
-        Assert-FileContains -Path ".agent/prompts/README.md" -Pattern $pattern -Message ".agent/prompts/README.md missing prompt reference: $pattern"
+        Assert-FileContains -Path ".agents/prompts/README.md" -Pattern $pattern -Message ".agents/prompts/README.md missing prompt reference: $pattern"
     }
 
-    Assert-FileContains -Path ".agent/guides/linter.md" -Pattern "docs/harness/project-constraints.md" -Message ".agent/guides/linter.md should point project-level mechanical constraints back to docs/harness/project-constraints.md"
+    Assert-FileContains -Path ".agents/guides/linter.md" -Pattern "docs/harness/project-constraints.md" -Message ".agents/guides/linter.md should point project-level mechanical constraints back to docs/harness/project-constraints.md"
 
     if ($detectedMode -eq "full") {
         foreach ($pattern in @(
@@ -541,7 +541,7 @@ if ($hasOptionalBundle) {
             "不要只写 happy path，不写关键分支 / 降级路径",
             "不要把 Concrete Steps 写成纯控制面收口步骤"
         )) {
-            Assert-FileContains -Path ".agent/prompts/issue-standard-workflow.md" -Pattern $pattern -Message ".agent/prompts/issue-standard-workflow.md missing required pattern: $pattern"
+            Assert-FileContains -Path ".agents/prompts/issue-standard-workflow.md" -Pattern $pattern -Message ".agents/prompts/issue-standard-workflow.md missing required pattern: $pattern"
         }
 
         foreach ($pattern in @(
@@ -558,7 +558,7 @@ if ($hasOptionalBundle) {
             "rule_promotion_candidate",
             "human_decision_required"
         )) {
-            Assert-FileContains -Path ".agent/prompts/maintenance-loop.md" -Pattern $pattern -Message ".agent/prompts/maintenance-loop.md missing required pattern: $pattern"
+            Assert-FileContains -Path ".agents/prompts/maintenance-loop.md" -Pattern $pattern -Message ".agents/prompts/maintenance-loop.md missing required pattern: $pattern"
         }
     }
 }

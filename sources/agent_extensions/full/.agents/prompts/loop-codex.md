@@ -6,7 +6,7 @@ Mode: full
 | --- | --- |
 | 文档定位 | 主对话 / 交互式 harness loop 的短 contract |
 | 适用范围 | 当前会话里围绕 issue 或 master 做 collect / gate / freeze / implement / closeout |
-| 关联文档 | `AGENTS.md`、`docs/harness/control-plane.md`、`docs/harness/linear.md`、`.agent/prompts/issue-standard-workflow.md`、`.agent/prompts/loop-automation.md`、`.agent/PLANS.md` |
+| 关联文档 | `AGENTS.md`、`docs/harness/control-plane.md`、`docs/harness/linear.md`、`.agents/prompts/issue-standard-workflow.md`、`.agents/prompts/loop-automation.md`、`.agents/PLANS.md` |
 
 固定规则：
 

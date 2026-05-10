@@ -28,5 +28,5 @@ Mode: placeholder
 
 - 在补齐前，默认优先关注：正确性、回归风险、范围越界、测试缺口、可维护性
 - 若仓库已有 `Review Summary` 字段契约，应以后者为准
-- 若 Superpowers skills 可用，只能参考 `.agent/prompts/README.md` 的 Optional Superpowers Skill Hooks；当前占位文件不冻结完整 review skill hook contract
+- 若 Superpowers skills 可用，只能参考 `.agents/prompts/README.md` 的 Optional Superpowers Skill Hooks；当前占位文件不冻结完整 review skill hook contract
 - 补齐前不要把当前文件当作完整 review gate contract

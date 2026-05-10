@@ -30,5 +30,5 @@ sources/agent_extensions/
 
 - 这些文件不由脚本默认生成
 - mode-sensitive 文件必须带 `Mode: placeholder|full`
-- `.agent/prompts/README.md` 是共享稳定文件，不带 `Mode`
-- `.agent/prompts/maintenance-loop.md` 默认 `report-only`，只在用户显式指定时进入 `issue-create / safe-fix / rule-promotion`
+- `.agents/prompts/README.md` 是共享稳定文件，不带 `Mode`
+- `.agents/prompts/maintenance-loop.md` 默认 `report-only`，只在用户显式指定时进入 `issue-create / safe-fix / rule-promotion`
