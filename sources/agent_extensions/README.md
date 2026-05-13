@@ -17,14 +17,15 @@ sources/agent_extensions/
 ```
 
 - `shared/`：不区分模式的稳定文件
-- `placeholder/`：占位文件版本
-- `full/`：完整 starter 模板版本
+- `full/`：默认完整可执行模板版本
+- `placeholder/`：显式轻量 / 占位文件版本
 
 ## 使用规则
 
 1. 先执行 base harness 初始化脚本
-2. 再由 agent 询问用户：补占位文件还是完整模板
-3. 复制 `shared/` + 选中模式目录下的文件到目标仓库
+2. agent 默认选择 `full`
+3. 只有用户明确要求轻量、占位或临时项目时，才选择 `placeholder`
+4. 复制 `shared/` + 选中模式目录下的文件到目标仓库
 
 固定规则：
 

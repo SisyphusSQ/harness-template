@@ -36,8 +36,8 @@
 | `docs/issues/` | `issue-provider=repo` 时的仓库 issue 存储 |
 | `.agents/PLANS.md` + `.agents/plans/` | 计划协议、计划主模板和实现型示例 |
 | `.agents/state/` + `.agents/runs/` | repo-local 恢复点与结果摘要面 |
-| `.agents/prompts/` | 可选 Prompt 模板，仅 agent 驱动初始化时补充 |
-| `.agents/guides/` | 可选 review / linter 说明，仅 agent 驱动初始化时补充 |
+| `.agents/prompts/` | 可选 Prompt 模板，仅 agent 驱动初始化时补充；默认使用 `full` |
+| `.agents/guides/` | 可选 review / linter 说明，仅 agent 驱动初始化时补充；默认使用 `full` |
 | `.agents/skills/` | 可选 repo-local skill，仅在项目需要稳定复用的专门流程时补充 |
 | `scripts/harness/` | base harness 的最小 gate 脚本与共享 helper |
 
@@ -60,7 +60,7 @@
 - `.agents/plans/EXAMPLE-implementation.md` 默认应提交
 - `.agents/state/TEMPLATE.md` 默认应提交
 - `.agents/runs/TEMPLATE.md` 默认应提交
-- 若后续补齐 `.agents/prompts/` 和 `.agents/guides/`，这些文档默认也应提交
+- 若后续补齐 `.agents/prompts/` 和 `.agents/guides/`，默认使用 `full` 模式，且这些文档默认也应提交
 - 若存在 `.agents/prompts/maintenance-loop.md`，默认只做 `report-only` 维护扫描；`issue-create / safe-fix / rule-promotion` 必须由用户显式指定
 - 模板配置可提交，真实环境配置不提交
 - 若需要环境配置，优先提交 `.env.example`、`settings.example.yaml` 这类示例文件

@@ -62,10 +62,10 @@ repo/
 
 这个文件来自 `sources/agent_adapters/cursor/`，是 Cursor 专属适配层，不属于 base harness，也不由初始化脚本默认生成。
 
-如果是 agent 驱动初始化，再由 agent 追问用户：
+如果是 agent 驱动初始化，默认补充完整模板；仅在用户明确要求轻量初始化时使用占位文件：
 
-- 生成占位文件
-- 或生成完整模板
+- 默认：生成完整模板（`full`）
+- 显式轻量模式：生成占位文件（`placeholder`）
 
 随后补充：
 
@@ -104,7 +104,7 @@ repo/
 2. macOS / Linux / Git Bash 跑 `bash scripts/init_harness_project.sh --target /abs/path/to/repo --project-name NAME --stack go --provider neutral --issue-provider linear`
 3. Windows PowerShell 跑 `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\init_harness_project.ps1 -Target C:\path\to\repo -ProjectName NAME -Stack go -Provider neutral -IssueProvider linear`
 4. 若初始化 agent 是 Cursor，再从 `sources/agent_adapters/cursor/` 补 `.cursor/rules/harness.mdc`
-5. 若是 agent 驱动初始化，再从 `sources/agent_extensions/shared/` 与 `sources/agent_extensions/{placeholder|full}/` 补 `.agents/prompts/` 和 `.agents/guides/`
+5. 若是 agent 驱动初始化，默认从 `sources/agent_extensions/shared/` 与 `sources/agent_extensions/full/` 补 `.agents/prompts/` 和 `.agents/guides/`；只有用户明确要求轻量模式时才改用 `placeholder`
 6. 阅读 `docs/harness/issue-workflow.md`；若无外部 issue 工具，使用 `docs/issues/TEMPLATE.md`
 7. 阅读并补齐 `docs/harness/project-constraints.md` 中的项目级机械约束登记表
 8. 若存在 `.agents/prompts/maintenance-loop.md`，确认默认 mode 仍是 `report-only`

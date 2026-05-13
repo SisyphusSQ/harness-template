@@ -10,7 +10,7 @@ Mode: full
 
 - 没有冻结 repo-local 命令与配置前，不要假装仓库已有可执行 lint contract
 - 是否把 lint 接进 Makefile / CI / verify，由仓库自己决定
-- 若 lint 结果被采用为 gate，应把 lint 摘要写进 Linear 反馈
+- 若 lint 结果被采用为 gate，应把 lint 摘要写进 Issue Tracker 反馈
 - 若 lint 承接项目级机械约束，应同步更新 `docs/harness/project-constraints.md` 的 `Enforcement`、`Command` 和 `Status`
 
 ## 2. 按栈候选方案
@@ -21,6 +21,8 @@ Mode: full
 | `python` | `ruff check .` / `pyright` | `pyproject.toml` |
 | `go-node` | Go lint + `eslint .` / 前端 lint 命令 | `.golangci.yml` + `eslint.config.*` |
 | `python-node` | Python lint + Node/前端 lint | `pyproject.toml` + `eslint.config.*` |
+| `java` | `mvn test` / `mvn verify` / `gradle check` / `spotlessCheck` | `pom.xml` / `build.gradle*` |
+| `c` | `clang-format --dry-run` / `clang-tidy` / `cmake --build` | `.clang-format` / CMake config |
 
 说明：
 
@@ -53,3 +55,18 @@ Mode: full
 - 在仓库还没稳定前，可以先只写本文件，不急着把 lint 接进 base harness
 - 若 lint 规则很重，先作为手动命令验证，再决定是否升级为默认 gate
 - 若未来确实稳定，再把 lint 入口提升为 repo-local verify contract 的一部分
+
+## 6. Rule Promotion Adapter
+
+当 review 中反复出现同类机械问题时，按以下顺序升级：
+
+1. 在 `docs/harness/project-constraints.md` 登记规则候选。
+2. 冻结 Rule ID、检测命令、误报风险、回滚方式。
+3. 先以手动命令或只读 check 验证。
+4. 再决定是否接入 Makefile、CI、pre-commit 或 review gate。
+
+固定要求：
+
+- 没有稳定命令前，规则状态不得写成 `enforced`。
+- 任何会重写文件的 lint / format 命令不得混入只读 gate。
+- 自定义 analyzer 或脚本需要有自己的测试或样例输入。

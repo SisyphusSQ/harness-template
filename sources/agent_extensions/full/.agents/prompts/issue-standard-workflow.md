@@ -15,7 +15,7 @@ Mode: full
 - 若本文与 `AGENTS.md`、`docs/harness/*`、`.agents/PLANS.md` 冲突，以后者为准。
 - `loop-codex.md` 负责交互式 loop 的短 contract；`loop-automation.md` 负责无人值守 loop 的自动化语义。
 - 能从仓库与 issue 真相自行定位的输入，先自行探索，不要反问用户。
-- 阶段反馈、收口结果、`recovery_point`、`next_action` 默认写回 Linear。
+- 阶段反馈、收口结果、`recovery_point`、`next_action` 默认写回 Issue Tracker。
 
 ## 0. 占位符约定
 
@@ -23,12 +23,16 @@ Mode: full
 | --- | --- |
 | `<ISSUE-ID>` | 当前 issue 标识 |
 | `<MASTER-ISSUE>` | 当前 Master issue |
+| `<ISSUE-PROVIDER>` | 当前 Issue Provider，如 `linear`、`github`、`gitlab`、`repo`、`other` |
 | `<PLAN-PATH>` | 当前计划路径 |
 | `<CONSTRAINTS>` | 额外范围约束；没有则写 `无` |
 | `<TEST-DOC-PATH>` | 当前测试文档路径；默认 `docs/test/<domain>/...` |
 | `<TEST-SCOPE>` | 当前测试范围，如 `只生成` / `只执行` / `生成 + 执行 + 回写` |
 | `<EXTERNAL-SYSTEM>` | 当前外部系统或接口目录名称 |
+| `<EXTERNAL-PROVIDER>` | 外部工具 provider，如 CLI、MCP、REST API、SDK、网页人工门禁 |
 | `<EXTERNAL-CATALOG>` | 当前外部接口目录、项目、空间或文档载体 |
+| `<STABLE-KEY>` | 稳定键，如 `method + path`、配置 key、schema 名、标题 + 父目录 |
+| `<ALLOWED-ACTIONS>` | 本轮允许的动作，如 `read-only`、`create`、`update`、`delete` |
 | `<SYNC-SCOPE>` | 当前同步范围 |
 | `<FOLDER-STRATEGY>` | 当前目录策略；默认沿用现有目录，不删除旧条目 |
 
@@ -39,7 +43,7 @@ Mode: full
 3. `verify / review / mr_prep` 是独立 checkpoint，不属于 `implement` 的隐含附属动作。
 4. 发现当前卡过大、依赖未清或 write scope 失控时，先回到 plan-only，不继续硬做。
 5. 若存在 `.agents/guides/code-review.md`，review 口径先按其中要求执行。
-6. 若仓库启用了 PR / MR，它是次级代码叙事面，不替代 Linear 的协作真相。
+6. 若仓库启用了 PR / MR，它是次级代码叙事面，不替代 Issue Tracker 的协作真相。
 7. 生成或更新 plan 时，`Architecture / Data Flow` 必须补齐以下 5 个实现子块：
    - `真实入口与触发`
    - `输入装配与边界校验`
@@ -71,9 +75,9 @@ Mode: full
 
 固定规则：
 
-- Superpowers 只作为阶段辅助，不替代本文、`.agents/PLANS.md`、`docs/harness/*` 或 Linear truth。
+- Superpowers 只作为阶段辅助，不替代本文、`.agents/PLANS.md`、`docs/harness/*` 或 Issue Tracker truth。
 - 实施计划统一写入 `.agents/plans/`；不采用 Superpowers 默认计划目录作为仓库计划真相。
-- skill 输出必须折回当前计划或 issue 的 `Verify Summary`、`Review Summary`、`Writeback Summary`、`Linear Actions`。
+- skill 输出必须折回当前计划或 issue 的 `Verify Summary`、`Review Summary`、`Writeback Summary`、`Issue Tracker Actions`。
 - 若 Superpowers 不可用，继续按本仓库 harness loop 执行。
 
 阶段提示：
@@ -96,6 +100,37 @@ Mode: full
 先基于当前仓库、相关文档和 issue 上下文判断这张卡目前处于什么阶段，
 再给出下一步最合适的动作。
 如果当前信息不足以直接进入开发，优先先做范围分析和计划准备，不要直接扩大范围。
+```
+
+### 2.1.1 从设计文档 / runbook / 需求文档创建 issue inventory
+
+```text
+基于以下文档创建或更新 issue inventory：
+- Source docs: <DOC-PATHS>
+- Issue provider: <ISSUE-PROVIDER>
+- Root issue: <MASTER-ISSUE 或 无>
+- Constraints: <CONSTRAINTS>
+
+本轮只做只读分析和 issue/writeback 规划，除非用户明确允许创建或更新 issue。
+
+必须先通读：
+1. 源文档全文和索引页
+2. 相关 docs/harness 文档
+3. 当前 issue provider 中已有同主题 issue
+4. 仓库已有计划、runbook、contract 和配置入口
+
+每张 issue 必须保留：
+- Goal
+- Scope
+- Out of Scope
+- Implementation Scope
+- Acceptance Criteria
+- Dependencies / blockers
+- Validation entrypoints
+- Required docs/config/writeback sync
+- Stable source doc references
+
+若无法判断某项内容应进入当前 issue、拆新卡还是仅作 follow-up，先列为 `Needs decision`，不要自行省略。
 ```
 
 ### 2.2 开发前准备 / plan-only（范围冻结 + 执行计划）
@@ -264,7 +299,10 @@ Additional constraints: <CONSTRAINTS>
 ```text
 围绕 <ISSUE-ID> 执行外部系统同步或接口目录验收。
 External system: <EXTERNAL-SYSTEM>
+External provider: <EXTERNAL-PROVIDER>
 External catalog: <EXTERNAL-CATALOG>
+Stable key: <STABLE-KEY>
+Allowed actions: <ALLOWED-ACTIONS>
 Sync scope: <SYNC-SCOPE>
 Folder strategy: <FOLDER-STRATEGY>
 Additional constraints: <CONSTRAINTS>
@@ -275,6 +313,7 @@ Additional constraints: <CONSTRAINTS>
    - 当前项目、空间、目录或分组结构
    - 当前已存在的条目列表
    - 本轮允许新增、更新、删除或只读验收的边界
+   - 当前 provider 的认证、权限、限流、回读能力和失败语义
 2. 再确认 repo truth：
    - 从当前仓库的 contract、schema、controller、配置或文档枚举本轮公开面
    - 明确哪些是新增、哪些是现有条目刷新、哪些保持不动
@@ -291,6 +330,7 @@ Additional constraints: <CONSTRAINTS>
    - 回读确认字段、示例、状态码、目录归类或其他关键元数据
 6. 输出验收结果：
    - 外部系统和目标载体
+   - provider 与 allowed actions
    - 同步范围
    - 本轮新增 / 更新 / 跳过摘要
    - 是否存在重复稳定键
@@ -301,6 +341,7 @@ Additional constraints: <CONSTRAINTS>
 - 默认只改本轮指定外部载体，不顺带改 repo docs/spec；除非用户明确要求双向同步
 - 默认不删除条目、不重构目录、不做整包导入；除非用户明确要求
 - 更新后必须回读验证，不能只以写入命令成功作为完成依据
+- provider 不可用、权限不足、稳定键冲突或回读能力不足时，停止并回写 blocker
 ```
 
 ### 2.9 开发后准备 PR / MR
@@ -345,6 +386,10 @@ Additional constraints: <CONSTRAINTS>
 4. 本地切回主分支并更新。
 ```
 
+固定要求：
+- 若 issue provider 不是 Linear，把“回写到 Linear”替换为当前 Issue Tracker 的 comment / state / project / label 写回方式。
+- merge 优先使用 git 或 provider 原生命令；只有必须网页交互时才进入浏览器工具链。
+
 ### 2.12 Master 是否可 Done
 
 ```text
@@ -352,6 +397,26 @@ Additional constraints: <CONSTRAINTS>
 先读取 Master issue、相关计划文档、验证记录与当前 harness 文档；
 只做检查、结论和 writeback 建议，不修改代码；
 按 findings-first 输出 PASS / FAIL、阻塞项、残余风险与 Suggested Action。
+```
+
+### 2.13 Provider / Tool 适配说明补齐
+
+```text
+为当前仓库补齐某个 provider 或 external tool 的 repo-local 使用说明。
+Provider / tool: <EXTERNAL-PROVIDER>
+Target docs: <DOC-PATHS>
+Constraints: <CONSTRAINTS>
+
+本轮默认只补使用说明和适配边界，不实现新工具。
+
+必须写清：
+- provider 名称和调用入口
+- 认证 / profile / 环境变量来源
+- 允许的读写动作
+- readback verify 方式
+- 常见失败语义和降级策略
+- 敏感信息不得提交的位置
+- 与 `.agents/prompts/*`、`docs/harness/*` 的关系
 ```
 
 ## 3. 使用建议

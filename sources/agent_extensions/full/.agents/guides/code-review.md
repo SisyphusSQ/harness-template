@@ -54,7 +54,7 @@ review 输出优先顺序固定为：
 - `status`
 - `scope_guard`
 
-最小 Linear writeback 结构建议包含：
+最小 Issue Tracker writeback 结构建议包含：
 
 - `review_summary`
 - `blocking_findings`
@@ -84,3 +84,21 @@ review 输出优先顺序固定为：
 Residual Risks 与下一步建议；
 若存在 blocking findings，不进入 mr_prep。
 ```
+
+## 8. Review Checklist
+
+默认检查面：
+
+- 行为是否满足已冻结 Included / Acceptance Matrix
+- 是否修改了 Excluded 或未授权 write scope
+- 错误语义、降级路径和恢复路径是否可解释
+- 测试是否覆盖关键路径和失败路径
+- docs/test、计划、Issue Tracker writeback 是否与实现一致
+- 外部系统同步是否有 readback verify 证据
+- PR / MR 描述是否和实际 diff 一致
+
+固定边界：
+
+- 发现范围膨胀时，优先判为 scope finding，而不是顺手扩大任务。
+- 外部 review 或工具 finding 需要折回本文件的输出结构。
+- 非阻塞建议只能进入 follow-up，不得阻塞当前冻结范围。

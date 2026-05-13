@@ -4,25 +4,16 @@ Mode: full
 
 | 项目 | 内容 |
 | --- | --- |
-| 文档定位 | 无人值守 / 自动化 loop 的规范页与 Prompt 模板 |
-| 适用范围 | 需要围绕 root issue 自动推进一轮受控 harness loop 的场景 |
+| 文档定位 | 无人值守 / 自动化 harness loop 的规范页与可复制 Prompt 模板 |
+| 适用范围 | 围绕 root issue 自动推进一轮受控 collect / freeze / implement / closeout |
 | 关联文档 | `.agents/prompts/issue-standard-workflow.md`、`.agents/prompts/loop-codex.md`、`AGENTS.md`、`docs/harness/control-plane.md`、`docs/harness/linear.md`、`.agents/guides/code-review.md`、`.agents/PLANS.md` |
 
 固定规则：
 
 - 本文用于 automation，不替代仓库级控制面真相。
 - 若本文与 `AGENTS.md`、`docs/harness/*`、`.agents/PLANS.md` 冲突，以后者为准。
-- 当前 automation 语义优先围绕 `root_issue_type=master|execution` 设计。
-- automation run 的结果面优先是 Linear，而不是本地 `state / runs`。
-
-## 0.1 Optional Superpowers Skill Hooks
-
-- automation 仍按本文的 `root_issue_type`、`mode`、drain 策略与结果面执行。
-- `superpowers:subagent-driven-development` 只在任务相互独立、subagent 可用且 write scope 不冲突时考虑；否则使用当前 inline loop。
-- `superpowers:executing-plans` 可用于按已冻结 plan 串行执行。
-- `superpowers:verification-before-completion` 可用于任何完成、通过或可收口声明前。
-- verify 失败或异常排查时，可考虑 `superpowers:systematic-debugging`，先定位根因再修。
-- skill 输出必须回填到 `verification_summary`、`review_summary`、`writeback_summary`、`residual_risks`、`recovery_point`。
+- automation 的结果面优先回写 Issue Tracker；PR/MR 和 repo 文档是次级叙事面。
+- 外部工具、目录、配置中心、文档平台、接口平台、监控平台统一称为 `External System`，必须按 readback verify 闭环。
 
 ## 1. Root Issue 双入口
 
@@ -33,68 +24,96 @@ Mode: full
 
 固定规则：
 
-1. `execution` 直启时，当前 loop 只围绕该 execution issue 推进。
-2. `master` 启动时，必须先完成 `collect -> gate -> freeze`，再开始第一张 execution issue 的实现。
-3. `master` 若采用自动 drain，必须先冻结完整初始 inventory。
+1. `execution` 直启时，只围绕该 execution issue 推进。
+2. `master` 启动时，必须先完成 `collect -> gate -> freeze`，并冻结初始 inventory。
+3. `master + full-auto` 默认采用 `serial-drain`，一次只推进一张 execution issue。
+4. execution issue 的 `Stop When` 只负责停当前 slice，不负责结束 Master。
 
 ## 2. 执行模式
 
-| 模式 | 行为 |
-| --- | --- |
-| `propose-only` | 只做分析、冻结与下一步建议，不建卡、不实现 |
-| `create-issues` | 冻结并创建 execution issue inventory，但不开始实现 |
-| `implement-no-merge` | 推进到 verify / review / writeback / MR ready，但不进入 merge |
-| `full-auto` | `master` 入口按 `serial-drain` 串行推进；`execution` 入口只围绕当前 slice 自动执行一轮 |
-
-## 3. Drain 策略
-
-| 策略 | 含义 | 默认适用场景 |
+| 模式 | 行为 | 允许副作用 |
 | --- | --- | --- |
-| `single-batch` | 只推进当前一轮，不自动继续下一张 execution issue | `execution` 入口，或 `propose-only / create-issues / implement-no-merge` |
-| `serial-drain` | 当前 slice 收口后，若 Master Exit Criteria 未满足，则自动回到 `collect` 继续下一张 | `master + full-auto` |
+| `propose-only` | 只做分析、冻结与下一步建议 | 无文件修改、无外部写入 |
+| `create-issues` | 冻结并创建 execution issue inventory | Issue Tracker 写入 |
+| `implement-no-merge` | 推进到 verify / review / writeback / MR ready | 代码和文档修改，禁止 merge |
+| `full-auto` | 按 loop 自动推进到可安全完成的位置 | 允许 merge，但必须满足仓库 merge gate |
 
-固定规则：
-
-1. `full-auto` 处理 `master` 时，默认采用 `serial-drain`。
-2. execution issue 的 `Stop When` 只负责停当前 slice，不负责结束整个 Master。
-3. 只有 Master 自身的 Exit Criteria 满足，才允许把整个 Master 判定为完成。
-
-## 4. Checkpoint 与停止规则
+## 3. Checkpoint 与停止规则
 
 固定主流程：
 
-`collect -> gate -> freeze -> slice -> implement -> verify -> review -> writeback -> mr_prep -> merge -> notify`
+```text
+collect -> gate -> freeze -> slice -> implement -> verify -> review -> writeback -> mr_prep -> merge -> notify
+```
+
+停止条件：
+
+| stop_scope | 触发条件 | next_action |
+| --- | --- | --- |
+| `needs-plan` | 范围、依赖或验收未冻结 | 写或更新 `.agents/plans/*` |
+| `blocked` | 缺凭证、权限、环境、上游决策或外部系统不可用 | 回写 blocker 和人工动作 |
+| `ready-for-implement` | plan-only 完成但未实现 | 等待实现授权或进入 implement |
+| `ready-for-review` | verify 完成，需要独立 review | 执行 review gate |
+| `ready-for-merge` | verify / review / writeback 通过 | 执行 provider 原生命令收口 |
+| `done` | 主分支、issue 状态和结果面已回读确认 | 输出 final summary |
 
 固定规则：
 
-1. `verify / review / mr_prep / merge / escalation` 都是独立 checkpoint。
-2. 当前 execution issue 若仍过大，必须先回 `freeze` 收窄或拆卡；拆卡完成前不继续编码。
-3. review 出现 blocking finding 时，先修正，再重新执行 `verify -> review`。
-4. 若自动 merge 条件不满足，应明确降级到 manual gate，而不是假装已自动收口。
+- `verify / review / mr_prep / merge / escalation` 都是独立 checkpoint。
+- verify 失败时不进入 review；review 有 blocking finding 时不进入 mr_prep。
+- 自动 merge 条件不满足时，降级为 manual gate，不伪装已合并。
+- 遇到未冻结的外部系统写入范围，降级为 plan-only。
 
-## 5. 结果面
+## 4. 结果面
 
-automation 至少要同步以下结果面：
+automation 至少同步以下字段：
 
-- 当前执行结果 `result`
-- 当前 stop_scope
-- 当前 verification / review 摘要
-- 当前 writeback 摘要
-- 当前 residual_risks
-- followups / next_action
-- 当前 `recovery_point`
+| 字段 | 含义 |
+| --- | --- |
+| `result` | 当前 run 结果 |
+| `stop_scope` | 当前停止点 |
+| `verification_summary` | 验证命令、结果和失败摘要 |
+| `review_summary` | findings-first review 结论 |
+| `writeback_summary` | Issue Tracker / PR / repo 文档回写摘要 |
+| `external_system_summary` | 外部系统读写、diff、readback 结果 |
+| `residual_risks` | 剩余风险 |
+| `followups` | 不属于当前冻结范围但需要排期的事项 |
+| `recovery_point` | 下一轮恢复所需的分支、计划、issue 状态和命令 |
+| `next_action` | 推荐下一步 |
 
-若是 `master` 场景，还必须说明：
+若是 `master` 场景，还必须同步：
 
-- 当前 Master 状态
-- 当前 inventory 是否已冻结
-- 当前 slice 与下一张 execution issue
+- `master_status`
+- `inventory_status`
+- `current_slice`
+- `next_slice`
+- `exit_criteria_status`
 
-默认回写面：
+## 5. External System Automation Contract
 
-- 优先写回 Linear
-- 若仓库启用了 PR / MR，再同步代码叙事面
-- 必要时再同步 repo 文档
+所有外部系统同步统一按下列占位抽象：
+
+| 占位符 | 含义 |
+| --- | --- |
+| `<EXTERNAL_SYSTEM>` | 外部系统名称，如接口平台、文档平台、知识库、配置中心、监控平台 |
+| `<PROVIDER>` | 工具或 API provider，如 CLI、MCP、REST API、SDK |
+| `<CATALOG>` | 项目、空间、目录、分组或 collection |
+| `<STABLE_KEY>` | 稳定键，如 `method + path`、配置 key、schema 名、标题 + 父目录 |
+| `<ALLOWED_ACTIONS>` | `read-only`、`create`、`update`、`delete` 中本轮允许的动作 |
+
+固定流程：
+
+```text
+read repo truth -> read external current truth -> diff by stable key -> apply allowed actions -> readback verify -> writeback summary
+```
+
+默认边界：
+
+- 默认 `delete` 不允许。
+- 默认不做整包导入。
+- 默认只改 `<CATALOG>` 内的本轮 `<SYNC_SCOPE>`。
+- 外部系统写入必须有 readback proof。
+- provider 失败、权限不足或稳定键冲突时，停止在 `blocked`。
 
 ## 6. 标准 Automation Prompt 模板
 
@@ -103,33 +122,38 @@ automation 至少要同步以下结果面：
 用仓库内 harness 真相推进一轮受控 automation loop，并在不能安全自动化时明确降级。
 
 运行参数：
-- Root issue type: <ROOT_ISSUE_TYPE>
+- Root issue type: <master|execution>
 - Root issue: <ROOT_ISSUE>
 - Run ID: <RUN_ID>
-- Mode: <MODE>
+- Mode: <propose-only|create-issues|implement-no-merge|full-auto>
+- External systems: <none|list>
+- Constraints: <CONSTRAINTS>
 
-你必须优先读取以下真相源：
+你必须优先读取：
 - 根规则：AGENTS.md
 - 工程控制面：docs/harness/control-plane.md、docs/harness/linear.md
+- 项目级机械约束：docs/harness/project-constraints.md
 - 计划协议：.agents/PLANS.md、.agents/plans/*
-- Prompt 合同：.agents/prompts/*
-- Review / Lint 说明：.agents/guides/*
+- Prompt / Guide：.agents/prompts/*、.agents/guides/*
+- 当前 issue / PR / MR / repo 状态
 
 固定主流程：
 collect -> gate -> freeze -> slice -> implement -> verify -> review -> writeback -> mr_prep -> merge -> notify
 
 执行硬约束：
-1. root_issue_type=execution 时，默认进入 solo-loop，不要求先有 Master issue。
-2. root_issue_type=master 时，必须先完成 collect -> gate -> freeze，并冻结完整初始 inventory。
-3. full-auto 下的 master-loop 默认采用 serial-drain，一次只推进一张 execution issue。
+1. root_issue_type=execution 时，默认进入 solo-loop。
+2. root_issue_type=master 时，必须先冻结完整初始 inventory。
+3. full-auto 下的 master-loop 默认 serial-drain，一次只推进一张 execution issue。
 4. verify / review / mr_prep / merge / escalation 都是独立 checkpoint。
-5. 若当前 execution issue 仍过大，必须先回 freeze 收窄或拆卡。
-6. 结果面至少同步当前 result、stop_scope、verification_summary、review_summary、writeback_summary、residual_risks、followups、recovery_point。
-7. `merge` / `escalation` 结论默认由 agent 给出；无法安全自动化时，明确降级为 manual gate 或 plan-only，不要伪装成已闭环。
+5. 若当前 execution issue 仍过大，回到 freeze 收窄或拆卡。
+6. 所有外部系统写入都必须先读当前详情，写后回读验证。
+7. 结果面至少同步 result、stop_scope、verification_summary、review_summary、writeback_summary、external_system_summary、residual_risks、followups、recovery_point、next_action。
+8. 无法安全自动化时，明确降级为 manual gate 或 plan-only。
 ```
 
 ## 7. 使用建议
 
-- 初次验证 automation prompt 时，先用 `propose-only` 或 `create-issues`
-- 需要验证实现主流程但不想自动收尾时，用 `implement-no-merge`
-- 只有在需要无人值守串行 drain 时，再对 `master` 使用 `full-auto`
+- 首次接入 automation 先用 `propose-only`。
+- 只想冻结 inventory 时用 `create-issues`。
+- 不想自动收尾时用 `implement-no-merge`。
+- 只有确认 merge gate、权限、验证和 writeback 都稳定后，才使用 `full-auto`。

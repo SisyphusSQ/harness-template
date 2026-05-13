@@ -8,7 +8,7 @@
 - `.agents/prompts/loop-codex.md` 是交互式主对话 loop contract。
 - `.agents/prompts/loop-automation.md` 是无人值守 / 自动化 loop contract。
 - `.agents/prompts/maintenance-loop.md` 是自治维护循环 prompt，默认 `report-only`，只在用户显式指定时进入 `issue-create / safe-fix / rule-promotion`。
-- `Linear 是主协作真相`
+- `Issue Tracker 是主协作真相`
 - `repo 是主执行真相`
 - 各文档共享同一套术语，不重复冻结第二套控制面真相。
 - 若 prompt 与 `AGENTS.md`、`docs/harness/control-plane.md`、`docs/harness/linear.md`、`.agents/PLANS.md` 冲突，以后者为准。
@@ -27,9 +27,9 @@
 
 如果当前 agent 环境提供 Superpowers skills，可把它们作为阶段辅助工具使用。固定边界：
 
-- Superpowers 只辅助执行，不替代 `AGENTS.md`、`docs/harness/*`、`.agents/PLANS.md` 或 Linear truth。
+- Superpowers 只辅助执行，不替代 `AGENTS.md`、`docs/harness/*`、`.agents/PLANS.md` 或 Issue Tracker truth。
 - Superpowers 的 plan / spec 默认路径不作为本仓库真相；计划仍写入 `.agents/plans/`。
-- skill 输出必须折回 `Verify Summary`、`Review Summary`、`Writeback Summary`、`Linear Actions` 或本仓库约定的结果面。
+- skill 输出必须折回 `Verify Summary`、`Review Summary`、`Writeback Summary`、`Issue Tracker Actions` 或本仓库约定的结果面。
 - 若 Superpowers 不可用，按本仓库 harness prompt 与 guide 正常执行，不降级为失败。
 
 | Harness 阶段 | 可考虑的 Superpowers skill | 适用条件 |

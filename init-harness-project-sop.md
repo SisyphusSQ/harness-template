@@ -91,10 +91,8 @@ target-repo/
 固定规则：
 
 - prompts / guides 不由脚本默认生成
-- agent 需要先询问用户：
-  - 生成占位文件
-  - 或生成完整模板
-- 若用户没有明确要求完整模板，默认生成占位文件
+- agent 驱动初始化默认生成完整模板（`full`）
+- 只有用户明确要求轻量、占位或暂不铺开 prompt 模板时，才生成占位文件（`placeholder`）
 - `.agents/prompts/README.md` 是稳定目录说明，不区分模式
 - 其他 6 个文件需要带 `Mode: placeholder|full`
 - 更推荐的入口是先读根目录 `agent-init-project.md`
@@ -241,7 +239,7 @@ sources/agent_adapters/cursor/.cursor/rules/harness.mdc
 - scripts/init 不负责 Cursor adapter
 - scripts/init 不负责 prompts / guides 的 placeholder/full 选择
 - agent adapter 只在 agent 驱动初始化流程中按 agent 类型决定
-- agent 扩展层只在 agent 驱动初始化时补充
+- agent 扩展层只在 agent 驱动初始化时补充，默认使用 `full`
 - 根目录 `agent-init-project.md` 是 agent 初始化整个项目的推荐入口
 - Windows 用户不需要安装 Git Bash / WSL / make 即可完成 base harness 初始化和 PowerShell gate 验证
 
@@ -407,6 +405,8 @@ sources/agent_extensions/
 固定规则：
 
 - `shared/` 只放不分模式的稳定文件
+- `full/` 是 agent 驱动初始化默认扩展层，必须保持可直接执行的 prompt 密度
+- `placeholder/` 是显式轻量模式，只用于用户要求占位或临时项目
 - `placeholder/` 和 `full/` 的路径结构必须完全一致
 - mode-sensitive 文件必须带 `Mode: placeholder|full`
 - `full/` 与 `placeholder/` 生成执行计划时，都必须与 `.agents/PLANS.md` 的实现骨架 contract 保持一致

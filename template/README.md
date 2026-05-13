@@ -7,7 +7,7 @@
 - 当前仓库已完成 harness 控制面初始化
 - 控制面文档统一收口到 `docs/harness/`
 - 初始化后应先确认 `.gitignore`、`.agents/`、`docs/harness/project-constraints.md`、`docs/test/RUNBOOK_TEMPLATE.md`、`scripts/harness/` 是否就位并可执行
-- 若通过 agent 驱动初始化，默认再补齐 `.agents/prompts/` 与 `.agents/guides/`
+- 若通过 agent 驱动初始化，默认再补齐完整 `full` 版 `.agents/prompts/` 与 `.agents/guides/`
 - base harness 默认只带 Bash 与 PowerShell 两套 `check + review_gate`
 - `.agents/state/` 与 `.agents/runs/` 默认作为本地辅助运行面存在
 
@@ -53,7 +53,7 @@
 6. 填写 `docs/harness/project-constraints.md` 中的项目级机械约束登记表
 7. 阅读 `docs/test/RUNBOOK_TEMPLATE.md`
 8. 阅读 `.agents/PLANS.md`、`.agents/plans/TEMPLATE.md`、`.agents/plans/EXAMPLE-implementation.md`
-9. 若是 agent 驱动初始化，再补齐 `.agents/prompts/` 与 `.agents/guides/`，并选择 `placeholder / full` 模式
+9. 若是 agent 驱动初始化，默认补齐 `full` 模式的 `.agents/prompts/` 与 `.agents/guides/`；只有明确要求轻量模式时才使用 `placeholder`
 10. 若存在 `.agents/prompts/maintenance-loop.md`，确认默认 mode 是 `report-only`
 11. macOS / Linux / Git Bash 执行 `make harness-verify`
 12. Windows PowerShell 执行 `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\harness\check.ps1`

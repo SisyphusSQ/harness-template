@@ -324,4 +324,4 @@ Log "  3. fill docs\harness\project-constraints.md with repo-specific mechanical
 Log "  4. update README and AGENTS with real project context"
 Log "  5. create the first plan in .agents\plans\"
 Log "  6. run powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\harness\check.ps1"
-Log "  7. if an agent is driving init, follow $harnessRoot\agent-init-project.md to add .agents\prompts\ + .agents\guides\"
+Log "  7. if an agent is driving init, follow $harnessRoot\agent-init-project.md to add full .agents\prompts\ + .agents\guides\ by default"

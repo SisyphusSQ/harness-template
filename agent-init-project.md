@@ -30,13 +30,13 @@
 - issue prefix
 - 初始化 agent 类型：`codex` / `cursor` / `other`
 - agent 扩展层模式：
-  - `placeholder`
-  - `full`
+  - `full`（默认，完整可执行模板）
+  - `placeholder`（显式轻量模式）
 
 若上述信息有缺口：
 
 - 能从仓库路径、现有文件、用户指令里推断的，先自行探索
-- 只有扩展层模式这种偏好型问题需要明确问用户；若用户未明确选择，默认 `placeholder`
+- 只有用户明确要求轻量初始化时才使用 `placeholder`；若用户未明确选择，默认 `full`
 
 ### 1.2 固定执行顺序
 
@@ -114,8 +114,8 @@
 
 4. 确定 agent 扩展层模式：
 
-   - 询问用户使用 `placeholder` 还是 `full`
-   - 若用户未明确选择，默认 `placeholder`
+   - 默认使用 `full`
+   - 只有用户明确要求“轻量 / 占位 / 暂不铺开 prompt 模板”时，才使用 `placeholder`
    - 复制：
      - `sources/agent_extensions/shared/.`
      - `sources/agent_extensions/{placeholder|full}/.`
@@ -220,9 +220,9 @@
    - 确认 `.cursor/rules/harness.mdc` 存在
    - 确认 `.cursor/rules/harness.mdc` 使用中文 `description`、中文正文和 `alwaysApply: true`
    - 如果是 codex 或 other，不生成 `.cursor/`
-5. 再询问用户：
-   - agent 扩展层用 placeholder 还是 full
-   - 若用户未明确选择，默认 placeholder
+5. 再确定 agent 扩展层模式：
+   - 默认使用 full
+   - 只有用户明确要求轻量模式才用 placeholder
 6. 然后复制：
    - `<HARNESS_ROOT>/sources/agent_extensions/shared/.`
    - `<HARNESS_ROOT>/sources/agent_extensions/{placeholder|full}/.`
@@ -270,7 +270,7 @@
    - base harness 是否完成
    - Cursor adapter 是否按 agent 类型处理
    - 扩展层是否补齐
-   - 当前使用的是 placeholder 还是 full
+   - 当前使用的是 full 还是显式轻量 placeholder
    - `PLANS.md / TEMPLATE.md / EXAMPLE-implementation.md` 三层关系是否已经可读
    - `docs/test/RUNBOOK_TEMPLATE.md` 是否已经就位
    - `docs/harness/project-constraints.md` 是否已经就位并提醒使用者后续按项目真实规则补齐
