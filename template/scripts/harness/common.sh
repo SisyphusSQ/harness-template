@@ -1,5 +1,40 @@
 #!/usr/bin/env bash
 
+ensure_utf8_locale() {
+  local charmap
+  local candidate
+
+  charmap="$(locale charmap 2>/dev/null || true)"
+  case "$charmap" in
+    UTF-8|utf-8|UTF8|utf8)
+      return 0
+      ;;
+  esac
+
+  candidate="$(
+    { locale -a 2>/dev/null || true; } \
+      | awk 'candidate == "" && tolower($0) ~ /^c\.utf-?8$/ { candidate = $0 } END { print candidate }'
+  )"
+  if [[ -n "$candidate" ]]; then
+    export LC_ALL="$candidate"
+    return 0
+  fi
+
+  candidate="$(
+    { locale -a 2>/dev/null || true; } \
+      | awk 'candidate == "" && tolower($0) ~ /^en_us\.utf-?8$/ { candidate = $0 } END { print candidate }'
+  )"
+  if [[ -n "$candidate" ]]; then
+    export LC_ALL="$candidate"
+    return 0
+  fi
+
+  echo "harness requires a UTF-8 locale; current charmap is ${charmap:-unknown}" >&2
+  exit 2
+}
+
+ensure_utf8_locale
+
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 repo_root="$(cd "$script_dir/../.." && pwd)"
 
