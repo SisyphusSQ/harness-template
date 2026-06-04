@@ -37,6 +37,10 @@ repo/
 │   ├── PLANS.md
 │   ├── plans/TEMPLATE.md
 │   ├── plans/EXAMPLE-implementation.md
+│   ├── skills/
+│   │   ├── project-plan-archive/
+│   │   ├── project-version-release/
+│   │   └── test-runbook/
 │   ├── state/TEMPLATE.md
 │   └── runs/TEMPLATE.md
 └── scripts/harness/
@@ -53,6 +57,12 @@ repo/
 - `.agents/PLANS.md`：协议，定义什么时候要写 plan、最小 contract 和写法约束
 - `.agents/plans/TEMPLATE.md`：主模板，可直接填写，默认按“实现优先”结构组织
 - `.agents/plans/EXAMPLE-implementation.md`：质量标杆，展示一份更像真实实施方案的 plan 应该写成什么样
+
+默认 skill 层固定提供三类 repo-local workflow：
+
+- `.agents/skills/project-plan-archive/`：计划归档、ISO 周目录移动与旧 plan 路径精确改写
+- `.agents/skills/project-version-release/`：CHANGELOG、版本和 release archive 边界维护
+- `.agents/skills/test-runbook/`：`docs/test/*` runbook 生成、执行、回写和提交版证据边界
 
 ## Agent 驱动补充层
 
@@ -87,7 +97,7 @@ repo/
 - code-review 与 linter 说明统一放在 `.agents/guides/`
 - `Issue Tracker = 主协作真相`
 - `repo = 主执行真相`
-- `.agents/` 的 base 输出默认初始化计划协议、计划模板、实现型 exemplar，以及本地辅助运行面模板
+- `.agents/` 的 base 输出默认初始化计划协议、计划模板、实现型 exemplar、repo-local skill 层，以及本地辅助运行面模板
 - `.agents/state` / `.agents/runs` 是本地辅助运行面，不替代 Issue Tracker
 - `.cursor/rules/harness.mdc` 只作为 Cursor adapter，负责把 Cursor 导向仓库内 harness 真相文件
 - `.gitignore` 必须在第一次提交前就完成初始化
@@ -109,7 +119,8 @@ repo/
 7. 阅读并补齐 `docs/harness/project-constraints.md` 中的项目级机械约束登记表
 8. 若存在 `.agents/prompts/maintenance-loop.md`，确认默认 mode 仍是 `report-only`
 9. 优先阅读 `.agents/PLANS.md`、`.agents/plans/TEMPLATE.md`、`.agents/plans/EXAMPLE-implementation.md`
-10. macOS / Linux / Git Bash 执行 `make harness-verify`；Windows PowerShell 可执行 `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\harness\check.ps1`
+10. 按任务需要阅读 `.agents/skills/project-plan-archive/`、`.agents/skills/project-version-release/` 或 `.agents/skills/test-runbook/`
+11. macOS / Linux / Git Bash 执行 `make harness-verify`；Windows PowerShell 可执行 `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\harness\check.ps1`
 
 更推荐的 agent 用法是：
 

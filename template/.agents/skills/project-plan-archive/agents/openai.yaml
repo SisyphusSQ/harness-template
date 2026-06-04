@@ -1,0 +1,4 @@
+agent:
+  display_name: "Project Plan Archive"
+  short_description: "归档已完成计划并精确修复旧 plan 路径引用"
+  default_prompt: "使用 project-plan-archive skill。先按当前 issue provider 查证完成态，再运行 inspect 和 archive dry-run；只有确认后才使用 --write。"

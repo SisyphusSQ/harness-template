@@ -22,6 +22,10 @@
 | 计划协议 | `.agents/PLANS.md` |
 | 计划主模板 | `.agents/plans/TEMPLATE.md` |
 | 实现型示例 | `.agents/plans/EXAMPLE-implementation.md` |
+| 默认技能层 | `.agents/skills/` |
+| 计划归档 skill | `.agents/skills/project-plan-archive/SKILL.md` |
+| 版本发布 skill | `.agents/skills/project-version-release/SKILL.md` |
+| 测试 runbook skill | `.agents/skills/test-runbook/SKILL.md` |
 | 本地恢复面 | `.agents/state/TEMPLATE.md` |
 | 本地结果面 | `.agents/runs/TEMPLATE.md` |
 | 可选 Prompt 层 | `.agents/prompts/README.md`（如存在） |
@@ -35,10 +39,10 @@
 | `docs/harness/` | 控制面规则、Issue Workflow、Issue Tracker profile 与项目级机械约束登记 |
 | `docs/issues/` | `issue-provider=repo` 时的仓库 issue 存储 |
 | `.agents/PLANS.md` + `.agents/plans/` | 计划协议、计划主模板和实现型示例 |
+| `.agents/skills/` | base 默认 repo-local workflow skill：计划归档、版本发布边界、测试 runbook 执行与回写 |
 | `.agents/state/` + `.agents/runs/` | repo-local 恢复点与结果摘要面 |
 | `.agents/prompts/` | 可选 Prompt 模板，仅 agent 驱动初始化时补充；默认使用 `full` |
 | `.agents/guides/` | 可选 review / linter 说明，仅 agent 驱动初始化时补充；默认使用 `full` |
-| `.agents/skills/` | 可选 repo-local skill，仅在项目需要稳定复用的专门流程时补充 |
 | `scripts/harness/` | base harness 的最小 gate 脚本与共享 helper |
 
 固定解释：
@@ -58,6 +62,7 @@
 - 初始化后应在 `docs/harness/project-constraints.md` 中登记项目级机械约束；没有可执行命令或 gate 的规则不得标记为 `enforced`
 - `.agents/plans/TEMPLATE.md` 默认应提交
 - `.agents/plans/EXAMPLE-implementation.md` 默认应提交
+- `.agents/skills/*/SKILL.md` 默认应提交；默认技能脚本只做 dry-run 或显式 `--write` 写入，不直接操作外部系统
 - `.agents/state/TEMPLATE.md` 默认应提交
 - `.agents/runs/TEMPLATE.md` 默认应提交
 - 若后续补齐 `.agents/prompts/` 和 `.agents/guides/`，默认使用 `full` 模式，且这些文档默认也应提交

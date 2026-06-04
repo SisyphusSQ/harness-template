@@ -125,6 +125,16 @@ $requiredFiles = @(
     ".agents/PLANS.md",
     ".agents/plans/TEMPLATE.md",
     ".agents/plans/EXAMPLE-implementation.md",
+    ".agents/skills/project-plan-archive/SKILL.md",
+    ".agents/skills/project-plan-archive/agents/openai.yaml",
+    ".agents/skills/project-plan-archive/scripts/project_plan_archive.py",
+    ".agents/skills/project-plan-archive/tests/test_project_plan_archive.py",
+    ".agents/skills/project-version-release/SKILL.md",
+    ".agents/skills/project-version-release/agents/openai.yaml",
+    ".agents/skills/project-version-release/references/project-version-policy.md",
+    ".agents/skills/project-version-release/scripts/project_version_release.py",
+    ".agents/skills/test-runbook/SKILL.md",
+    ".agents/skills/test-runbook/agents/openai.yaml",
     ".agents/state/TEMPLATE.md",
     ".agents/runs/TEMPLATE.md",
     "scripts/harness/check.sh",
@@ -138,6 +148,53 @@ $requiredFiles = @(
 foreach ($path in $requiredFiles) {
     if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
         Fail "Missing required harness file: $path"
+    }
+}
+
+foreach ($item in @(
+    @(".agents/skills/project-plan-archive/SKILL.md", "name: project-plan-archive"),
+    @(".agents/skills/project-version-release/SKILL.md", "name: project-version-release"),
+    @(".agents/skills/test-runbook/SKILL.md", "name: test-runbook")
+)) {
+    Assert-FileContains -Path $item[0] -Pattern "---" -Message "Skill frontmatter is incomplete: $($item[0])"
+    Assert-FileContains -Path $item[0] -Pattern $item[1] -Message "Skill frontmatter is incomplete: $($item[0])"
+    Assert-FileContains -Path $item[0] -Pattern "description:" -Message "Skill frontmatter is incomplete: $($item[0])"
+}
+
+foreach ($item in @(
+    @(".agents/skills/project-plan-archive/SKILL.md", "先查 Issue Tracker，再归档"),
+    @(".agents/skills/project-plan-archive/SKILL.md", "--done-issue"),
+    @(".agents/skills/project-plan-archive/SKILL.md", "no_issue_default_archive"),
+    @(".agents/skills/project-plan-archive/scripts/project_plan_archive.py", "Project plan archive helper"),
+    @(".agents/skills/project-plan-archive/scripts/project_plan_archive.py", "--write"),
+    @(".agents/skills/project-version-release/SKILL.md", "issue 是执行粒度，release 是发布粒度"),
+    @(".agents/skills/project-version-release/SKILL.md", "CHANGELOG.md -> Unreleased"),
+    @(".agents/skills/project-version-release/scripts/project_version_release.py", "Project version/release helper"),
+    @(".agents/skills/project-version-release/references/project-version-policy.md", "Project Version Policy"),
+    @(".agents/skills/test-runbook/SKILL.md", "执行副作用"),
+    @(".agents/skills/test-runbook/SKILL.md", "Request / Response 回写规则"),
+    @(".agents/skills/test-runbook/SKILL.md", "提交版证据边界"),
+    @(".agents/skills/test-runbook/SKILL.md", "结果回写规则")
+)) {
+    Assert-FileContains -Path $item[0] -Pattern $item[1] -Message "$($item[0]) missing required skill pattern: $($item[1])"
+}
+
+$skillText = Get-ChildItem -Path ".agents/skills" -Recurse -File | ForEach-Object {
+    Get-Content -LiteralPath $_.FullName -Raw -Encoding UTF8
+}
+if (($skillText -join "`n") -match 'DBBridge|db_bridge_test|/Users/suqing|TEA-') {
+    Fail "Default harness skills must not contain DBBridge-specific constants"
+}
+
+$python = Get-Command python3 -ErrorAction SilentlyContinue
+if ($null -ne $python) {
+    & $python.Source ".agents/skills/project-plan-archive/scripts/project_plan_archive.py" "--help" *> $null
+    if ($LASTEXITCODE -ne 0) {
+        Fail "project_plan_archive.py --help failed"
+    }
+    & $python.Source ".agents/skills/project-version-release/scripts/project_version_release.py" "--help" *> $null
+    if ($LASTEXITCODE -ne 0) {
+        Fail "project_version_release.py --help failed"
     }
 }
 

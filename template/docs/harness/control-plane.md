@@ -236,16 +236,17 @@ Maintenance loop 的输出必须包含：
 | `.agents/PLANS.md` | 复杂任务计划协议 |
 | `.agents/plans/TEMPLATE.md` | 具体计划模板 |
 | `.agents/plans/EXAMPLE-implementation.md` | 实现型计划范例与质量标杆 |
+| `.agents/skills/` | base 默认 repo-local workflow skill 层 |
 | `.agents/state/TEMPLATE.md` | 本地辅助恢复面模板 |
 | `.agents/runs/TEMPLATE.md` | 本地辅助结果面模板 |
-| `.agents/skills/` | 可选 repo-local skill 目录 |
 | `docs/issues/` | `issue-provider=repo` 时的仓库 issue 存储 |
 
 固定要求：
 
-- 默认初始化计划协议、计划主模板、实现型 exemplar 和本地辅助运行面模板
+- 默认初始化计划协议、计划主模板、实现型 exemplar、repo-local workflow skill 和本地辅助运行面模板
+- `.agents/skills` 默认包含 `project-plan-archive`、`project-version-release`、`test-runbook`
+- 默认 skill 不直接连接外部 Issue Tracker、数据库或发布系统；外部完成态、发布动作和 live 环境由 agent 按项目规则另行查证或执行
 - `.agents/state` / `.agents/runs` 服务本地恢复与结果审计，不替代 Issue Tracker
-- `.agents/skills` 只在项目有稳定复用的专门流程时补充，不属于 base harness 必备输出
 - `review_gate` 的输入真相来自 plan 文件，不依赖额外状态目录
 
 ## 目录级 AGENTS（按需）

@@ -1,0 +1,4 @@
+agent:
+  display_name: "Test Runbook"
+  short_description: "生成、执行并回写 docs/test runbook"
+  default_prompt: "使用 test-runbook skill。执行前声明副作用，回写业务 request/response 和脱敏结果摘要，不把凭据、完整 URL、DSN、主键或本机路径写入提交版文档。"

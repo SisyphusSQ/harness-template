@@ -19,6 +19,16 @@ required_files=(
   ".agents/PLANS.md"
   ".agents/plans/TEMPLATE.md"
   ".agents/plans/EXAMPLE-implementation.md"
+  ".agents/skills/project-plan-archive/SKILL.md"
+  ".agents/skills/project-plan-archive/agents/openai.yaml"
+  ".agents/skills/project-plan-archive/scripts/project_plan_archive.py"
+  ".agents/skills/project-plan-archive/tests/test_project_plan_archive.py"
+  ".agents/skills/project-version-release/SKILL.md"
+  ".agents/skills/project-version-release/agents/openai.yaml"
+  ".agents/skills/project-version-release/references/project-version-policy.md"
+  ".agents/skills/project-version-release/scripts/project_version_release.py"
+  ".agents/skills/test-runbook/SKILL.md"
+  ".agents/skills/test-runbook/agents/openai.yaml"
   ".agents/state/TEMPLATE.md"
   ".agents/runs/TEMPLATE.md"
   "scripts/harness/check.sh"
@@ -35,6 +45,56 @@ for path in "${required_files[@]}"; do
     exit 1
   fi
 done
+
+required_skill_frontmatter=(
+  ".agents/skills/project-plan-archive/SKILL.md|name: project-plan-archive"
+  ".agents/skills/project-version-release/SKILL.md|name: project-version-release"
+  ".agents/skills/test-runbook/SKILL.md|name: test-runbook"
+)
+
+for item in "${required_skill_frontmatter[@]}"; do
+  path="${item%%|*}"
+  pattern="${item#*|}"
+  if ! rg -Fq -- "---" "$path" || ! rg -Fq "$pattern" "$path" || ! rg -Fq "description:" "$path"; then
+    echo "Skill frontmatter is incomplete: $path" >&2
+    exit 1
+  fi
+done
+
+required_skill_patterns=(
+  ".agents/skills/project-plan-archive/SKILL.md|先查 Issue Tracker，再归档"
+  ".agents/skills/project-plan-archive/SKILL.md|--done-issue"
+  ".agents/skills/project-plan-archive/SKILL.md|no_issue_default_archive"
+  ".agents/skills/project-plan-archive/scripts/project_plan_archive.py|Project plan archive helper"
+  ".agents/skills/project-plan-archive/scripts/project_plan_archive.py|--write"
+  ".agents/skills/project-version-release/SKILL.md|issue 是执行粒度，release 是发布粒度"
+  ".agents/skills/project-version-release/SKILL.md|CHANGELOG.md -> Unreleased"
+  ".agents/skills/project-version-release/scripts/project_version_release.py|Project version/release helper"
+  ".agents/skills/project-version-release/references/project-version-policy.md|Project Version Policy"
+  ".agents/skills/test-runbook/SKILL.md|执行副作用"
+  ".agents/skills/test-runbook/SKILL.md|Request / Response 回写规则"
+  ".agents/skills/test-runbook/SKILL.md|提交版证据边界"
+  ".agents/skills/test-runbook/SKILL.md|结果回写规则"
+)
+
+for item in "${required_skill_patterns[@]}"; do
+  path="${item%%|*}"
+  pattern="${item#*|}"
+  if ! rg -Fq -- "$pattern" "$path"; then
+    echo "$path missing required skill pattern: $pattern" >&2
+    exit 1
+  fi
+done
+
+if rg -n "DBBridge|db_bridge_test|/Users/suqing|TEA-" .agents/skills >/dev/null; then
+  echo "Default harness skills must not contain DBBridge-specific constants" >&2
+  exit 1
+fi
+
+if command -v python3 >/dev/null 2>&1; then
+  python3 .agents/skills/project-plan-archive/scripts/project_plan_archive.py --help >/dev/null
+  python3 .agents/skills/project-version-release/scripts/project_version_release.py --help >/dev/null
+fi
 
 if [[ -f "docs/harness/prompt-templates.md" ]]; then
   echo "Obsolete harness file should not exist anymore: docs/harness/prompt-templates.md" >&2

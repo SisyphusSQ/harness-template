@@ -1,0 +1,4 @@
+agent:
+  display_name: "Project Version Release"
+  short_description: "维护 CHANGELOG、版本和 release 归档边界"
+  default_prompt: "使用 project-version-release skill。先分类版本影响，保持 issue 与 release 粒度分离，写入前先 dry-run，版本号必须显式输入。"

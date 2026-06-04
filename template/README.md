@@ -8,7 +8,7 @@
 - 控制面文档统一收口到 `docs/harness/`
 - 初始化后应先确认 `.gitignore`、`.agents/`、`docs/harness/project-constraints.md`、`docs/test/RUNBOOK_TEMPLATE.md`、`scripts/harness/` 是否就位并可执行
 - 若通过 agent 驱动初始化，默认再补齐完整 `full` 版 `.agents/prompts/` 与 `.agents/guides/`
-- base harness 默认只带 Bash 与 PowerShell 两套 `check + review_gate`
+- base harness 默认带 Bash 与 PowerShell 两套 `check + review_gate`，以及 `.agents/skills/` repo-local workflow 层
 - `.agents/state/` 与 `.agents/runs/` 默认作为本地辅助运行面存在
 
 ## 推荐阅读顺序
@@ -23,8 +23,11 @@
 8. `.agents/PLANS.md`
 9. `.agents/plans/TEMPLATE.md`
 10. `.agents/plans/EXAMPLE-implementation.md`
-11. 若存在，再读 `.agents/prompts/README.md`
-12. 若存在，再读 `.agents/prompts/maintenance-loop.md`
+11. `.agents/skills/project-plan-archive/SKILL.md`
+12. `.agents/skills/project-version-release/SKILL.md`
+13. `.agents/skills/test-runbook/SKILL.md`
+14. 若存在，再读 `.agents/prompts/README.md`
+15. 若存在，再读 `.agents/prompts/maintenance-loop.md`
 
 ## 目录职责
 
@@ -33,7 +36,7 @@
 | `docs/harness/` | 控制面规则、Issue Workflow、Issue Tracker profile 与项目级机械约束登记 |
 | `docs/issues/` | `issue-provider=repo` 时的仓库 issue 存储 |
 | `docs/test/` | 通用测试 runbook 模板与后续脱敏结果摘要 |
-| `.agents/` | 计划协议、计划模板、实现型 exemplar、本地辅助运行面，以及后续 prompts / guides |
+| `.agents/` | 计划协议、计划模板、实现型 exemplar、默认 workflow skill、本地辅助运行面，以及后续 prompts / guides |
 | `scripts/harness/` | base harness 的最小 gate 脚本与共享 helper |
 
 ## 默认 truth split
@@ -53,7 +56,8 @@
 6. 填写 `docs/harness/project-constraints.md` 中的项目级机械约束登记表
 7. 阅读 `docs/test/RUNBOOK_TEMPLATE.md`
 8. 阅读 `.agents/PLANS.md`、`.agents/plans/TEMPLATE.md`、`.agents/plans/EXAMPLE-implementation.md`
-9. 若是 agent 驱动初始化，默认补齐 `full` 模式的 `.agents/prompts/` 与 `.agents/guides/`；只有明确要求轻量模式时才使用 `placeholder`
-10. 若存在 `.agents/prompts/maintenance-loop.md`，确认默认 mode 是 `report-only`
-11. macOS / Linux / Git Bash 执行 `make harness-verify`
-12. Windows PowerShell 执行 `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\harness\check.ps1`
+9. 阅读 `.agents/skills/` 中的默认 workflow skill；按任务使用 `project-plan-archive`、`project-version-release` 或 `test-runbook`
+10. 若是 agent 驱动初始化，默认补齐 `full` 模式的 `.agents/prompts/` 与 `.agents/guides/`；只有明确要求轻量模式时才使用 `placeholder`
+11. 若存在 `.agents/prompts/maintenance-loop.md`，确认默认 mode 是 `report-only`
+12. macOS / Linux / Git Bash 执行 `make harness-verify`
+13. Windows PowerShell 执行 `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\harness\check.ps1`

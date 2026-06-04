@@ -270,6 +270,16 @@ $managedFiles = @(
     ".agents/PLANS.md",
     ".agents/plans/TEMPLATE.md",
     ".agents/plans/EXAMPLE-implementation.md",
+    ".agents/skills/project-plan-archive/SKILL.md",
+    ".agents/skills/project-plan-archive/agents/openai.yaml",
+    ".agents/skills/project-plan-archive/scripts/project_plan_archive.py",
+    ".agents/skills/project-plan-archive/tests/test_project_plan_archive.py",
+    ".agents/skills/project-version-release/SKILL.md",
+    ".agents/skills/project-version-release/agents/openai.yaml",
+    ".agents/skills/project-version-release/references/project-version-policy.md",
+    ".agents/skills/project-version-release/scripts/project_version_release.py",
+    ".agents/skills/test-runbook/SKILL.md",
+    ".agents/skills/test-runbook/agents/openai.yaml",
     ".agents/state/TEMPLATE.md",
     ".agents/runs/TEMPLATE.md",
     "docs/harness/control-plane.md",
@@ -322,6 +332,7 @@ Log "  1. inspect .gitignore and add repo-specific local files"
 Log "  2. read docs\harness\, docs\issues\, and docs\test\RUNBOOK_TEMPLATE.md"
 Log "  3. fill docs\harness\project-constraints.md with repo-specific mechanical constraints"
 Log "  4. update README and AGENTS with real project context"
-Log "  5. create the first plan in .agents\plans\"
-Log "  6. run powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\harness\check.ps1"
-Log "  7. if an agent is driving init, follow $harnessRoot\agent-init-project.md to add full .agents\prompts\ + .agents\guides\ by default"
+Log "  5. review default .agents\skills\ workflow guidance"
+Log "  6. create the first plan in .agents\plans\"
+Log "  7. run powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\harness\check.ps1"
+Log "  8. if an agent is driving init, follow $harnessRoot\agent-init-project.md to add full .agents\prompts\ + .agents\guides\ by default"

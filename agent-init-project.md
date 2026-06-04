@@ -12,8 +12,8 @@
 - 本文件位于当前 harness 维护源根目录，不属于目标项目模板，不会被初始化脚本复制到目标仓库
 - `init_harness_project.sh` 与 `init_harness_project.ps1` 只负责 base harness
 - `sources/agent_adapters/` 是按 agent 类型补充的适配层，不属于 base harness
+- `.agents/skills/` 是 base harness 默认 repo-local workflow 层，由初始化脚本生成
 - `.agents/prompts/` 与 `.agents/guides/` 由 agent 在 base harness 完成后补齐
-- `.agents/skills/` 不是 base harness 输出，只在项目需要稳定复用的 repo-local 专门流程时另行补充
 
 ## 1. 执行手册
 
@@ -79,6 +79,9 @@
    - `.agents/PLANS.md`
    - `.agents/plans/TEMPLATE.md`
    - `.agents/plans/EXAMPLE-implementation.md`
+   - `.agents/skills/project-plan-archive/SKILL.md`
+   - `.agents/skills/project-version-release/SKILL.md`
+   - `.agents/skills/test-runbook/SKILL.md`
    - `.agents/state/TEMPLATE.md`
    - `.agents/runs/TEMPLATE.md`
    - `scripts/harness/check.sh`
@@ -102,6 +105,7 @@
    - `组件职责与代码落点` 至少要有一条真实模块 / 路径 / 类型记录
    - `docs/harness/project-constraints.md` 是项目级机械约束登记入口，不能把只有文档约束的规则写成 `enforced`
    - `docs/test/RUNBOOK_TEMPLATE.md` 能作为测试 runbook、执行副作用、清理结果和脱敏结果回写模板
+   - `.agents/skills/` 已包含 `project-plan-archive`、`project-version-release`、`test-runbook` 三个默认 workflow skill
 
 3. 在 base harness 完成后，按初始化 agent 类型补充 adapter：
 
@@ -256,10 +260,12 @@
      `真实入口与触发 / 输入装配与边界校验 / 组件职责与代码落点 / 关键执行时序 / 停止 / 错误 / 恢复`
    - `.agents/plans/EXAMPLE-implementation.md` 已存在，可作为质量标杆
    - `docs/test/RUNBOOK_TEMPLATE.md` 已存在，可作为测试 runbook 和脱敏结果回写模板
+   - `.agents/skills/project-plan-archive/SKILL.md` 已存在，可作为计划归档 workflow
+   - `.agents/skills/project-version-release/SKILL.md` 已存在，可作为版本和 release 边界 workflow
+   - `.agents/skills/test-runbook/SKILL.md` 已存在，可作为测试 runbook 执行与回写 workflow
    - `review_gate.sh` / `review_gate.ps1` 已明确会拒绝只有 harness 流程、没有实现骨架的 plan
    - `review_gate.sh` / `review_gate.ps1` 已明确会拒绝空的 `Reference Snippets` 和空的组件职责记录
    - `.agents/state/TEMPLATE.md` 与 `.agents/runs/TEMPLATE.md` 已明确它们只是本地辅助运行面
-   - `.agents/skills` 未作为 base 必备输出；如项目需要 repo-local skill，应单独说明来源和使用边界
    - 如果生成了 `.cursor/rules/harness.mdc`，它已明确读取 harness 入口并要求 `make harness-verify`
 10. 最后在目标仓库执行 `make harness-verify`；Windows PowerShell 可执行 `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\harness\check.ps1`
 
