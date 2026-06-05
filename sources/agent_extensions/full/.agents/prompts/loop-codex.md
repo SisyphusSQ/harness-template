@@ -6,7 +6,7 @@ Mode: full
 | --- | --- |
 | 文档定位 | 主对话 / 交互式 harness loop 的可执行 prompt contract |
 | 适用范围 | 围绕 execution issue 或 master issue 做 collect / gate / freeze / implement / closeout |
-| 关联文档 | `AGENTS.md`、`docs/harness/control-plane.md`、`docs/harness/linear.md`、`.agents/PLANS.md`、`.agents/prompts/issue-standard-workflow.md`、`.agents/prompts/loop-automation.md`、`.agents/guides/code-review.md` |
+| 关联文档 | `AGENTS.md`、`docs/harness/control-plane.md`、`docs/harness/linear.md`、`.agents/PLANS.md`、`.agents/prompts/orchestrator-thread.md`、`.agents/prompts/issue-standard-workflow.md`、`.agents/prompts/loop-automation.md`、`.agents/guides/code-review.md` |
 
 固定规则：
 
@@ -15,6 +15,8 @@ Mode: full
 - 需要完整 issue 级模板时，优先跳到 `issue-standard-workflow.md`。
 - 当前状态、`recovery_point`、`next_action` 默认落 Issue Tracker；本地 `.agents/state` / `.agents/runs` 只补充恢复细节。
 - 外部工具、目录、知识库、接口平台和配置中心统一称为 `External System`；每轮必须先读外部当前真相，再写入或验收。
+- 多 thread / worktree / subagent 编排先读 `.agents/prompts/orchestrator-thread.md`；Codex thread tools 不可用时降级为人工 handoff。
+- 子 thread 不默认归档；完成后标题加 `【完成】`，该标识不替代 Issue Tracker 状态。
 
 ## 1. 术语
 
@@ -25,15 +27,18 @@ Mode: full
 | `solo-loop` | 围绕单张 execution issue 推进一轮 |
 | `plan-only loop` | 只做现状探索、范围冻结、拆卡建议和计划，不进入实现 |
 | `master-loop` | 围绕 master 先冻结 inventory，再逐张推进 execution issue |
+| `goal-orchestration` | root goal 由主 thread 拆解、下发、回收和集成多个 child threads / Master / Execution units |
+| `write_lease` | 主 thread 授权可写 thread 的写入范围、分支、worktree、阶段和集成 owner |
 | `serial-drain` | 当前 slice 收口后，回到 master 检查下一张 slice，直到 Exit Criteria 满足 |
-| `stop_scope` | 当前停止点：`needs-plan`、`blocked`、`ready-for-implement`、`ready-for-review`、`ready-for-merge`、`done` |
+| `waiting_on_child` | 长任务中主 thread 停在可恢复等待点，而不是空等或重复做子 thread 的 scope |
+| `stop_scope` | 当前停止点：`needs-plan`、`blocked`、`waiting-on-child`、`ready-for-implement`、`ready-for-review`、`ready-for-integration`、`ready-for-merge`、`done` |
 
 ## 2. 固定主流程
 
 交互式 loop 默认遵循：
 
 ```text
-collect -> gate -> freeze -> slice -> implement -> verify -> review -> writeback -> mr_prep -> merge -> closeout
+collect -> gate -> freeze -> slice -> dispatch -> implement -> verify -> review -> integrate -> verify -> writeback -> mr_prep -> merge -> closeout
 ```
 
 阶段要求：
@@ -44,9 +49,12 @@ collect -> gate -> freeze -> slice -> implement -> verify -> review -> writeback
 | `gate` | 判断是否过大、依赖是否清楚、权限和环境是否可用 | 遇到缺口仍硬做 |
 | `freeze` | 冻结 Included / Excluded / Acceptance Matrix / Write Scope Limit | 边做边扩大范围 |
 | `slice` | 选定当前单张 execution issue 或当前实现切片 | 同时打开互相影响的多张卡 |
+| `dispatch` | 派发 subagent / child thread / worktree thread，并登记 `write_lease` | 无 lease 派发可写任务 |
 | `implement` | 按冻结范围修改代码、文档、计划和配置 | 重构无关区域 |
-| `verify` | 跑计划指定验证并记录结果 | 未验证就声称通过 |
+| `verify` | 执行者或 test thread 跑局部验证并记录结果 | 未验证就进入 review |
 | `review` | findings-first 输出 review 结论 | verify 失败仍进入 review |
+| `integrate` | 主 thread 检查 lease、diff、review、verify 后集成子 thread 输出 | 子 thread 自行 merge 或 closeout |
+| `verify` | 主 thread 在集成后的 repo truth 上执行最终验证矩阵 | 只引用子 thread 验证就 Done |
 | `writeback` | 回写 Issue Tracker、PR/MR 或 repo 文档摘要 | 只在聊天里说完成 |
 | `mr_prep / merge` | 准备或执行 provider 原生命令收口 | 用网页替代可安全执行的 git/provider 命令 |
 | `closeout` | 确认主分支、issue 状态、残余风险和下一步 | 合并后不回读状态 |
@@ -149,6 +157,34 @@ Additional constraints: <CONSTRAINTS>
 - Done / Not Done 结论
 ```
 
+### 3.7 启动 goal orchestration
+
+```text
+围绕 <ROOT-GOAL 或 ROOT-ISSUE> 启动 goal-orchestration。
+先读取 Issue Tracker、repo docs、active plan、已有 thread / branch / run 状态。
+如果需要多 thread / worktree / subagent 编排，先读 `.agents/prompts/orchestrator-thread.md` 并生成主 thread Goal Prompt。
+
+必须输出：
+- root_goal
+- orchestration_mode
+- goal_state
+- goal_unit_roster
+- active_master_issue / active_execution_issue
+- child thread / subagent dispatch 建议
+- write_lease 表
+- waiting_on / next_check / recovery_point / next_action
+```
+
+### 3.8 子 thread ready 后集成
+
+```text
+围绕 <ISSUE-ID> 集成子 thread 输出。
+先读取子 thread 的 Thread Status comment、branch/worktree、write_lease 和验证摘要。
+检查 diff 是否落在 write_scope 且未触碰 excluded_scope。
+review 通过后进入 integrate；集成后必须重新执行 post-integration verify。
+若 required live E2E 未执行，停止在 blocked / manual-gate，不得标记 verified / done。
+```
+
 ## 4. 外部系统交互约束
 
 适用于接口平台、文档平台、知识库、配置中心、监控平台、工单平台、CI/CD、Issue Tracker 以外的 provider。
@@ -170,6 +206,7 @@ repo truth -> external current truth -> diff -> update/create -> readback verify
 ## 5. 使用建议
 
 - issue 级高频 prompt 直接读 `issue-standard-workflow.md`。
+- 多 thread / worktree / subagent 编排读 `orchestrator-thread.md`。
 - 自动推进、run id、drain 策略等语义读 `loop-automation.md`。
 - review 前默认读 `.agents/guides/code-review.md`。
 - lint 或机械规则接入前默认读 `.agents/guides/linter.md` 和 `docs/harness/project-constraints.md`。

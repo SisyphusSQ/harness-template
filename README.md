@@ -80,6 +80,7 @@ repo/
 随后补充：
 
 - `.agents/prompts/README.md`
+- `.agents/prompts/orchestrator-thread.md`
 - `.agents/prompts/issue-standard-workflow.md`
 - `.agents/prompts/loop-codex.md`
 - `.agents/prompts/loop-automation.md`
@@ -93,6 +94,7 @@ repo/
 - `docs/issues/` 是 `issue-provider=repo` 时的仓库内 issue 存储
 - `docs/harness/project-constraints.md` 是项目级机械约束登记入口，初始化后需要按真实项目补齐
 - prompt 模板统一放在 `.agents/prompts/`
+- `orchestrator-thread.md` 属于 agent 扩展 prompt，负责主 thread / 子 thread / worktree thread / subagent 编排；不替代 `docs/harness/` 的控制面真相
 - `maintenance-loop.md` 属于 agent 扩展 prompt，默认 `report-only`，不新增自动修复脚本；只有用户显式指定才进入 `issue-create / safe-fix / rule-promotion`
 - code-review 与 linter 说明统一放在 `.agents/guides/`
 - `Issue Tracker = 主协作真相`
@@ -100,6 +102,7 @@ repo/
 - `.agents/` 的 base 输出默认初始化计划协议、计划模板、实现型 exemplar、repo-local skill 层，以及本地辅助运行面模板
 - `.agents/state` / `.agents/runs` 是本地辅助运行面，不替代 Issue Tracker
 - `.cursor/rules/harness.mdc` 只作为 Cursor adapter，负责把 Cursor 导向仓库内 harness 真相文件
+- 多 thread / worktree thread 的真实创建、读取、消息发送和标题标记属于 Codex 专用能力；其他 agent 或人工流程只消费同一控制面状态，并按 handoff、Issue comment 与 `Current State` 维持状态机
 - `.gitignore` 必须在第一次提交前就完成初始化
 - `scripts/harness/` 中的 gate 脚本初始化后必须能真实执行，不能只靠关键字检查过关
 - Bash 入口使用 POSIX 路径，例如 `/abs/path/to/repo` 或 Git Bash 的 `/c/path/to/repo`
@@ -117,10 +120,11 @@ repo/
 5. 若是 agent 驱动初始化，默认从 `sources/agent_extensions/shared/` 与 `sources/agent_extensions/full/` 补 `.agents/prompts/` 和 `.agents/guides/`；只有用户明确要求轻量模式时才改用 `placeholder`
 6. 阅读 `docs/harness/issue-workflow.md`；若无外部 issue 工具，使用 `docs/issues/TEMPLATE.md`
 7. 阅读并补齐 `docs/harness/project-constraints.md` 中的项目级机械约束登记表
-8. 若存在 `.agents/prompts/maintenance-loop.md`，确认默认 mode 仍是 `report-only`
-9. 优先阅读 `.agents/PLANS.md`、`.agents/plans/TEMPLATE.md`、`.agents/plans/EXAMPLE-implementation.md`
-10. 按任务需要阅读 `.agents/skills/project-plan-archive/`、`.agents/skills/project-version-release/` 或 `.agents/skills/test-runbook/`
-11. macOS / Linux / Git Bash 执行 `make harness-verify`；Windows PowerShell 可执行 `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\harness\check.ps1`
+8. 若存在 `.agents/prompts/orchestrator-thread.md`，多 thread / worktree / subagent 编排先读它
+9. 若存在 `.agents/prompts/maintenance-loop.md`，确认默认 mode 仍是 `report-only`
+10. 优先阅读 `.agents/PLANS.md`、`.agents/plans/TEMPLATE.md`、`.agents/plans/EXAMPLE-implementation.md`
+11. 按任务需要阅读 `.agents/skills/project-plan-archive/`、`.agents/skills/project-version-release/` 或 `.agents/skills/test-runbook/`
+12. macOS / Linux / Git Bash 执行 `make harness-verify`；Windows PowerShell 可执行 `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\harness\check.ps1`
 
 更推荐的 agent 用法是：
 

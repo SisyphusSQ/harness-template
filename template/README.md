@@ -27,7 +27,8 @@
 12. `.agents/skills/project-version-release/SKILL.md`
 13. `.agents/skills/test-runbook/SKILL.md`
 14. 若存在，再读 `.agents/prompts/README.md`
-15. 若存在，再读 `.agents/prompts/maintenance-loop.md`
+15. 若存在，且任务涉及多 thread / worktree / subagent 编排，再读 `.agents/prompts/orchestrator-thread.md`
+16. 若存在，再读 `.agents/prompts/maintenance-loop.md`
 
 ## 目录职责
 
@@ -46,6 +47,12 @@
 - `PR / MR = 次级代码叙事面`
 - `.agents/state / .agents/runs = 本地辅助运行面`
 
+## Codex 专用能力边界
+
+- `.agents/prompts/orchestrator-thread.md` 是 Codex thread 编排 prompt；Codex 可用 thread tools 创建、读取、继续、发送消息、标记 `【完成】`。
+- `docs/harness/` 的控制面仍是 provider-neutral；非 Codex agent 或人工流程按 handoff 文档、Issue comment、`Current State` 与 `Thread Status` 执行同一状态机。
+- 不把 Codex thread tools 设为 harness 硬依赖；工具不可用时必须记录 fallback 和待补动作。
+
 ## 初始化后先做什么
 
 1. 检查 `.gitignore`
@@ -58,6 +65,7 @@
 8. 阅读 `.agents/PLANS.md`、`.agents/plans/TEMPLATE.md`、`.agents/plans/EXAMPLE-implementation.md`
 9. 阅读 `.agents/skills/` 中的默认 workflow skill；按任务使用 `project-plan-archive`、`project-version-release` 或 `test-runbook`
 10. 若是 agent 驱动初始化，默认补齐 `full` 模式的 `.agents/prompts/` 与 `.agents/guides/`；只有明确要求轻量模式时才使用 `placeholder`
-11. 若存在 `.agents/prompts/maintenance-loop.md`，确认默认 mode 是 `report-only`
-12. macOS / Linux / Git Bash 执行 `make harness-verify`
-13. Windows PowerShell 执行 `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\harness\check.ps1`
+11. 若存在 `.agents/prompts/orchestrator-thread.md`，确认多 thread 编排遵循 `write_lease`、`Current State`、`Thread Status`、post-integration verify 和 `【完成】` 标题标识
+12. 若存在 `.agents/prompts/maintenance-loop.md`，确认默认 mode 是 `report-only`
+13. macOS / Linux / Git Bash 执行 `make harness-verify`
+14. Windows PowerShell 执行 `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\harness\check.ps1`

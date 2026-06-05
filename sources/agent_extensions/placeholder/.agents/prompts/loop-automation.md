@@ -16,6 +16,7 @@ Mode: placeholder
 - 结果面字段与 writeback 目标
 - 人工降级 / manual gate 条件
 - 结果面是否默认优先写回 Linear
+- goal-orchestration、write_lease、post-integration verify 的自动化边界
 
 ## 后续应补齐的主题
 
@@ -24,6 +25,7 @@ Mode: placeholder
 - verify / review / mr_prep / merge / escalation checkpoint
 - stop-current-slice / stop-master
 - automation 结果面与 follow-up 规则
+- child thread handoff、waiting_on_child 与 `【完成】` 标题标识
 
 ## 临时占位模板骨架
 
@@ -48,6 +50,7 @@ Repo-local TODO:
 
 - 先读取 `AGENTS.md`、`docs/harness/control-plane.md`、`docs/harness/linear.md`、`.agents/PLANS.md`
 - 若是交互式主对话，不要直接拿本文件替代 `.agents/prompts/loop-codex.md`
+- 若涉及多 thread / worktree / subagent 编排，先读 `.agents/prompts/orchestrator-thread.md`
 - 补齐后默认应把 automation 结果面优先写回 Linear
 - 补齐后默认由 agent 给出 `merge / escalation` 结论
 - 若 Superpowers skills 可用，只能参考 `.agents/prompts/README.md` 的 Optional Superpowers Skill Hooks；当前占位文件不冻结完整 automation skill hook contract

@@ -4,7 +4,7 @@
 
 固定主流程：
 
-`collect -> gate -> freeze -> slice -> implement -> verify -> review -> writeback -> pr_prep -> merge -> notify`
+`collect -> gate -> freeze -> slice -> dispatch -> implement -> verify -> review -> integrate -> verify -> writeback -> pr_prep -> merge -> notify`
 
 ## 阶段职责
 
@@ -14,9 +14,12 @@
 | `gate` | 判断是否允许进入当前批次 | 准入 / 降级结论 |
 | `freeze` | 冻结当前轮范围和验收口径 | Batch Plan |
 | `slice` | 收敛最小可验证 slice | 当前轮实施边界 |
+| `dispatch` | 判断是否派发 subagent、child thread 或 worktree thread | Handoff Prompt / write_lease |
 | `implement` | 实施当前 slice | 代码 / 文档 / 计划更新 |
-| `verify` | 执行验证矩阵 | Verify Summary |
+| `verify` | 执行者或测试 thread 的局部验证 | Pre-review Verify Summary |
 | `review` | findings-first review | Review Summary |
+| `integrate` | 主 thread 收回子 thread 结果并检查 lease、diff、冲突和边界 | Integration Summary |
+| `verify` | 主 thread 在集成后的 repo truth 上执行最终验证矩阵 | Post-integration Verify Summary |
 | `writeback` | 回写 Issue Tracker、必要 repo 文档与代码叙事面 | Writeback Summary |
 | `pr_prep` | 准备 PR / MR 叙事 | PR Prep Summary |
 | `merge` | 自动或手动 merge 收口 | merge 结论 |
@@ -28,6 +31,8 @@
 - 若当前对象是 Master issue，只有 Master Exit Criteria 满足时，整个 Master 才算完成
 - provider 未锁定或自动化不可用时，`merge` 允许降级为 `manual`
 - 新发现的范围外内容统一进入 follow-up，不顺手纳入当前卡
+- 子 thread 完成只代表其工作单元完成，不代表 Execution Issue、Master Issue 或 root goal 已完成
+- 子 thread 不默认归档；完成后标题加 `【完成】` 标识，最终完成态仍以 Issue Tracker 和 `Current State` 为准
 
 ## 真相分层
 
@@ -62,6 +67,149 @@
 - 当两层发生冲突时，协作状态以 Issue Tracker 为准，执行约束以 repo 为准。
 - `.agents/state` / `.agents/runs` 属于本地辅助运行面；它们补充恢复和审计细节，但不替代 Issue Tracker。
 - Linear 只是一个 Issue Tracker profile，兼容说明在 `docs/harness/linear.md`。
+
+## Thread Orchestration
+
+固定解释：
+
+- 多 thread 编排不是新的真相源；它只是把原本单 thread 连续完成的 goal，改成由主 thread 拆解、下发、回收和集成的 fan-out / fan-in 执行方式。
+- Issue Tracker 仍承载协作状态，repo 仍承载执行事实，主 thread 负责调度、集成、最终验证和回写。
+- Codex thread 工具可用时，主 thread 可以用 `create_thread`、`read_thread`、`send_message_to_thread`、`set_thread_title` 驱动子 thread；工具不可用时降级为人工 handoff。
+- `set_thread_archived` 不作为默认动作；归档必须由用户显式要求。
+
+### Codex-Specific Capability Boundary
+
+- thread 的创建、读取、继续、消息发送、handoff 和 `【完成】` 标题标记属于 Codex 专用能力。
+- 控制面本身仍保持 provider-neutral：Issue Tracker、repo、`Current State`、`Thread Status`、`write_lease` 和 verify gate 不依赖 Codex thread tools。
+- 非 Codex agent 或人工流程只能按同一状态机执行手动 handoff；无法完成的 thread 工具动作必须显式记录为 fallback 或 pending action。
+
+### Orchestration Mode
+
+| `orchestration_mode` | 含义 |
+| --- | --- |
+| `goal-orchestration` | 围绕一个 root goal，由主 thread 拆解、下发、回收和集成多个 child threads / Master / Execution units |
+| `single-issue` | 围绕一张 Execution Issue 编排主 thread、子 thread 和 `write_lease` |
+| `master-inventory` | 围绕 Master Issue 冻结并推进多张 Execution Issues |
+| `review-fix` | 围绕 review findings 派发修正 lease |
+| `verify-only` | 只做验证 / 审查；默认不创建可写 lease |
+| `maintenance` | 维护循环、漂移扫描、rule-promotion 等 |
+
+`mode` 仍表达执行强度或副作用级别，例如 `propose-only`、`plan-only`、`create-issues`、`implement-no-merge`、`full-auto`。`mode` 不承载编排形态。
+
+### Goal-Level Orchestration
+
+固定规则：
+
+- `goal-orchestration` 的 root truth 来自 Issue Tracker、repo、active plan 和主 thread Goal Prompt。
+- 主 thread 维护全局 `goal_state` 与 `goal_unit_roster`；每个 Master / Execution Issue 仍维护自己的 `Current State`。
+- 多个 Master Issue 串行推进时，默认只有一个 `active_master_issue`。
+- 当前 Master 未达到 Exit Criteria，不进入下一个 Master；除非该 Master 被显式标记为 `blocked`、`deferred`、`skipped`，或用户要求切换。
+- 若没有 Master Issue，也可以直接围绕多个 Execution Issue、child thread 或 subagent 做 goal-level fan-out / fan-in。
+- root goal 只有在所有 required units 已集成、post-integration verify 已通过、writeback 和 closeout 完成后才算完成。
+
+### Thread Roles
+
+| 角色 | 定义 | 默认权限 |
+| --- | --- | --- |
+| `main_thread` | 主调度 thread，维护 root goal、状态机、dispatch、integrate、writeback 和 closeout | 可创建/暂停/释放 lease，可集成，可更新 `Current State` |
+| `child_thread` | 独立 Codex thread，可长期可见和继续 | 默认只按 handoff 执行 |
+| `worktree_thread` | 有独立 worktree / branch 的可写 child thread | 必须持有 `write_lease` |
+| `subagent` | 当前主 thread 内部短生命周期委派者 | 适合短期探索、验证、局部 review |
+| `test_thread` | 测试 / 验证 thread，可只读，也可持 lease 补测试、fixture 或 runbook | 是否可写取决于 `write_lease` |
+| `review_thread` | findings-first review thread，可只读，也可持 lease 修 review finding | 修代码必须持有 `write_lease` |
+| `integration_owner` | 集成 owner，默认是主 thread | 负责最终 diff、冲突、验证和状态回写 |
+
+主 thread 的特殊权力不是无边界写入；主 thread 如果直接修改代码、文档或配置，也必须登记自己的 `write_lease`。
+
+### Thread Naming
+
+默认 thread 标题格式：
+
+```text
+<issue-id> <role> [short-scope]
+```
+
+完成后标题格式：
+
+```text
+【完成】<issue-id> <role> [short-scope]
+```
+
+固定规则：
+
+- `【完成】` 只表示该 thread 自身分配的工作完成，不等于 issue 或 root goal 已 Done。
+- 可写 thread 只有在 lease 达到 `ready_for_integration`、`integrated` 或 `released` 后，才能打完成标识。
+- 只读 verify / review thread 只有在追加固定 `Thread Status` comment 后，才能打完成标识。
+- 标题标识不替代 Issue Tracker 的 `current_state`、`write_lease.state` 或 `Current State` comment。
+
+### Dispatch Rules
+
+固定规则：
+
+- subagent 用于短生命周期、当前主 thread 内部、无需长期 UI 可见、无需独立 worktree、无需直接回写 Issue Tracker 的任务。
+- child thread 用于需要独立 Codex 会话、长期可见、跨天继续、绑定 issue / branch / worktree 或持续回写状态的任务。
+- 会修改代码、文档或配置的 child thread 默认必须使用独立 worktree、独立 branch 和明确 `write_lease`。
+- single Execution Issue 下常规预期是 `1-2` 个 child threads；超过 `3` 个 active child threads 时，主 thread 应回到 `gate` 判断是否需要拆卡。
+
+### Write Lease
+
+`write_lease` 是主 thread 发给某个 thread 的写入许可、写入边界和集成约定；它不是 git lock 或文件系统锁。
+
+最小字段：
+
+- `lease_id`
+- `state`
+- `role`
+- `owner_thread`
+- `issue`
+- `branch`
+- `worktree`
+- `write_scope`
+- `excluded_scope`
+- `scope_note`
+- `allowed_phase`
+- `handoff_from`
+- `integration_owner`
+- `verification_commands`
+
+`write_lease.state` 使用：
+
+- `requested`
+- `active`
+- `paused`
+- `ready_for_integration`
+- `integrated`
+- `released`
+- `blocked`
+
+固定规则：
+
+- `write_scope` 以路径模式为主；语义说明只能补充边界，不能覆盖路径冲突。
+- 路径模式重叠默认视为冲突；只有主 thread 明确判断为 disjoint，才允许并发可写 thread。
+- scope 冲突默认串行 handoff：暂停后一个 lease，等前一个 lease `ready_for_integration` / `integrated` / `released` 后再决定是否恢复。
+- 第一版不把 `write_lease` 冲突判断做进 `harness-check`；重复踩坑后再通过 `rule-promotion` 升级为项目级可选 gate。
+
+### Waiting on Long-Running Threads
+
+长任务中主 thread 不应空等。若下一步依赖子 thread，主 thread 应停在可恢复状态：
+
+- `goal_state`: `waiting_on_child`
+- `waiting_on`: 等待的 thread、lease、期望 event
+- `next_check`: 下一次检查时间或触发条件
+- `recovery_point`: 需要读取的 issue、thread、branch、plan 和命令
+- `next_action`: 子 thread ready 时如何 integrate；未 ready 时如何更新 blocker / status
+
+若仍有不重叠工作，主 thread 可以继续 dispatch 或准备 review / test / final verify；不得重复实现子 thread 已分配的 scope。
+
+### Integration and Final Verify
+
+固定规则：
+
+- 默认顺序是 `implement -> local/test verify -> review -> integrate -> final verify`。
+- 第一个 `verify` 是执行者或 test thread 的局部验证，用来确认输出进入可 review 状态。
+- review 默认前置；集成后若发生冲突处理、integration fix、diff 形态明显变化、二次 verify 失败后返修，或 write scope 边界有争议，主 thread 必须补轻量 review。
+- `integrate -> verify` 是权威验证。主 thread 集成任何可写 lease 后，必须在集成后的 repo truth 上重新跑最终验证矩阵。
+- 若 Goal Prompt、Issue Acceptance Matrix、active plan 或 test runbook 声明 required live E2E，则 post-integration verify 必须执行 live E2E；无法执行时停止在 `blocked` / `manual-gate`，不得进入 `verified`、`ready_for_merge` 或 `done`。
 
 ### 跨仓 truth split（按需）
 

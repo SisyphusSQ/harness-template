@@ -183,9 +183,16 @@ if [[ -f ".cursor/rules/harness.mdc" ]]; then
 fi
 
 required_control_plane_patterns=(
-  "collect -> gate -> freeze -> slice -> implement -> verify -> review -> writeback -> pr_prep -> merge -> notify"
+  "collect -> gate -> freeze -> slice -> dispatch -> implement -> verify -> review -> integrate -> verify -> writeback -> pr_prep -> merge -> notify"
   "Issue Tracker 是主协作真相"
   "repo 是主执行真相"
+  "goal-orchestration"
+  "write_lease"
+  "Current State"
+  "Thread Status"
+  "post-integration verify"
+  "waiting_on_child"
+  "【完成】"
   "Issue Store Profiles"
   "docs/issues/"
   "provider 仓"
@@ -218,6 +225,14 @@ required_issue_workflow_patterns=(
   "Issue Workflow"
   "Issue Tracker 是主协作真相"
   "Issue Store Profiles"
+  "Orchestration Contract"
+  "Current State Comment Contract"
+  "Thread Status Comment Contract"
+  "Write Lease Contract"
+  "Post-Integration Verify Contract"
+  "goal-orchestration"
+  "write_lease"
+  "【完成】"
   "Requirement Clarification"
   "Master Issue"
   "Execution Issue"
@@ -252,6 +267,11 @@ required_repo_issue_patterns=(
   "verification_commands"
   "recovery_point"
   "next_action"
+  "Orchestration"
+  "Current State"
+  "Thread Status Log"
+  "active_write_leases"
+  "post_integration_verify_summary"
   "writeback_log"
 )
 
@@ -323,6 +343,11 @@ required_linear_profile_patterns=(
   "issue-workflow.md"
   "Linear 字段映射"
   "current_issue_state"
+  "Current State"
+  "Thread Status"
+  "write_lease"
+  "post-integration verify"
+  "【完成】"
   "recovery_point"
   "next_action"
   "Issue Tracker 是主协作真相"
@@ -462,6 +487,14 @@ required_state_run_patterns=(
   "State Snapshot Template"
   "Run Summary Template"
   "Issue Tracker"
+  "orchestration_mode"
+  "root_goal"
+  "goal_state"
+  "goal_unit_roster"
+  "active_write_leases"
+  "waiting_on"
+  "next_check"
+  "post_integration_verify"
   "recovery_point"
 )
 
@@ -491,6 +524,7 @@ for pattern in "${required_powershell_gate_patterns[@]}"; do
 done
 
 optional_mode_files=(
+  ".agents/prompts/orchestrator-thread.md"
   ".agents/prompts/issue-standard-workflow.md"
   ".agents/prompts/loop-codex.md"
   ".agents/prompts/loop-automation.md"
@@ -501,6 +535,7 @@ optional_mode_files=(
 
 optional_bundle_files=(
   ".agents/prompts/README.md"
+  ".agents/prompts/orchestrator-thread.md"
   ".agents/prompts/issue-standard-workflow.md"
   ".agents/prompts/loop-codex.md"
   ".agents/prompts/loop-automation.md"
@@ -542,7 +577,7 @@ if [[ "$has_optional_bundle" -eq 1 ]]; then
     fi
   done
 
-  for pattern in "issue-standard-workflow.md" "loop-codex.md" "loop-automation.md" "maintenance-loop.md"; do
+  for pattern in "orchestrator-thread.md" "issue-standard-workflow.md" "loop-codex.md" "loop-automation.md" "maintenance-loop.md"; do
     if ! rg -Fq "$pattern" ".agents/prompts/README.md"; then
       echo ".agents/prompts/README.md missing prompt reference: $pattern" >&2
       exit 1
@@ -555,6 +590,24 @@ if [[ "$has_optional_bundle" -eq 1 ]]; then
   fi
 
   if [[ "$detected_mode" == "full" ]]; then
+    required_orchestrator_patterns=(
+      "goal-orchestration"
+      "write_lease"
+      "Current State"
+      "Thread Status"
+      "post-integration verify"
+      "waiting_on_child"
+      "【完成】"
+      "set_thread_title"
+    )
+
+    for pattern in "${required_orchestrator_patterns[@]}"; do
+      if ! rg -Fq "$pattern" ".agents/prompts/orchestrator-thread.md"; then
+        echo ".agents/prompts/orchestrator-thread.md missing required pattern: $pattern" >&2
+        exit 1
+      fi
+    done
+
     required_issue_workflow_patterns=(
       "真实入口与触发"
       "输入装配与边界校验"
@@ -574,6 +627,10 @@ if [[ "$has_optional_bundle" -eq 1 ]]; then
       "不要只写职责，不写代码落点"
       "不要只写 happy path，不写关键分支 / 降级路径"
       "不要把 Concrete Steps 写成纯控制面收口步骤"
+      "orchestrator-thread.md"
+      "write_lease"
+      "post-integration verify"
+      "【完成】"
     )
 
     for pattern in "${required_issue_workflow_patterns[@]}"; do

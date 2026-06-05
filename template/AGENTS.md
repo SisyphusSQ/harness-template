@@ -29,6 +29,7 @@
 | 本地恢复面 | `.agents/state/TEMPLATE.md` |
 | 本地结果面 | `.agents/runs/TEMPLATE.md` |
 | 可选 Prompt 层 | `.agents/prompts/README.md`（如存在） |
+| 可选主 thread 编排 Prompt | `.agents/prompts/orchestrator-thread.md`（如存在） |
 | 可选维护循环 Prompt | `.agents/prompts/maintenance-loop.md`（如存在，默认 `report-only`） |
 | 可选 Guide 层 | `.agents/guides/`（如存在） |
 
@@ -66,6 +67,8 @@
 - `.agents/state/TEMPLATE.md` 默认应提交
 - `.agents/runs/TEMPLATE.md` 默认应提交
 - 若后续补齐 `.agents/prompts/` 和 `.agents/guides/`，默认使用 `full` 模式，且这些文档默认也应提交
+- 若存在 `.agents/prompts/orchestrator-thread.md`，多 thread / worktree / subagent 编排先读它；子 thread 不默认归档，完成后标题加 `【完成】`
+- `.agents/prompts/orchestrator-thread.md` 是 Codex 专用 thread 编排 prompt；非 Codex agent 或人工流程只能按其中的 handoff / Issue comment / `Current State` 约束维护状态机
 - 若存在 `.agents/prompts/maintenance-loop.md`，默认只做 `report-only` 维护扫描；`issue-create / safe-fix / rule-promotion` 必须由用户显式指定
 - 模板配置可提交，真实环境配置不提交
 - 若需要环境配置，优先提交 `.env.example`、`settings.example.yaml` 这类示例文件

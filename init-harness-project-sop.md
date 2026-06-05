@@ -86,6 +86,7 @@ target-repo/
 如果是 agent 驱动初始化，在 base harness 完成后，再补充：
 
 - `.agents/prompts/README.md`
+- `.agents/prompts/orchestrator-thread.md`
 - `.agents/prompts/issue-standard-workflow.md`
 - `.agents/prompts/loop-codex.md`
 - `.agents/prompts/loop-automation.md`
@@ -99,7 +100,8 @@ target-repo/
 - agent 驱动初始化默认生成完整模板（`full`）
 - 只有用户明确要求轻量、占位或暂不铺开 prompt 模板时，才生成占位文件（`placeholder`）
 - `.agents/prompts/README.md` 是稳定目录说明，不区分模式
-- 其他 6 个文件需要带 `Mode: placeholder|full`
+- `.agents/prompts/orchestrator-thread.md` 是主 thread / 子 thread / worktree thread / subagent 编排入口
+- 其他 7 个文件需要带 `Mode: placeholder|full`
 - 更推荐的入口是先读根目录 `agent-init-project.md`
 
 ### 3.1 Cursor Agent Adapter（按需）

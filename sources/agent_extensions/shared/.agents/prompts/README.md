@@ -5,6 +5,7 @@
 固定规则：
 
 - `.agents/prompts/issue-standard-workflow.md` 是标准 issue workflow 手册，负责高频 issue Prompt 模板。
+- `.agents/prompts/orchestrator-thread.md` 是主 thread / 子 thread 编排的 Goal Prompt 与 Handoff Prompt 模板。
 - `.agents/prompts/loop-codex.md` 是交互式主对话 loop contract。
 - `.agents/prompts/loop-automation.md` 是无人值守 / 自动化 loop contract。
 - `.agents/prompts/maintenance-loop.md` 是自治维护循环 prompt，默认 `report-only`，只在用户显式指定时进入 `issue-create / safe-fix / rule-promotion`。
@@ -19,6 +20,7 @@
 | 文件 | 负责什么 |
 | --- | --- |
 | `.agents/prompts/issue-standard-workflow.md` | 标准 issue workflow、常用 Prompt 模板、verify/review/mr_prep/收口模板 |
+| `.agents/prompts/orchestrator-thread.md` | root goal / issue 下的主 thread、child thread、worktree thread、subagent 编排模板 |
 | `.agents/prompts/loop-codex.md` | 交互式主对话里的短 loop contract |
 | `.agents/prompts/loop-automation.md` | 自动化运行使用的规范页与 Prompt 模板 |
 | `.agents/prompts/maintenance-loop.md` | docs / plans / runbooks / contracts / checks / writeback 漂移扫描、分类与维护输出 |
@@ -30,6 +32,7 @@
 - Superpowers 只辅助执行，不替代 `AGENTS.md`、`docs/harness/*`、`.agents/PLANS.md` 或 Issue Tracker truth。
 - Superpowers 的 plan / spec 默认路径不作为本仓库真相；计划仍写入 `.agents/plans/`。
 - skill 输出必须折回 `Verify Summary`、`Review Summary`、`Writeback Summary`、`Issue Tracker Actions` 或本仓库约定的结果面。
+- 多 thread 编排时，subagent 只是短生命周期执行资源；主 thread / child thread / `write_lease` / `Current State` 语义以 `orchestrator-thread.md` 和 `docs/harness/issue-workflow.md` 为准。
 - 若 Superpowers 不可用，按本仓库 harness prompt 与 guide 正常执行，不降级为失败。
 
 | Harness 阶段 | 可考虑的 Superpowers skill | 适用条件 |
@@ -50,4 +53,5 @@
 3. `docs/harness/linear.md`
 4. `.agents/PLANS.md`
 5. 本目录 `README.md`
-6. 按需进入 `issue-standard-workflow.md`、`loop-codex.md`、`loop-automation.md` 或 `maintenance-loop.md`
+6. 多 thread / worktree / subagent 编排先读 `orchestrator-thread.md`
+7. 按需进入 `issue-standard-workflow.md`、`loop-codex.md`、`loop-automation.md` 或 `maintenance-loop.md`

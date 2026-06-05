@@ -7,13 +7,14 @@ Mode: full
 | 文档定位 | 标准 issue workflow 手册与高频 Prompt 模板 |
 | 适用范围 | 当前仓库的单卡推进、开发前准备、verify / review / mr_prep / 收口场景 |
 | 主要载体 | `.agents/prompts/` + `docs/harness/` + `.agents/PLANS.md` + 仓库代码 |
-| 关联文档 | `AGENTS.md`、`docs/harness/control-plane.md`、`docs/harness/linear.md`、`.agents/prompts/loop-codex.md`、`.agents/prompts/loop-automation.md`、`.agents/guides/code-review.md`、`.agents/PLANS.md` |
+| 关联文档 | `AGENTS.md`、`docs/harness/control-plane.md`、`docs/harness/linear.md`、`.agents/prompts/orchestrator-thread.md`、`.agents/prompts/loop-codex.md`、`.agents/prompts/loop-automation.md`、`.agents/guides/code-review.md`、`.agents/PLANS.md` |
 
 固定规则：
 
 - 本文是 `.agents/prompts/` 的使用手册，不是新的控制面真相源。
 - 若本文与 `AGENTS.md`、`docs/harness/*`、`.agents/PLANS.md` 冲突，以后者为准。
 - `loop-codex.md` 负责交互式 loop 的短 contract；`loop-automation.md` 负责无人值守 loop 的自动化语义。
+- `orchestrator-thread.md` 负责主 thread / child thread / worktree thread / subagent 编排模板。
 - 能从仓库与 issue 真相自行定位的输入，先自行探索，不要反问用户。
 - 阶段反馈、收口结果、`recovery_point`、`next_action` 默认写回 Issue Tracker。
 
@@ -22,9 +23,13 @@ Mode: full
 | 占位符 | 含义 |
 | --- | --- |
 | `<ISSUE-ID>` | 当前 issue 标识 |
+| `<ROOT-GOAL>` | 当前 root goal；没有则写 `无` |
 | `<MASTER-ISSUE>` | 当前 Master issue |
+| `<ORCHESTRATION-MODE>` | `goal-orchestration` / `single-issue` / `master-inventory` / `review-fix` / `verify-only` / `maintenance` |
 | `<ISSUE-PROVIDER>` | 当前 Issue Provider，如 `linear`、`github`、`gitlab`、`repo`、`other` |
 | `<PLAN-PATH>` | 当前计划路径 |
+| `<THREAD-ROLE>` | `main` / `implementer` / `test` / `review` / `review-fix` / `explorer` / `integration` / `maintenance` |
+| `<WRITE-LEASE>` | 当前可写 thread 的 write lease；只读场景写 `none` |
 | `<CONSTRAINTS>` | 额外范围约束；没有则写 `无` |
 | `<TEST-DOC-PATH>` | 当前测试文档路径；默认 `docs/test/<domain>/...` |
 | `<TEST-SCOPE>` | 当前测试范围，如 `只生成` / `只执行` / `生成 + 执行 + 回写` |
@@ -70,6 +75,15 @@ Mode: full
     - 更新现有条目前先读取外部系统当前详情
     - 更新后立刻回读验收，不只依赖写入命令成功
     - 默认只改本轮指定载体，不顺带改其他 repo docs/spec；除非用户明确要求双向同步
+13. 多 thread 编排默认先读 `.agents/prompts/orchestrator-thread.md`：
+    - root goal 下发多个 thread 时使用 `goal-orchestration`
+    - 单卡多 thread 使用 `single-issue`
+    - 可写 child thread 必须有 `write_lease`
+    - 子 thread 不默认归档，完成后标题加 `【完成】`
+14. 集成后验证是最终 repo truth：
+    - 子 thread 验证只是输入证据
+    - 主 thread integrate 后必须执行 post-integration verify
+    - required live E2E 未执行时，不得进入 `verified / ready-for-merge / done`
 
 ## 1.1 Optional Superpowers Skill Hooks
 
@@ -86,6 +100,7 @@ Mode: full
 - `freeze / slice`：写实施计划时，可考虑 `superpowers:writing-plans`，但路径与结构服从 `.agents/PLANS.md`。
 - `implement`：行为变更、bugfix 或重构可考虑 `superpowers:test-driven-development`。
 - `implement`：任务独立且 subagent 可用时可考虑 `superpowers:subagent-driven-development`；否则使用普通 inline loop。
+- `dispatch / integrate`：多 thread、worktree thread 或 subagent 编排时，先使用 `.agents/prompts/orchestrator-thread.md`；Superpowers subagent 只作为短生命周期执行资源。
 - `verify`：声明完成、通过或可收口前，可考虑 `superpowers:verification-before-completion`。
 - `verify` 失败或异常排查：可考虑 `superpowers:systematic-debugging`，先定位根因再修。
 - `review`：重大改动或 merge 前可考虑 `superpowers:requesting-code-review`，并把结论归并到 `blocking_findings`。
@@ -100,6 +115,52 @@ Mode: full
 先基于当前仓库、相关文档和 issue 上下文判断这张卡目前处于什么阶段，
 再给出下一步最合适的动作。
 如果当前信息不足以直接进入开发，优先先做范围分析和计划准备，不要直接扩大范围。
+```
+
+### 2.1.0 启动 root goal / 多 thread 编排
+
+```text
+围绕 <ROOT-GOAL 或 ROOT-ISSUE> 启动 <ORCHESTRATION-MODE>。
+先读取 Issue Tracker、repo docs、active plan、已有 thread / branch / run 状态。
+如果需要多 thread / worktree / subagent 编排，先读 `.agents/prompts/orchestrator-thread.md` 并生成主 thread Goal Prompt。
+
+必须输出：
+- root_goal
+- orchestration_mode
+- mode
+- goal_state
+- goal_unit_roster
+- active_master_issue / active_execution_issue
+- child thread / subagent dispatch 建议
+- write_lease 表
+- waiting_on / next_check / recovery_point / next_action
+```
+
+### 2.1.0.1 子 thread handoff
+
+```text
+为 <ISSUE-ID> 创建或发送 <THREAD-ROLE> child thread handoff。
+先确认该 thread 是只读、可写 worktree thread，还是短期 subagent。
+如果会写代码、文档或配置，必须登记 <WRITE-LEASE>。
+
+handoff 必须包含：
+- Thread Title: <issue-id> <role> [short-scope]
+- branch / worktree
+- read_scope / write_scope / excluded_scope
+- verification commands
+- stop conditions
+- fixed Thread Status comment template
+- done rule: 不归档，完成后等待主 thread 加 `【完成】` 标识
+```
+
+### 2.1.0.2 子 thread ready 后集成
+
+```text
+围绕 <ISSUE-ID> 集成子 thread 输出。
+先读取子 thread 的 Thread Status comment、branch/worktree、write_lease 和验证摘要。
+检查 diff 是否落在 write_scope 且未触碰 excluded_scope。
+review 通过后进入 integrate；集成后必须重新执行 post-integration verify。
+若 required live E2E 未执行，停止在 blocked / manual-gate，不得标记 verified / done。
 ```
 
 ### 2.1.1 从设计文档 / runbook / 需求文档创建 issue inventory

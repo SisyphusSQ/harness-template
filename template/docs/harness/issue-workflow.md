@@ -84,6 +84,165 @@ Master / Execution issue 至少要清楚这些字段：
 - `next_action`
 - `current_issue_state`
 
+## Orchestration Contract
+
+本节定义 provider-neutral 的多 thread 编排字段。Linear、GitHub、GitLab、repo issue 或其它工具都应能承载同一组状态。
+
+### Orchestration 字段
+
+当一张 issue 或一个 root goal 使用多 thread 编排时，至少记录：
+
+- `root_goal`
+- `orchestration_mode`: `goal-orchestration` / `single-issue` / `master-inventory` / `review-fix` / `verify-only` / `maintenance`
+- `mode`: `propose-only` / `plan-only` / `create-issues` / `implement-no-merge` / `full-auto`
+- `goal_state`
+- `goal_unit_roster`
+- `main_thread`
+- `threads`
+- `active_write_leases`
+- `recent_write_leases`
+- `branch_refs`
+- `worktree_refs`
+- `verification_policy`
+- `waiting_on`
+- `next_check`
+- `recovery_point`
+- `next_action`
+
+固定解释：
+
+- `goal-orchestration` 表示一个原本可由单 thread 完成的 root goal，由主 thread 拆解、下发、回收并集成多个 child threads / Master / Execution units。
+- `goal_state` 是 root goal 层状态；每个 Master / Execution Issue 仍维护自己的 `current_issue_state`。
+- 多个 Master Issue 串行推进时，默认只有一个 `active_master_issue`；当前 Master 未 Done / blocked / deferred / skipped 前，不进入下一个 Master。
+
+### Current State Comment Contract
+
+`Current State` 是当前 issue / root goal 的固定状态快照。默认只由主 thread 更新；子 thread 不直接改这条 comment。
+
+```markdown
+## Current State
+
+- `orchestration_mode`:
+- `mode`:
+- `current_phase`:
+- `current_state`:
+- `root_goal`:
+- `root_issue`:
+- `parent_issue`:
+- `execution_issue`:
+- `goal_state`:
+- `goal_unit_roster`:
+- `main_thread`:
+- `threads`:
+- `active_write_leases`:
+- `recent_write_leases`:
+- `branch_refs`:
+- `worktree_refs`:
+- `verification_policy`:
+- `waiting_on`:
+- `next_check`:
+- `blockers`:
+- `residual_risks`:
+- `recovery_point`:
+- `next_action`:
+- `last_updated_by`: main_thread
+```
+
+如果 thread 工具不可用，无法给完成的子 thread 标题加 `【完成】` 时，在 `Current State` 中记录 `title_marker_pending=true`。
+
+### Thread Status Comment Contract
+
+子 thread 使用固定 milestone/status comment 汇报状态。主 thread 读取这些 comment 后，统一更新 `Current State` 和本地 orchestration snapshot。
+
+```markdown
+## Thread Status
+
+- `event`:
+- `thread_id`:
+- `thread_title`:
+- `role`:
+- `lease_id`:
+- `lease_state_requested`:
+- `phase`:
+- `branch`:
+- `worktree`:
+- `changed_files`:
+- `verification_summary`:
+- `review_summary`:
+- `blockers`:
+- `residual_risks`:
+- `requested_action`:
+```
+
+常见 `event`：
+
+- `lease_requested`
+- `lease_active_ack`
+- `ready_for_integration`
+- `blocked`
+- `verification_complete`
+- `review_complete`
+- `review_fix_complete`
+- `test_author_complete`
+- `runbook_sync_complete`
+
+### Write Lease Contract
+
+`write_lease` 是写入许可、写入边界和集成约定。任何会修改代码、文档或配置的 thread，包括主 thread 自己，都必须先登记 `write_lease`。
+
+最小字段：
+
+- `lease_id`
+- `state`: `requested` / `active` / `paused` / `ready_for_integration` / `integrated` / `released` / `blocked`
+- `role`
+- `owner_thread`
+- `issue`
+- `branch`
+- `worktree`
+- `write_scope`
+- `excluded_scope`
+- `scope_note`
+- `allowed_phase`
+- `handoff_from`
+- `integration_owner`
+- `verification_commands`
+
+固定规则：
+
+- `write_scope` 以路径模式为主，语义说明只作补充。
+- 路径重叠默认冲突；并发可写必须由主 thread 判断为 disjoint。
+- 冲突默认串行 handoff，不能并发写同一范围。
+- 子 thread 不自行 merge，不自行扩大范围，不绕过主 thread closeout。
+
+### Thread Title Contract
+
+默认 thread 标题：
+
+```text
+<issue-id> <role> [short-scope]
+```
+
+完成后标题：
+
+```text
+【完成】<issue-id> <role> [short-scope]
+```
+
+`【完成】` 只表示该 thread 自身工作完成，不等于 issue Done。issue 是否完成仍看 `Current State`、`current_issue_state`、验证和 writeback。
+
+### Post-Integration Verify Contract
+
+子 thread 的验证结果只是输入证据。主 thread 集成任何可写 lease 后，必须执行 post-integration verify。
+
+post-integration verify 必须覆盖 required sources：
+
+- 主 thread Goal Prompt
+- Issue Acceptance Matrix / Verification Commands
+- active plan 的 Validation and Acceptance
+- 相关 test runbook
+
+如果任何 required item 是 live E2E，必须执行 live E2E，或停止为 `blocked` / `manual-gate`。未执行 required live E2E 时，不得进入 `verified`、`ready_for_merge`、`done`。
+
 ## Requirement Clarification 模板
 
 ### 背景
@@ -331,8 +490,12 @@ Master / Execution issue 至少要清楚这些字段：
 - `result`
 - `verification_summary`
 - `review_summary`
+- `integration_summary`
+- `post_integration_verify_summary`
 - `writeback_summary`
 - `residual_risks`
+- `active_write_leases`
+- `recent_write_leases`
 - `recovery_point`
 - `next_action`
 - `current_issue_state`
@@ -342,6 +505,7 @@ Master / Execution issue 至少要清楚这些字段：
 - `运行反馈` 默认写回 Issue Tracker comment / issue body / writeback log
 - 不启用本地 `state / runs` 时，也必须能在 Issue Tracker 上恢复当前状态
 - 若是 `master` 场景，还要显式写出 `current_slice` 与 `master_status`
+- 若是 `goal-orchestration` 场景，还要显式写出 `goal_state`、`goal_unit_roster`、`waiting_on` 与 `next_check`
 
 ## 结果回写 Contract
 
@@ -350,6 +514,8 @@ Master / Execution issue 至少要清楚这些字段：
 - 回写本轮 `result`
 - 回写 `verification_summary`
 - 回写 `review_summary`
+- 回写 `integration_summary`
+- 回写 `post_integration_verify_summary`
 - 回写 `writeback_summary`
 - 回写 `residual_risks`
 - 回写下一步 `next_action`
@@ -360,6 +526,14 @@ Master / Execution issue 至少要清楚这些字段：
 - 明确 `stop_scope`
 - 明确下一张 execution issue
 - 明确当前 `recovery_point`
+
+### Goal 未完成时
+
+- 明确 `goal_state`
+- 明确 `active_master_issue` / `active_execution_issue`
+- 明确 `goal_unit_roster`
+- 明确 `completed_units` / `deferred_units` / `blocked_units`
+- 明确 `waiting_on`、`next_check`、`recovery_point` 与 `goal_next_action`
 
 ### Master Done 时
 
@@ -385,9 +559,24 @@ Master / Execution issue 至少要清楚这些字段：
 - `PR/MR`:
 - `Merge commit`:
 - `Verification Summary`:
+- `Integration Summary`:
+- `Post-integration Verify Summary`:
 - `Master Status`:
 - `stop_scope`:
 - `Next execution issue`:
+
+### Goal orchestration 评论
+
+- `Goal State`:
+- `Active master issue`:
+- `Active execution issue`:
+- `Goal unit roster`:
+- `Completed units`:
+- `Deferred units`:
+- `Blocked units`:
+- `Waiting on`:
+- `Next check`:
+- `Goal next action`:
 
 ### Master 未完成评论
 

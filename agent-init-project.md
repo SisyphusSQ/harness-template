@@ -127,6 +127,7 @@
 5. 扩展层补齐后，确认目标仓库存在：
 
    - `.agents/prompts/README.md`
+   - `.agents/prompts/orchestrator-thread.md`
    - `.agents/prompts/issue-standard-workflow.md`
    - `.agents/prompts/loop-codex.md`
    - `.agents/prompts/loop-automation.md`
@@ -134,7 +135,7 @@
    - `.agents/guides/code-review.md`
    - `.agents/guides/linter.md`
 
-6. 对 6 个 mode-sensitive 文件检查：
+6. 对 7 个 mode-sensitive 文件检查：
 
    - 都带 `Mode: placeholder` 或 `Mode: full`
    - mode 必须一致
@@ -158,6 +159,13 @@
      - 默认 mode 是 `report-only`
      - 只有用户显式指定才进入 `issue-create / safe-fix / rule-promotion`
      - API contract、schema、安全策略和业务行为不能自动修
+   - `.agents/prompts/orchestrator-thread.md` 能读出：
+     - `goal-orchestration`
+     - `write_lease`
+     - `Current State`
+     - `Thread Status`
+     - post-integration verify
+     - 子 thread 不默认归档，完成后标题加 `【完成】`
    - `.agents/state/TEMPLATE.md` 与 `.agents/runs/TEMPLATE.md` 能读出：
      - 它们是本地辅助运行面
      - 不替代 Issue Tracker
@@ -232,13 +240,15 @@
    - `<HARNESS_ROOT>/sources/agent_extensions/{placeholder|full}/.`
 7. 扩展层补齐后，必须确认以下文件全部存在：
    - `.agents/prompts/README.md`
+   - `.agents/prompts/orchestrator-thread.md`
    - `.agents/prompts/issue-standard-workflow.md`
    - `.agents/prompts/loop-codex.md`
    - `.agents/prompts/loop-automation.md`
    - `.agents/prompts/maintenance-loop.md`
    - `.agents/guides/code-review.md`
    - `.agents/guides/linter.md`
-8. 对以下 6 个文件检查 mode：
+8. 对以下 7 个文件检查 mode：
+   - `.agents/prompts/orchestrator-thread.md`
    - `.agents/prompts/issue-standard-workflow.md`
    - `.agents/prompts/loop-codex.md`
    - `.agents/prompts/loop-automation.md`
@@ -252,6 +262,7 @@
    - `docs/harness/control-plane.md` 已明确 `Issue Tracker 是主协作真相`
    - `docs/harness/control-plane.md` 已明确 `repo 是主执行真相`
    - `docs/harness/issue-workflow.md` 已明确运行反馈与结果回写默认写回 Issue Tracker
+   - `docs/harness/issue-workflow.md` 已明确 `Current State`、`Thread Status`、`write_lease`、post-integration verify 和 `【完成】` 标题标识
    - `docs/harness/linear.md` 已明确它是 Linear profile / migration note
    - `docs/issues/TEMPLATE.md` 已存在，可作为 repo issue 和 `writeback_log` 模板
    - `docs/harness/project-constraints.md` 已存在，且明确项目级机械约束登记、状态枚举、分类枚举、`project-check` 挂载协议和不得假装 `enforced`

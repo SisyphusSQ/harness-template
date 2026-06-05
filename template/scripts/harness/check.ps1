@@ -268,9 +268,16 @@ if (Test-Path -LiteralPath ".cursor/rules/harness.mdc" -PathType Leaf) {
 }
 
 foreach ($pattern in @(
-    "collect -> gate -> freeze -> slice -> implement -> verify -> review -> writeback -> pr_prep -> merge -> notify",
+    "collect -> gate -> freeze -> slice -> dispatch -> implement -> verify -> review -> integrate -> verify -> writeback -> pr_prep -> merge -> notify",
     "Issue Tracker 是主协作真相",
     "repo 是主执行真相",
+    "goal-orchestration",
+    "write_lease",
+    "Current State",
+    "Thread Status",
+    "post-integration verify",
+    "waiting_on_child",
+    "【完成】",
     "Issue Store Profiles",
     "docs/issues/",
     "provider 仓",
@@ -298,6 +305,14 @@ foreach ($pattern in @(
     "Issue Workflow",
     "Issue Tracker 是主协作真相",
     "Issue Store Profiles",
+    "Orchestration Contract",
+    "Current State Comment Contract",
+    "Thread Status Comment Contract",
+    "Write Lease Contract",
+    "Post-Integration Verify Contract",
+    "goal-orchestration",
+    "write_lease",
+    "【完成】",
     "Requirement Clarification",
     "Master Issue",
     "Execution Issue",
@@ -327,6 +342,11 @@ foreach ($pattern in @(
     "verification_commands",
     "recovery_point",
     "next_action",
+    "Orchestration",
+    "Current State",
+    "Thread Status Log",
+    "active_write_leases",
+    "post_integration_verify_summary",
     "writeback_log"
 )) {
     Assert-AnyFileContains -Paths @("docs/issues/README.md", "docs/issues/TEMPLATE.md") -Pattern $pattern -Message "docs/issues templates missing required pattern: $pattern"
@@ -383,6 +403,11 @@ foreach ($pattern in @(
     "issue-workflow.md",
     "Linear 字段映射",
     "current_issue_state",
+    "Current State",
+    "Thread Status",
+    "write_lease",
+    "post-integration verify",
+    "【完成】",
     "recovery_point",
     "next_action",
     "Issue Tracker 是主协作真相"
@@ -498,6 +523,14 @@ foreach ($pattern in @(
     "State Snapshot Template",
     "Run Summary Template",
     "Issue Tracker",
+    "orchestration_mode",
+    "root_goal",
+    "goal_state",
+    "goal_unit_roster",
+    "active_write_leases",
+    "waiting_on",
+    "next_check",
+    "post_integration_verify",
     "recovery_point"
 )) {
     Assert-AnyFileContains -Paths @(".agents/state/TEMPLATE.md", ".agents/runs/TEMPLATE.md") -Pattern $pattern -Message "state/run templates missing required pattern: $pattern"
@@ -524,6 +557,7 @@ foreach ($pattern in @(
 Assert-FileContains -Path "scripts/harness/check.ps1" -Pattern "harness check passed" -Message "scripts/harness/check.ps1 missing smoke completion marker"
 
 $optionalModeFiles = @(
+    ".agents/prompts/orchestrator-thread.md",
     ".agents/prompts/issue-standard-workflow.md",
     ".agents/prompts/loop-codex.md",
     ".agents/prompts/loop-automation.md",
@@ -534,6 +568,7 @@ $optionalModeFiles = @(
 
 $optionalBundleFiles = @(
     ".agents/prompts/README.md",
+    ".agents/prompts/orchestrator-thread.md",
     ".agents/prompts/issue-standard-workflow.md",
     ".agents/prompts/loop-codex.md",
     ".agents/prompts/loop-automation.md",
@@ -571,13 +606,26 @@ if ($hasOptionalBundle) {
         }
     }
 
-    foreach ($pattern in @("issue-standard-workflow.md", "loop-codex.md", "loop-automation.md", "maintenance-loop.md")) {
+    foreach ($pattern in @("orchestrator-thread.md", "issue-standard-workflow.md", "loop-codex.md", "loop-automation.md", "maintenance-loop.md")) {
         Assert-FileContains -Path ".agents/prompts/README.md" -Pattern $pattern -Message ".agents/prompts/README.md missing prompt reference: $pattern"
     }
 
     Assert-FileContains -Path ".agents/guides/linter.md" -Pattern "docs/harness/project-constraints.md" -Message ".agents/guides/linter.md should point project-level mechanical constraints back to docs/harness/project-constraints.md"
 
     if ($detectedMode -eq "full") {
+        foreach ($pattern in @(
+            "goal-orchestration",
+            "write_lease",
+            "Current State",
+            "Thread Status",
+            "post-integration verify",
+            "waiting_on_child",
+            "【完成】",
+            "set_thread_title"
+        )) {
+            Assert-FileContains -Path ".agents/prompts/orchestrator-thread.md" -Pattern $pattern -Message ".agents/prompts/orchestrator-thread.md missing required pattern: $pattern"
+        }
+
         foreach ($pattern in @(
             "真实入口与触发",
             "输入装配与边界校验",
@@ -596,7 +644,11 @@ if ($hasOptionalBundle) {
             "不要只画图，不写步骤化时序",
             "不要只写职责，不写代码落点",
             "不要只写 happy path，不写关键分支 / 降级路径",
-            "不要把 Concrete Steps 写成纯控制面收口步骤"
+            "不要把 Concrete Steps 写成纯控制面收口步骤",
+            "orchestrator-thread.md",
+            "write_lease",
+            "post-integration verify",
+            "【完成】"
         )) {
             Assert-FileContains -Path ".agents/prompts/issue-standard-workflow.md" -Pattern $pattern -Message ".agents/prompts/issue-standard-workflow.md missing required pattern: $pattern"
         }

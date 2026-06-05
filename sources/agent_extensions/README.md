@@ -32,4 +32,6 @@ sources/agent_extensions/
 - 这些文件不由脚本默认生成
 - mode-sensitive 文件必须带 `Mode: placeholder|full`
 - `.agents/prompts/README.md` 是共享稳定文件，不带 `Mode`
+- `.agents/prompts/orchestrator-thread.md` 是主 thread / 子 thread / worktree thread / subagent 编排入口；full 版给出可复制 Goal Prompt 与 Handoff Prompt，placeholder 版只保留入口和边界
+- thread 工具链是 Codex 专用能力；非 Codex agent 可读取该 prompt 作为 handoff 模板和状态机约束，但不要求具备创建、读取、发送消息或改标题的 thread tools
 - `.agents/prompts/maintenance-loop.md` 默认 `report-only`，只在用户显式指定时进入 `issue-create / safe-fix / rule-promotion`
