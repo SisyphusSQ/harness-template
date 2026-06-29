@@ -33,7 +33,7 @@
 | `runtime` | 配置、环境变量、日志、指标、trace、启动方式 |
 | `verification` | 测试矩阵、E2E、live self-test、构建和验证入口 |
 | `docs` | 设计文档、runbook、计划、结果摘要和链接同步 |
-| `security` | secret、权限、副作用、脱敏、危险命令 |
+| `security` | 权限、副作用、危险命令 |
 | `cross-repo` | provider / consumer / shared truth 分层与同步 |
 
 ## 维护循环关联

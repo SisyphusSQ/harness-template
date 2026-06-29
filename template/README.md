@@ -36,7 +36,7 @@
 | --- | --- |
 | `docs/harness/` | 控制面规则、Issue Workflow、Issue Tracker profile 与项目级机械约束登记 |
 | `docs/issues/` | `issue-provider=repo` 时的仓库 issue 存储 |
-| `docs/test/` | 通用测试 runbook 模板与后续脱敏结果摘要 |
+| `docs/test/` | 通用测试 runbook 模板与后续结果摘要 |
 | `.agents/` | 计划协议、计划模板、实现型 exemplar、默认 workflow skill、本地辅助运行面，以及后续 prompts / guides |
 | `scripts/harness/` | base harness 的最小 gate 脚本与共享 helper |
 

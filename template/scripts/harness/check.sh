@@ -138,13 +138,6 @@ for pattern in "${required_gitignore_patterns[@]}"; do
   fi
 done
 
-if rg -Fq "真实环境配置不提交" AGENTS.md; then
-  if ! rg -n "\.env|settings\.yaml|example|template|模板|示例" .gitignore README.md AGENTS.md docs/harness/control-plane.md >/dev/null; then
-    echo "Repository declares real config must not be committed, but ignore/template guidance is missing" >&2
-    exit 1
-  fi
-fi
-
 if ! rg -Fq "EXAMPLE-implementation.md" README.md AGENTS.md; then
   echo "Base harness output should point readers to EXAMPLE-implementation.md" >&2
   exit 1
@@ -325,9 +318,7 @@ required_test_runbook_patterns=(
   "测试变量 / 初始化"
   "主路径"
   "清理结果"
-  "敏感信息处理"
   "结果回写"
-  "脱敏"
   "runbook"
 )
 

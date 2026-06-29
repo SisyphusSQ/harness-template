@@ -225,18 +225,6 @@ foreach ($pattern in @(
     Assert-FileContains -Path ".gitignore" -Pattern $pattern -Message ".gitignore missing required pattern: $pattern"
 }
 
-if ((Get-FileText -Path "AGENTS.md").IndexOf("真实环境配置不提交", [System.StringComparison]::Ordinal) -ge 0) {
-    $combined = @(
-        Get-FileText -Path ".gitignore",
-        Get-FileText -Path "README.md",
-        Get-FileText -Path "AGENTS.md",
-        Get-FileText -Path "docs/harness/control-plane.md"
-    ) -join "`n"
-    if ($combined -notmatch '\.env|settings\.yaml|example|template|模板|示例') {
-        Fail "Repository declares real config must not be committed, but ignore/template guidance is missing"
-    }
-}
-
 foreach ($path in @("README.md", "AGENTS.md")) {
     Assert-FileContains -Path $path -Pattern "EXAMPLE-implementation.md" -Message "Base harness output should point readers to EXAMPLE-implementation.md"
 }
@@ -390,9 +378,7 @@ foreach ($pattern in @(
     "测试变量 / 初始化",
     "主路径",
     "清理结果",
-    "敏感信息处理",
     "结果回写",
-    "脱敏",
     "runbook"
 )) {
     Assert-FileContains -Path "docs/test/RUNBOOK_TEMPLATE.md" -Pattern $pattern -Message "docs/test/RUNBOOK_TEMPLATE.md missing required pattern: $pattern"

@@ -76,7 +76,7 @@ target-repo/
 - 不再在目标项目里生成 `docs/harness/prompt-templates.md`
 - `docs/harness/` 只承载控制面真相文档、Issue Workflow、Issue Tracker profile 和项目级机械约束登记
 - `docs/issues/` 是 `issue-provider=repo` 时的仓库内 issue 存储
-- `docs/test/RUNBOOK_TEMPLATE.md` 属于 base harness，承载通用测试 runbook 与脱敏结果摘要模板
+- `docs/test/RUNBOOK_TEMPLATE.md` 属于 base harness，承载通用测试 runbook 与结果摘要模板
 - 不再默认生成没有消费链路的 `.agents/mappings/`
 - 默认生成 `.agents/skills/`，承载通用 repo-local workflow：计划归档、版本发布边界、测试 runbook 执行与回写
 - 不默认生成 `.cursor/`；Cursor rules 只在初始化 agent 是 Cursor 时作为 adapter 补充
@@ -199,8 +199,6 @@ sources/agent_adapters/cursor/.cursor/rules/harness.mdc
 
 | 类别 | 示例 |
 | --- | --- |
-| 真实环境配置 | `.env`、`settings.yaml`、`config.local.yml` |
-| 凭据和密钥 | token、cookie、DSN、账号密码 |
 | 本地辅助运行面 | `.agents/state/*`、`.agents/runs/*` 的真实运行文件 |
 | Cursor 私有配置 | `.cursor/*` 中除 `.cursor/rules/*.mdc` 外的本地文件 |
 | 日志和缓存 | `*.log`、`logs/`、缓存目录 |
@@ -309,7 +307,7 @@ sources/agent_adapters/cursor/.cursor/rules/harness.mdc
 - `docs/harness/` 不再承载 prompt 模板
 - `project-constraints.md` 属于 base harness managed file，初始化后必须由项目按真实规则补齐
 - maintenance loop 会扫描 `project-constraints.md`，但发现 `documented` 长期未机械化时只能报告或建议建 issue
-- `docs/test/` 默认承载可执行测试 runbook 和提交版脱敏结果摘要
+- `docs/test/` 默认承载可执行测试 runbook 和提交版结果摘要
 - 所有 prompt 模板统一归口 `.agents/prompts/`
 - `Issue Tracker` 默认承接任务范围、状态、运行反馈、结果回写
 - `repo` 默认承接执行命令、代码路径、设计入口、Prompt / Guide
@@ -325,14 +323,13 @@ sources/agent_adapters/cursor/.cursor/rules/harness.mdc
 - `测试变量 / 初始化`
 - `主路径`
 - `清理结果`
-- `敏感信息处理`
 - `结果回写`
 
 固定规则：
 
 - 测试文档默认写成可执行 runbook，不写成泛化 QA 说明
 - 未执行步骤必须写 `未执行` 或 `blocker`，不得伪装成 `通过`
-- 提交版文档只保留脱敏摘要，真实凭据、token、连接串、行主键、临时目录、完整下载 URL 和原始响应不写入仓库
+- 提交版文档应保留真实执行状态、结果摘要和必要恢复信息
 
 ## 8. `.agents` Base 输出
 

@@ -279,7 +279,7 @@ Maintenance loop 的输出必须包含：
 只能报告或建 issue，不能自动修复的项：
 
 - API contract、schema、OpenAPI 语义和兼容性策略
-- 安全策略、鉴权、权限、脱敏规则和危险命令边界
+- 安全策略、鉴权、权限和危险命令边界
 - 业务行为、数据变更、迁移策略、运行时配置语义
 - 任何需要人类选择取舍的 `human_decision_required` 项
 
@@ -355,9 +355,8 @@ Maintenance loop 的输出必须包含：
 固定规则：
 
 - `docs/test/RUNBOOK_TEMPLATE.md` 是 base harness 的通用测试 runbook 模板。
-- 具体测试文档默认放在 `docs/test/<domain>/`，同时保留可执行步骤和提交版脱敏结果摘要。
-- 已脱敏的 `当前验证结果` / `本次执行结果` 是提交版测试真相，后续同步或 closeout 不得删成空模板。
-- 原始命令输出、真实凭据、数据库主机、连接串、行主键、临时目录、完整下载 URL 和机器本地痕迹不写入提交版文档。
+- 具体测试文档默认放在 `docs/test/<domain>/`，同时保留可执行步骤和提交版结果摘要。
+- `当前验证结果` / `本次执行结果` 是提交版测试真相，后续同步或 closeout 不得删成空模板。
 
 ## provider-neutral 默认策略
 
@@ -404,7 +403,7 @@ Maintenance loop 的输出必须包含：
 - 根级 `AGENTS.md` 负责全局边界、提交流程、验证入口和默认不提交规则。
 - 目录级 `AGENTS.md` 负责该目录的稳定实现习惯、分层约束、测试约定和代码风格。
 - 修改某个目录前，优先读取就近的目录级 `AGENTS.md`；若约束更细，以目录级规则为准。
-- 不用目录级 `AGENTS.md` 保存临时 issue 计划、一次性排查记录或敏感运行结果。
+- 不用目录级 `AGENTS.md` 保存临时 issue 计划、一次性排查记录或临时运行结果。
 
 ## Agent 扩展层
 
@@ -428,8 +427,6 @@ Maintenance loop 的输出必须包含：
 
 同时默认不提交：
 
-- 真实环境配置
-- token / cookie / DSN / secret
 - 本地日志和缓存
 - 本地数据库文件
 - IDE 私有文件

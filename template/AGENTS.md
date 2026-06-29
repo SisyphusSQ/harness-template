@@ -70,12 +70,11 @@
 - 若存在 `.agents/prompts/orchestrator-thread.md`，多 thread / worktree / subagent 编排先读它；子 thread 不默认归档，完成后标题加 `【完成】`
 - `.agents/prompts/orchestrator-thread.md` 是 Codex 专用 thread 编排 prompt；非 Codex agent 或人工流程只能按其中的 handoff / Issue comment / `Current State` 约束维护状态机
 - 若存在 `.agents/prompts/maintenance-loop.md`，默认只做 `report-only` 维护扫描；`issue-create / safe-fix / rule-promotion` 必须由用户显式指定
-- 模板配置可提交，真实环境配置不提交
-- 若需要环境配置，优先提交 `.env.example`、`settings.example.yaml` 这类示例文件
-- `docs/test/*` 默认提交可复用 runbook 与脱敏后的当前 / 本次验证结果摘要
-- `docs/issues/*` 默认提交工具中立 issue 与脱敏后的 writeback log
-- 原始命令输出、真实凭据、数据库主机、临时目录、完整下载 URL、token、行主键、本机路径等敏感或机器本地痕迹不提交
-- 已写入 `docs/test/*` 的脱敏验证结果摘要是提交版测试真相，后续同步或 closeout 不得因为避免敏感信息而删成空模板
+- 模板配置可提交
+- 若需要环境配置，可按项目约定提交 `.env.example`、`settings.example.yaml` 这类示例文件
+- `docs/test/*` 默认提交可复用 runbook 与当前 / 本次验证结果摘要
+- `docs/issues/*` 默认提交工具中立 issue 与 writeback log
+- 已写入 `docs/test/*` 的验证结果摘要是提交版测试真相，后续同步或 closeout 不得删成空模板
 - `.agents/state/*` 与 `.agents/runs/*` 的真实运行文件默认不提交
 - 本地日志、数据库文件、缓存、IDE 私有文件默认不提交
 - `merge` / `escalation` 仍然是流程阶段，但默认不由 initializer 自带 shell gate 承担

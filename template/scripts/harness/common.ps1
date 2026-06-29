@@ -171,7 +171,7 @@ function Test-SectionHasMeaningfulContent {
 
         if ($inSection) {
             $trimmed = $line.Trim()
-            if ($trimmed -eq "至少锁定一个与当前关键调用链直接相关的真实接口 / 结构 / 命令 / 配置片段，不要保留占位 token。") {
+            if ($trimmed -eq "至少锁定一个与当前关键调用链直接相关的真实接口 / 结构 / 命令 / 配置片段，不要保留占位内容。") {
                 continue
             }
             if ($trimmed -eq "至少锁定一个与当前关键调用链直接相关的真实接口 / 结构 / 命令 / 配置片段。复杂任务推荐放两段：一段锁定接口 / 结构，一段锁定规则 / 配置 / SQL / CLI。") {
