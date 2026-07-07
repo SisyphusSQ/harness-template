@@ -55,6 +55,7 @@ target-repo/
 │   ├── plans/TEMPLATE.md
 │   ├── plans/EXAMPLE-implementation.md
 │   ├── skills/
+│   │   ├── issue-goal-prompt/
 │   │   ├── project-plan-archive/
 │   │   ├── project-version-release/
 │   │   └── test-runbook/
@@ -78,7 +79,7 @@ target-repo/
 - `docs/issues/` 是 `issue-provider=repo` 时的仓库内 issue 存储
 - `docs/test/RUNBOOK_TEMPLATE.md` 属于 base harness，承载通用测试 runbook 与结果摘要模板
 - 不再默认生成没有消费链路的 `.agents/mappings/`
-- 默认生成 `.agents/skills/`，承载通用 repo-local workflow：计划归档、版本发布边界、测试 runbook 执行与回写
+- 默认生成 `.agents/skills/`，承载通用 repo-local workflow：issue goal prompt、计划归档、版本发布边界、测试 runbook 执行与回写
 - 不默认生成 `.cursor/`；Cursor rules 只在初始化 agent 是 Cursor 时作为 adapter 补充
 
 ## 3. Agent 扩展层
@@ -356,7 +357,7 @@ sources/agent_adapters/cursor/.cursor/rules/harness.mdc
 - `Reference Snippets` 不能是空块或纯占位内容
 - `组件职责与代码落点` 至少要有一条真实模块 / 路径 / 类型记录
 - `.agents/prompts/` 与 `.agents/guides/` 由 agent 驱动初始化时补充
-- `.agents/skills/` 属于 base harness 默认输出；默认包含 `project-plan-archive`、`project-version-release`、`test-runbook`
+- `.agents/skills/` 属于 base harness 默认输出；默认包含 `issue-goal-prompt`、`project-plan-archive`、`project-version-release`、`test-runbook`
 - 若仓库同时使用 Issue Tracker 和本地运行面，则协作状态以 Issue Tracker 为准，本地恢复细节以 `.agents/state` / `.agents/runs` 为准
 
 ## 9. Agent 扩展维护源
@@ -455,6 +456,7 @@ sources/agent_extensions/
 | `docs/harness/project-constraints.md` 是否存在 | 应存在 |
 | `docs/harness/prompt-templates.md` 是否不存在 | 应不存在 |
 | `.agents/plans/EXAMPLE-implementation.md` 是否存在 | 应存在 |
+| `.agents/skills/issue-goal-prompt/SKILL.md` 是否存在 | 应存在 |
 | `.agents/skills/project-plan-archive/SKILL.md` 是否存在 | 应存在 |
 | `.agents/skills/project-version-release/SKILL.md` 是否存在 | 应存在 |
 | `.agents/skills/test-runbook/SKILL.md` 是否存在 | 应存在 |

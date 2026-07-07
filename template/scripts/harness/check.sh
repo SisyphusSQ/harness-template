@@ -19,6 +19,9 @@ required_files=(
   ".agents/PLANS.md"
   ".agents/plans/TEMPLATE.md"
   ".agents/plans/EXAMPLE-implementation.md"
+  ".agents/skills/issue-goal-prompt/SKILL.md"
+  ".agents/skills/issue-goal-prompt/agents/openai.yaml"
+  ".agents/skills/issue-goal-prompt/references/goal-prompt-template.md"
   ".agents/skills/project-plan-archive/SKILL.md"
   ".agents/skills/project-plan-archive/agents/openai.yaml"
   ".agents/skills/project-plan-archive/scripts/project_plan_archive.py"
@@ -47,6 +50,7 @@ for path in "${required_files[@]}"; do
 done
 
 required_skill_frontmatter=(
+  ".agents/skills/issue-goal-prompt/SKILL.md|name: issue-goal-prompt"
   ".agents/skills/project-plan-archive/SKILL.md|name: project-plan-archive"
   ".agents/skills/project-version-release/SKILL.md|name: project-version-release"
   ".agents/skills/test-runbook/SKILL.md|name: test-runbook"
@@ -62,6 +66,14 @@ for item in "${required_skill_frontmatter[@]}"; do
 done
 
 required_skill_patterns=(
+  ".agents/skills/issue-goal-prompt/SKILL.md|任务系统"
+  ".agents/skills/issue-goal-prompt/SKILL.md|状态文件规则"
+  ".agents/skills/issue-goal-prompt/SKILL.md|pre-commit ready"
+  ".agents/skills/issue-goal-prompt/SKILL.md|subagent_review_unavailable"
+  ".agents/skills/issue-goal-prompt/SKILL.md|manual_gate_live_e2e"
+  ".agents/skills/issue-goal-prompt/references/goal-prompt-template.md|完整目标提示词"
+  ".agents/skills/issue-goal-prompt/references/goal-prompt-template.md|状态文件模板"
+  ".agents/skills/issue-goal-prompt/references/goal-prompt-template.md|短启动提示词"
   ".agents/skills/project-plan-archive/SKILL.md|先查 Issue Tracker，再归档"
   ".agents/skills/project-plan-archive/SKILL.md|--done-issue"
   ".agents/skills/project-plan-archive/SKILL.md|no_issue_default_archive"

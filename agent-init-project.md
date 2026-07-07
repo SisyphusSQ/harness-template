@@ -79,6 +79,7 @@
    - `.agents/PLANS.md`
    - `.agents/plans/TEMPLATE.md`
    - `.agents/plans/EXAMPLE-implementation.md`
+   - `.agents/skills/issue-goal-prompt/SKILL.md`
    - `.agents/skills/project-plan-archive/SKILL.md`
    - `.agents/skills/project-version-release/SKILL.md`
    - `.agents/skills/test-runbook/SKILL.md`
@@ -105,7 +106,7 @@
    - `组件职责与代码落点` 至少要有一条真实模块 / 路径 / 类型记录
    - `docs/harness/project-constraints.md` 是项目级机械约束登记入口，不能把只有文档约束的规则写成 `enforced`
    - `docs/test/RUNBOOK_TEMPLATE.md` 能作为测试 runbook、执行副作用、清理结果和结果回写模板
-   - `.agents/skills/` 已包含 `project-plan-archive`、`project-version-release`、`test-runbook` 三个默认 workflow skill
+   - `.agents/skills/` 已包含 `issue-goal-prompt`、`project-plan-archive`、`project-version-release`、`test-runbook` 四个默认 workflow skill
 
 3. 在 base harness 完成后，按初始化 agent 类型补充 adapter：
 
@@ -271,6 +272,7 @@
      `真实入口与触发 / 输入装配与边界校验 / 组件职责与代码落点 / 关键执行时序 / 停止 / 错误 / 恢复`
    - `.agents/plans/EXAMPLE-implementation.md` 已存在，可作为质量标杆
    - `docs/test/RUNBOOK_TEMPLATE.md` 已存在，可作为测试 runbook 和结果回写模板
+   - `.agents/skills/issue-goal-prompt/SKILL.md` 已存在，可作为 issue goal prompt workflow
    - `.agents/skills/project-plan-archive/SKILL.md` 已存在，可作为计划归档 workflow
    - `.agents/skills/project-version-release/SKILL.md` 已存在，可作为版本和 release 边界 workflow
    - `.agents/skills/test-runbook/SKILL.md` 已存在，可作为测试 runbook 执行与回写 workflow

@@ -391,7 +391,7 @@ Maintenance loop 的输出必须包含：
 固定要求：
 
 - 默认初始化计划协议、计划主模板、实现型 exemplar、repo-local workflow skill 和本地辅助运行面模板
-- `.agents/skills` 默认包含 `project-plan-archive`、`project-version-release`、`test-runbook`
+- `.agents/skills` 默认包含 `issue-goal-prompt`、`project-plan-archive`、`project-version-release`、`test-runbook`
 - 默认 skill 不直接连接外部 Issue Tracker、数据库或发布系统；外部完成态、发布动作和 live 环境由 agent 按项目规则另行查证或执行
 - `.agents/state` / `.agents/runs` 服务本地恢复与结果审计，不替代 Issue Tracker
 - `review_gate` 的输入真相来自 plan 文件，不依赖额外状态目录

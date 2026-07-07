@@ -23,12 +23,13 @@
 8. `.agents/PLANS.md`
 9. `.agents/plans/TEMPLATE.md`
 10. `.agents/plans/EXAMPLE-implementation.md`
-11. `.agents/skills/project-plan-archive/SKILL.md`
-12. `.agents/skills/project-version-release/SKILL.md`
-13. `.agents/skills/test-runbook/SKILL.md`
-14. 若存在，再读 `.agents/prompts/README.md`
-15. 若存在，且任务涉及多 thread / worktree / subagent 编排，再读 `.agents/prompts/orchestrator-thread.md`
-16. 若存在，再读 `.agents/prompts/maintenance-loop.md`
+11. `.agents/skills/issue-goal-prompt/SKILL.md`
+12. `.agents/skills/project-plan-archive/SKILL.md`
+13. `.agents/skills/project-version-release/SKILL.md`
+14. `.agents/skills/test-runbook/SKILL.md`
+15. 若存在，再读 `.agents/prompts/README.md`
+16. 若存在，且任务涉及多 thread / worktree / subagent 编排，再读 `.agents/prompts/orchestrator-thread.md`
+17. 若存在，再读 `.agents/prompts/maintenance-loop.md`
 
 ## 目录职责
 
@@ -63,7 +64,7 @@
 6. 填写 `docs/harness/project-constraints.md` 中的项目级机械约束登记表
 7. 阅读 `docs/test/RUNBOOK_TEMPLATE.md`
 8. 阅读 `.agents/PLANS.md`、`.agents/plans/TEMPLATE.md`、`.agents/plans/EXAMPLE-implementation.md`
-9. 阅读 `.agents/skills/` 中的默认 workflow skill；按任务使用 `project-plan-archive`、`project-version-release` 或 `test-runbook`
+9. 阅读 `.agents/skills/` 中的默认 workflow skill；按任务使用 `issue-goal-prompt`、`project-plan-archive`、`project-version-release` 或 `test-runbook`
 10. 若是 agent 驱动初始化，默认补齐 `full` 模式的 `.agents/prompts/` 与 `.agents/guides/`；只有明确要求轻量模式时才使用 `placeholder`
 11. 若存在 `.agents/prompts/orchestrator-thread.md`，确认多 thread 编排遵循 `write_lease`、`Current State`、`Thread Status`、post-integration verify 和 `【完成】` 标题标识
 12. 若存在 `.agents/prompts/maintenance-loop.md`，确认默认 mode 是 `report-only`

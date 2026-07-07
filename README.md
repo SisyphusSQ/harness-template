@@ -38,6 +38,7 @@ repo/
 │   ├── plans/TEMPLATE.md
 │   ├── plans/EXAMPLE-implementation.md
 │   ├── skills/
+│   │   ├── issue-goal-prompt/
 │   │   ├── project-plan-archive/
 │   │   ├── project-version-release/
 │   │   └── test-runbook/
@@ -58,8 +59,9 @@ repo/
 - `.agents/plans/TEMPLATE.md`：主模板，可直接填写，默认按“实现优先”结构组织
 - `.agents/plans/EXAMPLE-implementation.md`：质量标杆，展示一份更像真实实施方案的 plan 应该写成什么样
 
-默认 skill 层固定提供三类 repo-local workflow：
+默认 skill 层固定提供四类 repo-local workflow：
 
+- `.agents/skills/issue-goal-prompt/`：从 Issue Tracker item 生成执行级 goal prompt 和长 prompt 的 state-file launcher
 - `.agents/skills/project-plan-archive/`：计划归档、ISO 周目录移动与旧 plan 路径精确改写
 - `.agents/skills/project-version-release/`：CHANGELOG、版本和 release archive 边界维护
 - `.agents/skills/test-runbook/`：`docs/test/*` runbook 生成、执行、回写和提交版证据边界
@@ -123,7 +125,7 @@ repo/
 8. 若存在 `.agents/prompts/orchestrator-thread.md`，多 thread / worktree / subagent 编排先读它
 9. 若存在 `.agents/prompts/maintenance-loop.md`，确认默认 mode 仍是 `report-only`
 10. 优先阅读 `.agents/PLANS.md`、`.agents/plans/TEMPLATE.md`、`.agents/plans/EXAMPLE-implementation.md`
-11. 按任务需要阅读 `.agents/skills/project-plan-archive/`、`.agents/skills/project-version-release/` 或 `.agents/skills/test-runbook/`
+11. 按任务需要阅读 `.agents/skills/issue-goal-prompt/`、`.agents/skills/project-plan-archive/`、`.agents/skills/project-version-release/` 或 `.agents/skills/test-runbook/`
 12. macOS / Linux / Git Bash 执行 `make harness-verify`；Windows PowerShell 可执行 `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\harness\check.ps1`
 
 更推荐的 agent 用法是：

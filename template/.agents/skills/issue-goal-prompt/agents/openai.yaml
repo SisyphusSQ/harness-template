@@ -1,0 +1,4 @@
+interface:
+  display_name: "任务目标提示词"
+  short_description: "从任务生成可执行目标提示词"
+  default_prompt: "使用 $issue-goal-prompt 从任务生成可执行目标提示词。"

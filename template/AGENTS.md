@@ -23,6 +23,7 @@
 | 计划主模板 | `.agents/plans/TEMPLATE.md` |
 | 实现型示例 | `.agents/plans/EXAMPLE-implementation.md` |
 | 默认技能层 | `.agents/skills/` |
+| Issue goal prompt skill | `.agents/skills/issue-goal-prompt/SKILL.md` |
 | 计划归档 skill | `.agents/skills/project-plan-archive/SKILL.md` |
 | 版本发布 skill | `.agents/skills/project-version-release/SKILL.md` |
 | 测试 runbook skill | `.agents/skills/test-runbook/SKILL.md` |
