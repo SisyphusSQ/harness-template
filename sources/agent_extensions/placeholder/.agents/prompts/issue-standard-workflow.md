@@ -104,3 +104,12 @@ Repo-local TODO: 合并动作、Linear/Issue writeback、ChangeLog 规则。
 - plan-only 输出即使来自占位 prompt，也不能退化成纯 harness 流程；仍要按 `.agents/PLANS.md` 写清实现逻辑骨架
 - 若 Superpowers skills 可用，只能参考 `.agents/prompts/README.md` 的 Optional Superpowers Skill Hooks；当前占位文件不冻结完整 skill hook contract
 - 当前文件只是占位 skeleton，补齐前不要把它当成可直接执行的完整仓库 contract
+
+## 基础 Review / Evidence Contract
+
+即使本文件仍是 placeholder，也必须继承 `docs/harness/control-plane.md` 的基础 contract：
+
+- gate / freeze 派生 `review_policy=standard|strict` 和 `subagent_review_required`；未提供 policy 时兼容性默认 `strict`。
+- `standard` 允许主 agent 对抗式自审；`strict` 必须由 subagent 独立评审，均要求 `blocking_findings=none`。
+- 验证摘要记录 `evidence_id`、同一执行 session、有序命令与 `deterministic-local` / `environment-dependent` / `live` 类型。
+- 只有同 session、同快照、同命令的确定性本地证据才可在 post-integration verify 标记 `reused`；strict、live、环境依赖、多仓、多 lease 或任何不确定情况必须重跑。

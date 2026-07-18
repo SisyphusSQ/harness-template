@@ -45,16 +45,20 @@ description: 从任务系统条目生成可执行目标提示词，适用于 har
    - 分支名只允许 ASCII 字母、数字、`-`、`_` 和 `/`。
    - 保护已有脏工作区；不得丢弃或覆盖无关改动。
    - 在计划、恢复点和最终回写中记录实际分支名。
-5. 要求验证后执行独立评审：
-   - 可用时优先使用 subagent 评审。
-   - 对实现任务，主 agent 自审不能单独满足默认评审门禁。
-   - 如果必需的 subagent 评审不可用，停止在 `blocked: subagent_review_unavailable`。
+5. 在 `gate / freeze` 阶段派生 `review_policy`，并写入 Goal Prompt 与 Goal 状态文件：
+   - 用户显式要求独立评审时使用 `strict`。
+   - 多仓 / 多可写 lease / branch 或 worktree 集成、鉴权安全权限、公开 API / contract、schema / migration / 数据修改、并发 / 幂等 / 重试 / 业务状态机、release / 部署 / 生产或不可逆副作用、required live E2E、full-auto、自动 merge，以及风险无法可靠判断时使用 `strict`。
+   - 其余普通单仓任务可显式使用 `standard`；`standard` 允许主 agent 做 findings-first 对抗式自审。
+   - 兼容性默认值是 `strict`：调用方未提供 policy 时不得自行降为 `standard`。
+   - `subagent_review_required` 等于 `review_policy == strict`。`strict` 下必须由 subagent 独立评审；不可用时停止在 `blocked: subagent_review_unavailable`。
+   - 两种 policy 都必须满足 `blocking_findings=none`，并在回写中记录 `review_owner`。
 6. 编码 live E2E 策略：
    - 默认目标是 `pre-commit ready`。
    - 除非用户明确要求，不要 commit、push、merge 或 mark Done。
    - 如果 live E2E 必需但当前不可用，在本地验证后停止在 `manual_gate_live_e2e`。
    - 如果 live E2E 不适用，设置 `live_e2e_status: not_required`。
-7. 加入任务系统回写要求：验证、评审、集成、集成后验证、live E2E 状态、残余风险、恢复点和下一步。
+7. 编码验证证据复用规则：用 evidence helper 记录仓库快照、有序命令、执行 session、验证类型、时间和仓库路径；仅允许同 session、同快照、同命令的单仓单写入者 `deterministic-local` 证据复用。多仓、多 lease、strict、环境依赖、live 或任何不确定情况都重跑。
+8. 加入任务系统回写要求：验证、评审、集成、集成后验证、验证证据复用、live E2E 状态、残余风险、恢复点和下一步。
 
 完整提示词、状态文件和短启动提示词模板见 `references/goal-prompt-template.md`。
 

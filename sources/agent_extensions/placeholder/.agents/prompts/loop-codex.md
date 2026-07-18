@@ -63,3 +63,11 @@ Repo-local TODO: goal_unit_roster、write_lease、waiting_on_child、post-integr
 - 若涉及多 thread / worktree / subagent 编排，应优先补齐 `.agents/prompts/orchestrator-thread.md`
 - 补齐后默认应把当前状态、`recovery_point`、`next_action` 写回 Linear
 - 补齐前不要把这里的占位语义当作完整 loop contract
+
+## 基础 Review / Evidence Loop
+
+- gate / freeze 派生 `review_policy` 与 `subagent_review_required`；未提供 policy 时按 strict。
+- standard 允许主 agent findings-first 对抗式自审，strict 必须由 subagent 独立评审。
+- verify 摘要必须含 `evidence_id`、有序命令、同一执行 session 和验证类型。
+- post-integration verify 不跳过；只有同 session / 同快照 / 同命令的 deterministic-local 证据可复用。
+- 多仓、多 lease、strict、环境依赖、live 或仍有 required live E2E 时必须重跑。

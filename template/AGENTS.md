@@ -33,6 +33,7 @@
 | 可选主 thread 编排 Prompt | `.agents/prompts/orchestrator-thread.md`（如存在） |
 | 可选维护循环 Prompt | `.agents/prompts/maintenance-loop.md`（如存在，默认 `report-only`） |
 | 可选 Guide 层 | `.agents/guides/`（如存在） |
+| 验证证据快照 | `scripts/harness/evidence.sh` / `scripts/harness/evidence.ps1` |
 
 ## 真相边界
 
@@ -59,6 +60,8 @@
 - 复杂任务默认先写 plan，再进入实现
 - macOS / Linux / Git Bash 默认用 `make harness-verify` 验证 base harness
 - Windows PowerShell 默认用 `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\harness\check.ps1` 验证 base harness
+- `make harness-verify` 只验证 base harness 运行时关键不变量，不替代项目自身 build / test / lint
+- 成功验证后可用 `bash scripts/harness/evidence.sh snapshot` 生成只读快照；是否复用仍按 `docs/harness/control-plane.md` 的 session、命令顺序、验证类型和 `review_policy` 规则判断
 - Bash / Git Bash 命令示例使用 POSIX 路径；PowerShell 命令示例使用 `C:\path\to\repo` 或 UNC 路径，不自动互转
 - `docs/harness/*.md` 默认应提交
 - 初始化后应在 `docs/harness/project-constraints.md` 中登记项目级机械约束；没有可执行命令或 gate 的规则不得标记为 `enforced`

@@ -185,3 +185,11 @@ collect -> gate -> freeze -> slice -> dispatch -> implement -> verify -> review 
 - 只想冻结 inventory 时用 `create-issues`。
 - 不想自动收尾时用 `implement-no-merge`。
 - 只有确认 merge gate、权限、验证和 writeback 都稳定后，才使用 `full-auto`。
+
+## 8. Review Policy 与 Evidence 安全边界
+
+- automation 必须在 gate / freeze 写入 `review_policy`；兼容性默认 `strict`，只有新版 Goal Prompt 完成风险派生后才可显式选择 standard。
+- `subagent_review_required = review_policy == strict`。strict 下 subagent 不可用时停止，不允许静默降级成主 agent 自审。
+- required live E2E、full-auto 和自动 merge 本身都触发 strict；多仓、多 lease、集成、安全、contract、schema / 数据、并发 / 幂等 / 重试、release / 生产或未知风险同样触发 strict。
+- `verification_summary` 必须记录 `evidence_id`、命令顺序、session 和验证类型。
+- 仅同 session、同快照、同命令的单仓单写入者 deterministic-local 证据可复用；任何无法确认的情况默认重跑。

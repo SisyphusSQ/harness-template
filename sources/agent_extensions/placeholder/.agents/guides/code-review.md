@@ -30,3 +30,10 @@ Mode: placeholder
 - 若仓库已有 `Review Summary` 字段契约，应以后者为准
 - 若 Superpowers skills 可用，只能参考 `.agents/prompts/README.md` 的 Optional Superpowers Skill Hooks；当前占位文件不冻结完整 review skill hook contract
 - 补齐前不要把当前文件当作完整 review gate contract
+
+## 基础 Review Policy
+
+- standard 使用 `review_owner=main-agent-self-review`，要求主 agent 做 findings-first 对抗式自审。
+- strict 使用 `review_owner=subagent`，必须由 subagent 独立评审；不可用时阻塞。
+- 两种 policy 都必须输出 `blocking_findings`，只有 `blocking_findings=none` 才通过。
+- 未提供 `review_policy` 时按 strict；repo-local 规则只能增加 strict 条件，不能降低 `docs/harness/control-plane.md` 的基础风险条件。

@@ -88,9 +88,11 @@
    - `scripts/harness/check.sh`
    - `scripts/harness/common.sh`
    - `scripts/harness/review_gate.sh`
+   - `scripts/harness/evidence.sh`
    - `scripts/harness/check.ps1`
    - `scripts/harness/common.ps1`
    - `scripts/harness/review_gate.ps1`
+   - `scripts/harness/evidence.ps1`
 
    同时确认当前 base harness 的计划 contract 已经可读出：
 
@@ -280,7 +282,7 @@
    - `review_gate.sh` / `review_gate.ps1` 已明确会拒绝空的 `Reference Snippets` 和空的组件职责记录
    - `.agents/state/TEMPLATE.md` 与 `.agents/runs/TEMPLATE.md` 已明确它们只是本地辅助运行面
    - 如果生成了 `.cursor/rules/harness.mdc`，它已明确读取 harness 入口并要求 `make harness-verify`
-10. 最后在目标仓库执行 `make harness-verify`；Windows PowerShell 可执行 `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\harness\check.ps1`
+10. 最后在目标仓库执行 `make harness-verify`；Windows PowerShell 可执行 `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\harness\check.ps1`。这是目标仓日常 harness 检查，不替代项目自身验证命令。
 
 输出要求：
 1. 先说明当前在做 base harness、agent adapter 还是 agent 扩展层

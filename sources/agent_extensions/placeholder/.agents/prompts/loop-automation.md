@@ -55,3 +55,10 @@ Repo-local TODO:
 - 补齐后默认由 agent 给出 `merge / escalation` 结论
 - 若 Superpowers skills 可用，只能参考 `.agents/prompts/README.md` 的 Optional Superpowers Skill Hooks；当前占位文件不冻结完整 automation skill hook contract
 - 补齐前不要把这里的占位语义当作完整 automation contract
+
+## 基础 Review / Evidence 安全边界
+
+- gate / freeze 派生 `review_policy` 和 `subagent_review_required`；兼容性默认 `strict`。
+- standard 允许主 agent 对抗式自审；strict 必须由 subagent 独立评审。
+- `verification_summary` 记录 `evidence_id`、有序命令、session 与验证类型。
+- 只有单仓单写入者的 deterministic-local 同 session / 同快照 / 同命令证据可复用；strict、live、环境依赖、多仓、多 lease 或任何无法确认的情况默认重跑。

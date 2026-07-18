@@ -208,8 +208,43 @@
 - 默认顺序是 `implement -> local/test verify -> review -> integrate -> final verify`。
 - 第一个 `verify` 是执行者或 test thread 的局部验证，用来确认输出进入可 review 状态。
 - review 默认前置；集成后若发生冲突处理、integration fix、diff 形态明显变化、二次 verify 失败后返修，或 write scope 边界有争议，主 thread 必须补轻量 review。
-- `integrate -> verify` 是权威验证。主 thread 集成任何可写 lease 后，必须在集成后的 repo truth 上重新跑最终验证矩阵。
+- `integrate -> verify` 是权威验证。post-integration verify 阶段不得跳过；只有满足下方 Verification Evidence Reuse Contract 时，阶段内的确定性本地命令才可记录为证据复用，否则必须在集成后的 repo truth 上重新执行最终验证矩阵。
 - 若 Goal Prompt、Issue Acceptance Matrix、active plan 或 test runbook 声明 required live E2E，则 post-integration verify 必须执行 live E2E；无法执行时停止在 `blocked` / `manual-gate`，不得进入 `verified`、`ready_for_merge` 或 `done`。
+
+#### Verification Evidence Reuse Contract
+
+验证完成后，`verification_summary` 必须记录：
+
+- `evidence_id`：由 `scripts/harness/evidence.sh snapshot` 或 `scripts/harness/evidence.ps1 -Action Snapshot` 生成。
+- `commands`：Required Verification Commands 的有序命令及逐项结果，集合和顺序都是 contract。
+- `execution_session_id`：当前连续执行 session 的稳定标识；进程重启、任务交接或恢复执行后必须更换。
+- `verification_type`：`deterministic-local` / `environment-dependent` / `live`。
+- `verified_at` 与 `repository_path`。
+
+只有以下条件全部满足，post-integration verify 才可复用已有验证证据：
+
+1. 单仓、单写入者，且没有 branch merge、rebase、cherry-pick、冲突处理或 integration fix。
+2. 当前 `evidence_id` 与验证完成时记录的值完全一致，helper 同时返回 `reusable=true`。
+3. Required Verification Commands 的集合和顺序完全一致。
+4. 仍在同一执行 session，即 `execution_session_id` 完全一致。
+5. 所有待复用项都是 `deterministic-local` build / test / lint / contract check。
+6. 没有尚未执行的 required live E2E。
+
+以下情况一律重新执行：多仓、多个可写 lease、`review_policy=strict`、`environment-dependent`、`live`，以及任何发生过集成或历史改写的场景。任何无法确认的情况默认重跑。
+
+复用不改变状态机：仍进入 post-integration verify，并写入：
+
+```text
+post_integration_verify_summary.status = reused
+post_integration_verify_summary.evidence_id = <id>
+```
+
+字段化记录时使用：
+
+- `post_integration_verify_summary.status`: `reused`
+- `post_integration_verify_summary.evidence_id`: `<id>`
+
+未复用时 `status=executed`，并保留新执行命令及结果。未完成的 required live E2E 永远不可由本地证据替代。
 
 ### 跨仓 truth split（按需）
 
@@ -290,6 +325,31 @@ Maintenance loop 的输出必须包含：
 - prompts / guides 与 `AGENTS.md`、`docs/harness/*`、`.agents/PLANS.md` 冲突时，以后者为准。
 
 ## Review 口径
+
+### Review Policy Contract
+
+在 `gate / freeze` 阶段基于冻结范围派生并记录：
+
+- `review_policy`: `standard` / `strict`
+- `subagent_review_required`: `review_policy == strict`
+
+兼容性规则：用户显式要求独立评审时无条件使用 `strict`；调用方未提供 `review_policy` 时按 `strict` 处理。只有新版 Goal Prompt 完成风险派生且确认不命中 strict 条件时，才可显式写入 `standard`。
+
+`standard` 允许主 agent 执行对抗式自审，但仍是独立的 review checkpoint，必须按 findings-first 输出正确性、回归风险、范围越界、测试缺口、可维护性，并满足 `blocking_findings=none`。Issue writeback 的 `review_owner` 记录为 `main-agent-self-review`。
+
+`strict` 必须由 subagent 独立评审，Issue writeback 的 `review_owner` 记录为 `subagent`。subagent 不可用时保持 `blocked: subagent_review_unavailable`，不得用主 agent 自审降级替代。
+
+以下任一条件自动进入 `strict`：
+
+- 多仓代码改动、多个可写 lease 或 branch / worktree 集成。
+- 鉴权、安全、权限、公开 API 或 contract 兼容性。
+- schema、migration 或数据修改。
+- 并发、幂等、重试或业务状态机。
+- release、部署、生产环境或不可逆外部副作用。
+- required live E2E、full-auto 或自动 merge。
+- 风险无法可靠判断。
+
+`harness-review-gate` 的接口和职责不变：继续校验完整计划骨架与 `blocking_findings`，不新增人工 checkpoint，也不自行推导 reviewer 身份。
 
 ### findings-first
 
