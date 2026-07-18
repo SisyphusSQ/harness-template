@@ -8,7 +8,7 @@
 - 控制面文档统一收口到 `docs/harness/`
 - 初始化后应先确认 `.gitignore`、`.agents/`、`docs/harness/project-constraints.md`、`docs/test/RUNBOOK_TEMPLATE.md`、`scripts/harness/` 是否就位并可执行
 - 若通过 agent 驱动初始化，默认再补齐完整 `full` 版 `.agents/prompts/` 与 `.agents/guides/`
-- base harness 默认带 Bash 与 PowerShell 两套 `check + review_gate`，以及 `.agents/skills/` repo-local workflow 层
+- base harness 默认带 Bash 与 PowerShell 两套 `check + review_gate + evidence`，以及 `.agents/skills/` repo-local workflow 层
 - `.agents/state/` 与 `.agents/runs/` 默认作为本地辅助运行面存在
 
 ## 推荐阅读顺序
@@ -41,6 +41,8 @@
 | `.agents/` | 计划协议、计划模板、实现型 exemplar、默认 workflow skill、本地辅助运行面，以及后续 prompts / guides |
 | `scripts/harness/` | base harness 的最小 gate 脚本与共享 helper |
 
+`make harness-check` / `make harness-verify` 是目标仓日常检查，只验证 harness 运行时关键不变量，不替代项目自身 build / test / lint。需要记录可复用验证证据时，在仓库根执行 `bash scripts/harness/evidence.sh snapshot`；PowerShell 使用 `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\harness\evidence.ps1 -Action Snapshot`。
+
 ## 默认 truth split
 
 - `Issue Tracker = 主协作真相`
@@ -70,3 +72,4 @@
 12. 若存在 `.agents/prompts/maintenance-loop.md`，确认默认 mode 是 `report-only`
 13. macOS / Linux / Git Bash 执行 `make harness-verify`
 14. Windows PowerShell 执行 `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\harness\check.ps1`
+15. 验证成功后按控制面 contract 记录 evidence snapshot、有序命令、执行 session 和验证类型

@@ -48,9 +48,11 @@ repo/
     ├── check.sh
     ├── common.sh
     ├── review_gate.sh
+    ├── evidence.sh
     ├── check.ps1
     ├── common.ps1
-    └── review_gate.ps1
+    ├── review_gate.ps1
+    └── evidence.ps1
 ```
 
 其中 plan 相关的三层关系固定为：
@@ -113,6 +115,16 @@ repo/
 - `sources/agent_adapters/` 只给特定 agent 使用，不进入 `init_harness_project.sh` / `init_harness_project.ps1` 的 managed files
 - `sources/agent_extensions/` 只给 agent 使用，不进入 `init_harness_project.sh` / `init_harness_project.ps1` 的 managed files
 
+## 两层验证入口
+
+源仓完整回归和目标仓日常检查是两个不同责任面：
+
+- 在本 harness 源仓执行 `make verify` 或 `bash scripts/verify_harness_source.sh`，运行精简 target check 后，再覆盖模板文案 contract、plan 模板与正反例矩阵、full / placeholder 源一致性、Bash / PowerShell 静态对齐和临时目标仓初始化。
+- Windows PowerShell 可执行 `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify_harness_source.ps1`（脚本路径 `scripts/verify_harness_source.ps1`）；源仓的 Bash 入口在检测到 PowerShell runtime 时也会调用它，否则明确报告只完成静态对齐检查。
+- 初始化后的目标仓执行 `make harness-check` / `make harness-verify`，只检查运行时关键不变量、review gate smoke 和 evidence helper 稳定性，不再用大量中文文案或完整 plan 矩阵阻塞目标项目日常开发。
+
+维护原则：修改 `template/`、初始化脚本或 `sources/agent_extensions/` 后，必须跑源仓完整回归；普通目标项目只需跑目标仓日常检查及项目自身验证命令。
+
 ## 推荐用法
 
 1. 先读 [init-harness-project-sop.md](init-harness-project-sop.md)
@@ -126,7 +138,8 @@ repo/
 9. 若存在 `.agents/prompts/maintenance-loop.md`，确认默认 mode 仍是 `report-only`
 10. 优先阅读 `.agents/PLANS.md`、`.agents/plans/TEMPLATE.md`、`.agents/plans/EXAMPLE-implementation.md`
 11. 按任务需要阅读 `.agents/skills/issue-goal-prompt/`、`.agents/skills/project-plan-archive/`、`.agents/skills/project-version-release/` 或 `.agents/skills/test-runbook/`
-12. macOS / Linux / Git Bash 执行 `make harness-verify`；Windows PowerShell 可执行 `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\harness\check.ps1`
+12. 在目标仓，macOS / Linux / Git Bash 执行 `make harness-verify`；Windows PowerShell 可执行 `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\harness\check.ps1`
+13. 在本 harness 源仓维护模板时，执行 `make verify`
 
 更推荐的 agent 用法是：
 

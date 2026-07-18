@@ -52,3 +52,10 @@ When child thread is done:
 - 可写 thread 必须有 `write_lease`
 - 子 thread 不自行 merge，不自行扩大范围
 - post-integration verify 仍由主 thread 基于最终 repo truth 执行
+
+## 基础 Review / Evidence 编排字段
+
+- gate / freeze 记录 `review_policy` 与 `subagent_review_required`。
+- 多仓、多个可写 lease、branch / worktree 集成自动使用 strict，并重新执行验证。
+- 验证摘要记录 `evidence_id`、有序命令、session 与验证类型。
+- 仅单仓单写入者、同 session、无 integration event 的 deterministic-local 证据可在 post-integration verify 标记 `post_integration_verify_summary.status = reused`；strict、live、环境依赖或不确定时重跑。

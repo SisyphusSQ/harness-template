@@ -102,3 +102,11 @@ Residual Risks 与下一步建议；
 - 发现范围膨胀时，优先判为 scope finding，而不是顺手扩大任务。
 - 外部 review 或工具 finding 需要折回本文件的输出结构。
 - 非阻塞建议只能进入 follow-up，不得阻塞当前冻结范围。
+
+## 9. Review Policy
+
+- `standard`：`review_owner=main-agent-self-review`，主 agent 必须切换到对抗式自审，按正确性、回归风险、范围越界、测试缺口、可维护性顺序 findings-first 输出。
+- `strict`：`review_owner=subagent`，必须由未实施该改动的 subagent 独立评审；不可用时停止在 `blocked: subagent_review_unavailable`。
+- 两种 policy 都必须输出 `blocking_findings`，且只有 `blocking_findings=none` 才能通过 review checkpoint。
+- 用户显式要求独立评审、多仓 / 多 lease / 集成、安全 / contract、schema / 数据、并发 / 幂等 / 重试 / 状态机、release / 生产 / 不可逆副作用、required live E2E、full-auto、自动 merge 或风险未知时必须 strict。
+- 未提供 `review_policy` 的旧调用按 strict 处理。

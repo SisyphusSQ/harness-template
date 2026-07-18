@@ -14,6 +14,8 @@
 当前模式：
 - issue_provider: <linear|github|gitlab|repo|other>
 - mode: <propose-only|plan-only|create-issues|implement-no-merge|full-auto>
+- review_policy: <standard|strict>
+- subagent_review_required: <true|false>
 - default_boundary: pre-commit ready，除非用户明确要求 commit / push / merge / Done
 
 分支要求：
@@ -85,10 +87,13 @@ Harness 要求：
 - 不保存真实凭据、token、Cookie、完整 URL、真实数据库主机、真实 SQL 或其它敏感输出到提交版文档。
 
 评审要求：
-- 验证通过后，必须执行独立评审。
-- 默认 `review_owner: subagent`。
-- 主 agent 自审不能满足默认评审门禁。
-- 如果 subagent 工具不可用且评审为必需项，停止在 `blocked: subagent_review_unavailable`，写明 `next_action`。
+- 在 gate / freeze 阶段根据冻结范围派生 `review_policy`；用户显式要求独立评审时无条件使用 `strict`。
+- 多仓 / 多可写 lease / branch 或 worktree 集成、鉴权安全权限、公开 API / contract、schema / migration / 数据修改、并发 / 幂等 / 重试 / 业务状态机、release / 部署 / 生产或不可逆副作用、required live E2E、full-auto、自动 merge，以及风险无法可靠判断时必须使用 `strict`。
+- 调用方未提供 `review_policy` 时使用兼容性默认 `strict`；只有本提示词完成风险派生并确认不命中 strict 条件时，才可显式使用 `standard`。
+- `standard` 允许主 agent 执行 findings-first 对抗式自审，回写 `review_owner: main-agent-self-review`。
+- `strict` 必须由 subagent 独立评审，回写 `review_owner: subagent`；subagent 不可用时停止在 `blocked: subagent_review_unavailable`，写明 `next_action`。
+- `subagent_review_required` 等于 `review_policy == strict`。
+- 两种 policy 都必须满足 `blocking_findings=none`。
 - 如果有阻塞发现，先修复，再重新执行验证 -> 评审。
 
 Live E2E 要求：
@@ -102,10 +107,17 @@ Live E2E 要求：
 - <命令 2>
 - <命令 3>
 
+验证证据与复用：
+- 成功验证后的 `verification_summary` 必须记录 `evidence_id`、Required Verification Commands 的有序命令和结果、`execution_session_id`、验证类型、执行时间和仓库路径。
+- 验证类型只能是 `deterministic-local` / `environment-dependent` / `live`。
+- 仅当单仓、单写入者、无 branch merge / rebase / cherry-pick / 冲突处理 / integration fix、当前 `evidence_id` 和命令顺序完全一致、`execution_session_id` 未变化、证据均为 `deterministic-local`，且没有未执行的 required live E2E 时，才可在 post-integration verify 复用。
+- 多仓、多 lease、`review_policy=strict`、`environment-dependent`、`live` 或任何无法确认的情况一律重跑。
+- 复用时仍进入 post-integration verify，并记录 `post_integration_verify_summary.status`: `reused` 与对应 `evidence_id`。
+
 任务系统回写：
 完成或阻塞时，给任务 <ISSUE-ID> 追加评论，或写入仓库任务回写日志，至少包含：
 - verification_summary
-- review_summary，其中明确 `review_owner`
+- review_summary，其中明确 `review_policy`、`subagent_review_required`、`review_owner`
 - integration_summary
 - post_integration_verify_summary
 - writeback_summary
@@ -146,7 +158,8 @@ Live E2E 要求：
 - `goal_state`: ready_to_execute
 - `prompt_length`: <字符数>
 - `plan_required`: true
-- `subagent_review_required`: true
+- `review_policy`: <standard|strict>
+- `subagent_review_required`: <true|false>
 - `live_e2e_policy`: required_if_available_else_manual_gate
 - `pre_commit_boundary`: true
 - `branch_required`: true

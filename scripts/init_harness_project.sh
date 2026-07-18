@@ -350,9 +350,11 @@ managed_files=(
   "scripts/harness/check.sh"
   "scripts/harness/common.sh"
   "scripts/harness/review_gate.sh"
+  "scripts/harness/evidence.sh"
   "scripts/harness/check.ps1"
   "scripts/harness/common.ps1"
   "scripts/harness/review_gate.ps1"
+  "scripts/harness/evidence.ps1"
 )
 
 for rel in "${managed_files[@]}"; do

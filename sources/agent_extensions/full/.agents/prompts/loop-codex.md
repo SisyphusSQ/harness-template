@@ -210,3 +210,11 @@ repo truth -> external current truth -> diff -> update/create -> readback verify
 - 自动推进、run id、drain 策略等语义读 `loop-automation.md`。
 - review 前默认读 `.agents/guides/code-review.md`。
 - lint 或机械规则接入前默认读 `.agents/guides/linter.md` 和 `docs/harness/project-constraints.md`。
+
+## 6. 自适应 Review / Evidence Loop
+
+- gate / freeze 先写入 `review_policy` 与 `subagent_review_required`。普通单仓低风险任务可显式使用 standard 对抗式自审；strict 必须由 subagent 独立评审，旧调用未提供 policy 时按 strict。
+- strict 覆盖多仓 / 多 lease / 集成、安全与公开 contract、schema / 数据、并发 / 幂等 / 重试 / 业务状态机、release / 生产 / 不可逆副作用、required live E2E、full-auto、自动 merge和未知风险。
+- verify 成功后记录 `evidence_id`、有序命令、`execution_session_id` 和验证类型。
+- post-integration verify 仍必须进入；只允许同一执行 session、同一快照、同一命令顺序、单仓单写入者的 deterministic-local 结果复用。
+- strict、环境依赖、live、多仓、多 lease、发生 integration event 或尚有 required live E2E 时必须重跑。

@@ -65,9 +65,11 @@ target-repo/
     ├── check.sh
     ├── common.sh
     ├── review_gate.sh
+    ├── evidence.sh
     ├── check.ps1
     ├── common.ps1
-    └── review_gate.ps1
+    ├── review_gate.ps1
+    └── evidence.ps1
 ```
 
 固定规则：
@@ -354,6 +356,7 @@ sources/agent_adapters/cursor/.cursor/rules/harness.mdc
   - `Concrete Steps` 需要拆成 `### 实现步骤` 与 `### 验证与收口步骤`
   - `TEMPLATE.md` 默认采用“实现优先”结构：`0. 现有架构回顾与核心设计决策 -> 1..N 改动面 -> 数据流可视化 -> 关键设计决策摘要 -> 与现有代码的关系`
 - `scripts/harness/review_gate.sh` 与 `scripts/harness/review_gate.ps1` 除了读取 `blocking_findings`，还要对 plan 做结构型轻量 lint，拒绝缺少实现骨架或仍保留明显占位内容的计划
+- `scripts/harness/evidence.sh` 与 `scripts/harness/evidence.ps1` 只读生成 `head`、`worktree_digest`、`evidence_id`、`reusable` 和 `reason`
 - `Reference Snippets` 不能是空块或纯占位内容
 - `组件职责与代码落点` 至少要有一条真实模块 / 路径 / 类型记录
 - `.agents/prompts/` 与 `.agents/guides/` 由 agent 驱动初始化时补充
@@ -424,9 +427,11 @@ sources/agent_extensions/
 - `check.sh`
 - `common.sh`
 - `review_gate.sh`
+- `evidence.sh`
 - `check.ps1`
 - `common.ps1`
 - `review_gate.ps1`
+- `evidence.ps1`
 
 固定要求：
 

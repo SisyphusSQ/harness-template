@@ -489,3 +489,13 @@ Constraints: <CONSTRAINTS>
 - 需要交互式 loop 入口时，优先改用 `.agents/prompts/loop-codex.md`。
 - 需要无人值守 / 自动推进时，优先改用 `.agents/prompts/loop-automation.md`。
 - 做本地 review 前，默认先读取 `.agents/guides/code-review.md`（若存在）。
+
+## 4. 自适应 Review 与验证证据复用
+
+- 在 gate / freeze 阶段派生 `review_policy=standard|strict`，同时写入 `subagent_review_required`。
+- `standard` 可由主 agent 做 findings-first 对抗式自审；`strict` 必须由 subagent 独立评审。两者都以 `blocking_findings=none` 收口。
+- 多仓、多可写 lease、branch / worktree 集成、安全或公开 contract、schema / 数据、并发 / 幂等 / 重试 / 业务状态机、release / 生产 / 不可逆副作用、required live E2E、full-auto、自动 merge 或风险未知时使用 `strict`。
+- 未提供 `review_policy` 的旧调用按 `strict` 处理。
+- 验证后记录 `evidence_id`、有序命令和结果、`execution_session_id`、验证类型、时间与仓库路径。验证类型为 `deterministic-local`、`environment-dependent` 或 `live`。
+- 只有同一 session、同一快照、同一命令顺序的单仓单写入者 `deterministic-local` 证据才可在 post-integration verify 标记为 `reused`；strict、环境依赖、live、多仓、多 lease 或任何不确定情况都重跑。
+- required live E2E 不可复用，未执行时继续停在既有 manual gate。

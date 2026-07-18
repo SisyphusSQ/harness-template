@@ -201,3 +201,14 @@ When Done:
 - `set_thread_title` 用于对齐 `<issue-id> <role> [short-scope]` 和完成后的 `【完成】` 标识。
 - 不默认使用 `set_thread_archived`；归档必须由用户显式要求。
 - thread tools 不可用时，使用人工 handoff，但仍保留 `Current State`、`Thread Status`、`write_lease` 和 recovery fields。
+
+## 6. Review / Evidence 编排字段
+
+主 thread 在 gate / freeze 记录：
+
+- `review_policy`: `standard` / `strict`
+- `subagent_review_required`: `true` / `false`
+
+多仓、多个可写 lease、branch / worktree 集成会自动触发 strict，因此这些场景不得复用 pre-integration 验证。其余 strict 风险条件沿用 `docs/harness/control-plane.md`。
+
+每个验证结果记录 `evidence_id`、有序命令、`execution_session_id` 和验证类型。只有单仓、单写入者、同 session、未发生任何 integration event 且 deterministic-local 的证据可在阶段内复用；复用时仍进入 post-integration verify，并写 `post_integration_verify_summary.status = reused` 与对应 evidence id。多仓、多 lease、strict、环境依赖、live 或不确定时重跑。
