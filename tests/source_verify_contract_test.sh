@@ -77,7 +77,7 @@ trap 'rm -rf "$tmp_root"' EXIT
 
 wording="$tmp_root/wording"
 new_source_fixture "$wording"
-perl -0pi -e 's/## Maintenance Loop/## Maintenance Cycle/' \
+perl -0pi -e 's/## 5\. Review Policy Contract/## 5. Review Strategy/' \
   "$wording/template/docs/harness/control-plane.md"
 expect_source_fail "$wording" "control-plane contract drift"
 

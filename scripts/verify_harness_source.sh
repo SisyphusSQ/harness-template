@@ -69,7 +69,7 @@ done
 assert_patterns "$repo_root/README.md" \
   "make verify" \
   "源仓完整回归" \
-  "目标仓日常检查" \
+  '目标仓执行 `make harness-verify`' \
   "scripts/verify_harness_source.sh" \
   "scripts/verify_harness_source.ps1"
 
@@ -80,28 +80,30 @@ assert_patterns "$repo_root/scripts/init_harness_project.ps1" \
   '"scripts/harness/evidence.sh"' \
   '"scripts/harness/evidence.ps1"'
 
-assert_patterns "$template_root/README.md" \
-  "scripts/harness/evidence.sh snapshot" \
-  "harness-verify"
 assert_patterns "$template_root/AGENTS.md" \
   "scripts/harness/evidence.sh snapshot" \
   "review_policy"
+
+if rg -ni 'harness|control-plane|\.agents/' "$template_root/README.md" >/dev/null; then
+  fail "template/README.md must stay business-only and contain no harness guidance"
+fi
 
 (
   cd "$template_root"
   bash scripts/harness/check.sh
 )
 
-for path in "$template_root/README.md" "$template_root/AGENTS.md"; do
-  rg -Fq "EXAMPLE-implementation.md" "$path" \
-    || fail "${path#$repo_root/} should point readers to EXAMPLE-implementation.md"
-done
+rg -Fq "EXAMPLE-implementation.md" "$template_root/AGENTS.md" \
+  || fail "template/AGENTS.md should point readers to EXAMPLE-implementation.md"
 if rg -n '^docs/test' "$template_root/.gitignore" >/dev/null; then
   fail "template/.gitignore should not ignore docs/test runbook documents"
 fi
 
 assert_patterns "$template_root/docs/harness/control-plane.md" \
-  "collect -> gate -> freeze -> slice -> dispatch -> implement -> verify -> review -> integrate -> verify -> writeback -> pr_prep -> merge -> notify" \
+  "collect + gate -> freeze + slice -> implement -> verify -> review -> closeout" \
+  '`dispatch` 只在需要多 thread / worktree / subagent fan-out 时进入' \
+  '`integrate -> post-integration verify` 只在存在可写 lease、branch / worktree 集成或其他 integration event 时进入' \
+  '`pr_prep -> merge` 只在当前交付目标包含 PR / MR 且用户或仓库规则已授权时进入' \
   "Issue Tracker 是主协作真相" \
   "repo 是主执行真相" \
   "goal-orchestration" \
@@ -109,18 +111,12 @@ assert_patterns "$template_root/docs/harness/control-plane.md" \
   "Current State" \
   "Thread Status" \
   "post-integration verify" \
-  "waiting_on_child" \
   "【完成】" \
   "Issue Store Profiles" \
+  "Linear 字段映射" \
   "provider 仓" \
   "consumer 仓" \
-  "project-constraints.md" \
-  "Maintenance Loop" \
-  "report-only" \
-  "rule-promotion" \
-  "review_gate" \
   ".agents/PLANS.md" \
-  ".agents/plans/TEMPLATE.md" \
   "Review Policy Contract" \
   '`review_policy`: `standard` / `strict`' \
   '`standard` 允许主 agent 执行对抗式自审' \
@@ -136,26 +132,6 @@ assert_patterns "$template_root/docs/harness/control-plane.md" \
   "deterministic-local" \
   "environment-dependent" \
   "任何无法确认的情况默认重跑"
-
-assert_patterns "$template_root/docs/harness/issue-workflow.md" \
-  "Issue Workflow" \
-  "Issue Tracker 是主协作真相" \
-  "Issue Store Profiles" \
-  "Orchestration Contract" \
-  "Current State Comment Contract" \
-  "Thread Status Comment Contract" \
-  "Write Lease Contract" \
-  "Post-Integration Verify Contract" \
-  "goal-orchestration" \
-  "write_lease" \
-  "Requirement Clarification" \
-  "Master Issue" \
-  "Execution Issue" \
-  "Codex Handoff" \
-  "recovery_point" \
-  "next_action" \
-  "current_issue_state" \
-  "Master 是否可置 Done"
 
 assert_patterns_any "docs/issues templates" \
   "$template_root/docs/issues/README.md $template_root/docs/issues/TEMPLATE.md" \
@@ -180,45 +156,13 @@ assert_patterns_any "docs/issues templates" \
   "post_integration_verify_summary" \
   "writeback_log"
 
-assert_patterns "$template_root/docs/harness/project-constraints.md" \
-  "Project Mechanical Constraints" \
-  "状态枚举" \
-  "分类枚举" \
-  "enforced" \
-  "partial" \
-  "documented" \
-  "planned" \
-  "not_applicable" \
-  "architecture" \
-  "contract" \
-  "runtime" \
-  "verification" \
-  "docs" \
-  "security" \
-  "cross-repo" \
-  "维护循环关联" \
-  "maintenance_candidate" \
-  "rule_promotion_candidate" \
-  "human_decision_required" \
-  "Maintenance Tag" \
-  "Rule ID | Category | Rule | Source | Enforcement | Command | Status | Maintenance Tag | Notes" \
-  "project-check" \
-  '没有可执行命令或 gate 时，不得假装 `enforced`' \
-  "repeated review finding"
 
-assert_patterns "$template_root/docs/harness/linear.md" \
-  "Linear Profile" \
-  "issue-workflow.md" \
-  "Linear 字段映射" \
-  "current_issue_state" \
-  "Current State" \
-  "Thread Status" \
-  "write_lease" \
-  "post-integration verify" \
-  "【完成】" \
-  "recovery_point" \
-  "next_action" \
-  "Issue Tracker 是主协作真相"
+for obsolete in \
+  "$template_root/docs/harness/issue-workflow.md" \
+  "$template_root/docs/harness/linear.md" \
+  "$template_root/docs/harness/project-constraints.md"; do
+  [[ ! -e "$obsolete" ]] || fail "obsolete template document still exists: ${obsolete#$repo_root/}"
+done
 
 assert_patterns "$template_root/docs/test/RUNBOOK_TEMPLATE.md" \
   "Test Runbook Template" \
@@ -233,11 +177,8 @@ assert_patterns "$template_root/docs/test/RUNBOOK_TEMPLATE.md" \
   "runbook"
 
 assert_patterns "$template_root/.agents/PLANS.md" \
-  "文档定位" \
-  "计划实例位置" \
   "何时必须写 plan" \
-  "计划文档最小结构" \
-  "技术实现型任务推荐写法" \
+  "最小结构" \
   "EXAMPLE-implementation.md" \
   "真实入口与触发" \
   "输入装配与边界校验" \
@@ -253,11 +194,7 @@ assert_patterns "$template_root/.agents/PLANS.md" \
   "伪代码 / 主循环" \
   "关键分支与实现策略" \
   "竞态 / 状态机分析" \
-  "Mermaid 使用规则" \
-  "代码示例使用规则" \
-  "Maintenance Loop 计划要求" \
-  "Maintenance Findings" \
-  "Issue Tracker 默认约定"
+  "不要在 plan 复制整套控制面"
 
 assert_patterns "$template_root/.agents/plans/TEMPLATE.md" \
   "name: <任务名>" \
@@ -278,13 +215,7 @@ assert_patterns "$template_root/.agents/plans/TEMPLATE.md" \
   "步骤化时序" \
   "### 停止 / 错误 / 恢复" \
   "关键分支 / 降级路径" \
-  "## 数据流可视化" \
-  "## 关键设计决策摘要" \
-  "## 与现有代码的关系" \
-  "## File Map（按需）" \
-  "## 关键分支与实现策略（按需）" \
-  "## 伪代码 / 主循环（按需）" \
-  "## 竞态 / 状态机分析（按需）" \
+  "### 按需补充" \
   "## Reference Snippets" \
   "## Concrete Steps" \
   "### 实现步骤" \
@@ -294,22 +225,13 @@ assert_patterns "$template_root/.agents/plans/TEMPLATE.md" \
   "## Surprises & Discoveries" \
   "## Validation and Acceptance" \
   "## Idempotence and Recovery" \
+  "## Review Summary" \
   "## Outcomes & Retrospective"
-
-for field in \
-  issue_provider issue_project current_issue_state recovery_point next_action \
-  state_ref latest_run_ref master_run_ref; do
-  rg -Fq -- "$field" "$template_root/.agents/plans/TEMPLATE.md" \
-    || fail "plan template missing issue/state field: $field"
-done
 
 assert_patterns "$template_root/.agents/plans/EXAMPLE-implementation.md" \
   "## Goal" \
   "## 0. 现有架构回顾与核心设计决策" \
-  "## 1. HTTP 入口层 -- 收口请求与幂等键" \
-  "## 数据流可视化" \
-  "## 关键设计决策摘要" \
-  "## 与现有代码的关系" \
+  "## 1. HTTP 与 service -- 稳定幂等入口" \
   "## Reference Snippets" \
   "## Review Summary"
 
@@ -356,7 +278,7 @@ assert_patterns "$template_root/.agents/skills/issue-goal-prompt/references/goal
   "review_owner: subagent" \
   '`evidence_id`' \
   '`execution_session_id`' \
-  '`post_integration_verify_summary.status`: `reused`'
+  '`post_integration_verify_summary.status`: `executed`'
 
 assert_patterns "$template_root/.agents/skills/project-plan-archive/SKILL.md" \
   "先查 Issue Tracker，再归档" \
@@ -395,7 +317,7 @@ assert_patterns "$template_root/scripts/harness/evidence.ps1" \
   "reason="
 
 assert_patterns "$repo_root/scripts/verify_harness_source.ps1" \
-  "Maintenance Loop" \
+  "template/README.md must stay business-only" \
   "Reference Snippets" \
   "Get-PlanImplementationSkeletonErrors" \
   "full and placeholder extension bundles have different file sets" \
@@ -416,34 +338,23 @@ placeholder_files="$(cd "$placeholder_root" && find . -type f -print | sort)"
 assert_patterns "$shared_root/.agents/prompts/README.md" \
   "orchestrator-thread.md" \
   "issue-standard-workflow.md" \
-  "loop-codex.md" \
-  "loop-automation.md" \
-  "maintenance-loop.md"
+  "日常自然语言协作不需要额外的 loop prompt"
 
 for mode_root in "$full_root" "$placeholder_root"; do
   assert_patterns "$mode_root/.agents/guides/linter.md" \
-    "docs/harness/project-constraints.md"
+    "AGENTS.md"
   assert_patterns "$mode_root/.agents/prompts/issue-standard-workflow.md" \
     "review_policy" \
     "subagent_review_required" \
     "evidence_id" \
     "deterministic-local" \
     "environment-dependent" \
-    "reused"
-  assert_patterns "$mode_root/.agents/prompts/loop-codex.md" \
-    "review_policy" \
-    "subagent_review_required" \
-    "evidence_id" \
-    "required live E2E"
-  assert_patterns "$mode_root/.agents/prompts/loop-automation.md" \
-    "review_policy" \
-    "evidence_id" \
-    "任何无法确认的情况默认重跑"
+    "发生 integration event"
   assert_patterns "$mode_root/.agents/prompts/orchestrator-thread.md" \
-    "review_policy" \
-    "subagent_review_required" \
+    "Review policy" \
+    "write_lease" \
     "post_integration_verify_summary.status" \
-    "reused"
+    "executed"
   assert_patterns "$mode_root/.agents/guides/code-review.md" \
     "Review Policy" \
     "main-agent-self-review" \
@@ -461,13 +372,11 @@ while IFS= read -r rel; do
 done <<<"$full_files"
 
 assert_patterns "$full_root/.agents/prompts/orchestrator-thread.md" \
-  "goal-orchestration" \
+  "Handoff 模板" \
   "write_lease" \
   "Current State" \
   "Thread Status" \
-  "post-integration verify" \
-  "waiting_on_child" \
-  "【完成】"
+  "post-integration verify"
 
 assert_patterns "$full_root/.agents/prompts/issue-standard-workflow.md" \
   "真实入口与触发" \
@@ -483,19 +392,12 @@ assert_patterns "$full_root/.agents/prompts/issue-standard-workflow.md" \
   "write_lease" \
   "post-integration verify"
 
-assert_patterns "$full_root/.agents/prompts/maintenance-loop.md" \
-  "report-only" \
-  "issue-create" \
-  "safe-fix" \
-  "rule-promotion" \
-  "Maintenance Findings" \
-  "Classification" \
-  "Verification Plan" \
-  "Writeback Plan" \
-  "Residual Risks" \
-  "Next Action" \
-  "rule_promotion_candidate" \
-  "human_decision_required"
+for mode_root in "$full_root" "$placeholder_root"; do
+  for obsolete in loop-codex.md loop-automation.md maintenance-loop.md; do
+    [[ ! -e "$mode_root/.agents/prompts/$obsolete" ]] \
+      || fail "obsolete prompt still exists: ${mode_root#$repo_root/}/.agents/prompts/$obsolete"
+  done
+done
 
 tmp_root="$(mktemp -d -t harness-source-verify)"
 trap 'rm -rf "$tmp_root"' EXIT

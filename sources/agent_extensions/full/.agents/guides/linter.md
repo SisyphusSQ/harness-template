@@ -1,72 +1,35 @@
 Mode: full
 
-# Linter Guide
+# Linter 接入指南
 
-## 1. 目标
+本文帮助项目把稳定约束落实为可执行检查。它不是“已经接通 lint”的证明。
 
-这份文档用于帮助仓库按技术栈补齐 lint 能力，但它本身不是“已经接通 lint”的证明。lint 是项目级机械约束的一种载体，具体规则必须回登记到 `docs/harness/project-constraints.md`。
+## 原则
 
-固定规则：
+- 项目真实约束先写入根 `AGENTS.md`。
+- 可以机械验证的规则再落实到 linter、test、contract diff、Makefile 或 Harness gate。
+- 没有可执行命令、正反例和稳定失败语义时，只能称为文档约束。
+- 不把临时 Issue 需求、一次性 review finding 或特定实现偏好直接升级成全仓规则。
 
-- 没有冻结 repo-local 命令与配置前，不要假装仓库已有可执行 lint contract
-- 是否把 lint 接进 Makefile / CI / verify，由仓库自己决定
-- 若 lint 结果被采用为 gate，应把 lint 摘要写进 Issue Tracker 反馈
-- 若 lint 承接项目级机械约束，应同步更新 `docs/harness/project-constraints.md` 的 `Enforcement`、`Command` 和 `Status`
+## 接入步骤
 
-## 2. 按栈候选方案
+1. 从重复缺陷、稳定架构边界或外部 contract 中提取候选规则。
+2. 明确检查对象、适用目录、允许例外和误报边界。
+3. 选择项目已有 lint/test 入口，避免另建平行工具链。
+4. 先写至少一个应通过和一个应失败的 fixture。
+5. 实现检查并给出稳定、可定位的错误信息。
+6. 把命令接入项目 Makefile 或既有验证入口。
+7. 更新 `AGENTS.md` 的项目约束与验证命令。
+8. 运行 focused tests、项目完整验证、`make harness-verify` 和 `git diff --check`。
 
-| 栈 | 候选命令 | 典型配置 |
-| --- | --- | --- |
-| `go` | `golangci-lint run ./...` | `.golangci.yml` |
-| `python` | `ruff check .` / `pyright` | `pyproject.toml` |
-| `go-node` | Go lint + `eslint .` / 前端 lint 命令 | `.golangci.yml` + `eslint.config.*` |
-| `python-node` | Python lint + Node/前端 lint | `pyproject.toml` + `eslint.config.*` |
-| `java` | `mvn test` / `mvn verify` / `gradle check` / `spotlessCheck` | `pom.xml` / `build.gradle*` |
-| `c` | `clang-format --dry-run` / `clang-tidy` / `cmake --build` | `.clang-format` / CMake config |
+## 交付结果
 
-说明：
+至少报告：
 
-- 上表只是候选起点，不是强制命令
-- 只有在仓库确认采用后，才应写进 Makefile、CI 或 verify contract
-
-## 3. 接入顺序
-
-建议按以下顺序补齐：
-
-1. 冻结当前仓库真实使用的 lint 工具
-2. 冻结配置文件路径
-3. 冻结本地执行入口
-4. 冻结是否接入 CI
-5. 冻结 lint 失败是否阻塞 verify / review
-6. 回写 `docs/harness/project-constraints.md`，把对应规则状态从 `documented` / `planned` 调整为真实状态
-
-## 4. 最小决策表
-
-| 项目 | 必须回答的问题 |
-| --- | --- |
-| 工具 | 用什么 lint 工具 |
-| 命令 | 最终执行命令是什么 |
-| 配置 | 配置文件在哪里 |
-| 入口 | 手动执行 / Make / CI / pre-commit 哪些需要 |
-| 阻塞性 | 是否阻塞 verify / review |
-
-## 5. 推荐做法
-
-- 在仓库还没稳定前，可以先只写本文件，不急着把 lint 接进 base harness
-- 若 lint 规则很重，先作为手动命令验证，再决定是否升级为默认 gate
-- 若未来确实稳定，再把 lint 入口提升为 repo-local verify contract 的一部分
-
-## 6. Rule Promotion Adapter
-
-当 review 中反复出现同类机械问题时，按以下顺序升级：
-
-1. 在 `docs/harness/project-constraints.md` 登记规则候选。
-2. 冻结 Rule ID、检测命令、误报风险、回滚方式。
-3. 先以手动命令或只读 check 验证。
-4. 再决定是否接入 Makefile、CI、pre-commit 或 review gate。
-
-固定要求：
-
-- 没有稳定命令前，规则状态不得写成 `enforced`。
-- 任何会重写文件的 lint / format 命令不得混入只读 gate。
-- 自定义 analyzer 或脚本需要有自己的测试或样例输入。
+- Rule / source
+- Enforcement command
+- Positive / negative fixture
+- Scope and exceptions
+- Verification result
+- Residual risks
+- Rollback or disable path

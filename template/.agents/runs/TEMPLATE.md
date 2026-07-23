@@ -24,8 +24,6 @@
 - `stop_scope`:
 - `verification_summary`:
 - `review_summary`:
-- `integration_summary`:
-- `post_integration_verify_summary`:
 - `goal_level_verification_summary`:
 - `writeback_summary`:
 - `residual_risks`:
@@ -36,9 +34,16 @@
 - `write_lease_summary`:
 - `waiting_on`:
 - `next_check`:
-- `merge_closeout`:
 - `issue_writeback`:
 - `sanitized_artifacts`:
+
+## 条件字段（按需）
+
+- `integration_summary`: 仅存在可写 lease、branch / worktree 集成或其他 integration event 时填写
+- `post_integration_verify_summary`: 仅进入 integration 分支时填写
+- `optional_delivery`: `not_requested` / `manual` / `pr_prep` / `merged`
+- `pr_mr_summary`: 仅进入可选交付阶段时填写
+- `merge_summary`: 仅进入可选交付阶段时填写
 
 ## PR / MR Draft（按需）
 

@@ -65,7 +65,7 @@ expect_pass "$baseline" "baseline target"
 
 wording="$tmp_root/wording"
 new_target "$wording"
-perl -0pi -e 's/## Maintenance Loop/## Maintenance Cycle/' "$wording/docs/harness/control-plane.md"
+perl -0pi -e 's/## 3\. Issue 状态机/## 3. Issue Lifecycle/' "$wording/docs/harness/control-plane.md"
 expect_pass "$wording" "non-contract wording change"
 
 missing="$tmp_root/missing"
@@ -89,8 +89,14 @@ new_target "$mixed_mode"
 cp -R "$repo_root/sources/agent_extensions/shared/." "$mixed_mode/"
 cp -R "$repo_root/sources/agent_extensions/full/." "$mixed_mode/"
 perl -0pi -e 's/^Mode: full/Mode: placeholder/' \
-  "$mixed_mode/.agents/prompts/loop-codex.md"
+  "$mixed_mode/.agents/prompts/orchestrator-thread.md"
 expect_fail "$mixed_mode" "mixed extension mode"
+
+obsolete_prompt="$tmp_root/obsolete-prompt"
+new_target "$obsolete_prompt"
+mkdir -p "$obsolete_prompt/.agents/prompts"
+: >"$obsolete_prompt/.agents/prompts/loop-codex.md"
+expect_fail "$obsolete_prompt" "obsolete prompt"
 
 powershell_check="$template_root/scripts/harness/check.ps1"
 for pattern in \

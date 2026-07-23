@@ -1,61 +1,31 @@
 Mode: placeholder
 
-# Orchestrator Thread Prompt（占位）
+# Thread 编排与 Handoff（占位）
 
-## 用途
+仅在独立任务、主子任务或并行写入时使用。普通单任务不需要额外编排。
 
-这份文件用于主 thread / 子 thread 编排的入口，包括：
-
-- root goal 下发到多个 thread 的 `goal-orchestration`
-- 单张 Execution Issue 的 `single-issue` 编排
-- Master Issue inventory 的串行推进
-- 子 thread handoff、`write_lease`、`Current State`、`Thread Status`
-
-当前是占位文件，不代表仓库已经冻结完整多 thread 编排语义。
-
-## 当前仍缺的 repo-local 决策
-
-- 是否启用 Codex thread tools，或只使用人工 handoff
-- 子 thread worktree / branch 命名约定
-- `write_lease` 是否需要项目级可执行检查
-- live E2E 的真实命令、环境和 fallback 规则
-- `waiting_on_child` 的定时检查方式
-
-## 临时占位模板骨架
+## Handoff 最小字段
 
 ```text
-你是本项目的主调度 thread。
-
-Root Goal:
-Root Issue:
-Orchestration Mode: goal-orchestration | single-issue | master-inventory
-Mode:
-
-Write Lease Table:
-- lease_id:
-- owner_thread:
-- role:
-- state:
-- write_scope:
-- next_action:
-
-When child thread is done:
-- require fixed Thread Status comment
-- do not archive by default
-- add 【完成】 to thread title if thread tools are available
-- if not available, record title_marker_pending=true in Current State
+目标：<一个可验收结果>
+当前事实与来源：<Issue、repo、branch、文档或 contract>
+Included：<范围>
+Excluded：<范围>
+Read scope：<路径或系统>
+Write scope：<路径或 none>
+Write lease：<id 或 none>
+允许的副作用：<read-only / 文件 / Git / 外部系统>
+验证命令：<有序命令>
+Review policy：<standard|strict>
+停止条件：<冲突、缺授权或不安全状态>
+最终回传：<改动、验证、blocking_findings、风险、next action>
 ```
 
-## 使用约束
+固定边界：
 
-- 本文件只服务编排 prompt，占位期间不得替代 `docs/harness/control-plane.md` 或 `docs/harness/issue-workflow.md`
-- 可写 thread 必须有 `write_lease`
-- 子 thread 不自行 merge，不自行扩大范围
-- post-integration verify 仍由主 thread 基于最终 repo truth 执行
-
-## 基础 Review / Evidence 编排字段
-
-- gate / freeze 记录 `review_policy` 与 `subagent_review_required`。
-- 多仓、多个可写 lease、branch / worktree 集成自动使用 strict，并重新执行验证。
-- 验证摘要记录 `evidence_id`、有序命令、session 与验证类型。
-- 仅单仓单写入者、同 session、无 integration event 的 deterministic-local 证据可在 post-integration verify 标记 `post_integration_verify_summary.status = reused`；strict、live、环境依赖或不确定时重跑。
+- 只读任务不需要 lease；可写任务必须有互不重叠的 `write_lease`。
+- 执行任务不扩大 Goal，不覆盖既有用户改动。
+- `ready` 只代表可交回主任务，不代表完成。
+- 发生 integration event 后，主任务必须执行 post-integration verify，并记录 `post_integration_verify_summary.status: executed`。
+- 没有 integration event 时不制造第二次验证。
+- 共享状态使用 control plane 的 `Current State` 与 `Thread Status`。

@@ -7,26 +7,29 @@ alwaysApply: true
 
 在本仓库工作时，先进入仓库内的 harness 控制面，再开始分析、计划、修改或收口。
 
-## 必读顺序
+## 渐进式读取
+
+每个任务只默认读取：
 
 1. `AGENTS.md`
 2. 当前修改目录就近的目录级 `AGENTS.md`（如果存在）
-3. `docs/harness/control-plane.md`
-4. `docs/harness/issue-workflow.md`
-5. `docs/harness/linear.md`（Linear profile，如适用）
-6. `docs/issues/README.md`
-7. `docs/harness/project-constraints.md`
-8. `.agents/PLANS.md`
-9. `.agents/plans/TEMPLATE.md`
-10. `.agents/plans/EXAMPLE-implementation.md`
-11. `docs/test/RUNBOOK_TEMPLATE.md`
+
+之后按任务需要读取，不要预加载全部 Harness 文件：
+
+- 状态机、Issue、review、验证或交付边界：`docs/harness/control-plane.md`
+- 复杂任务：`.agents/PLANS.md`
+- 真正写计划：`.agents/plans/TEMPLATE.md`
+- 计划质量需要校准：`.agents/plans/EXAMPLE-implementation.md`
+- `issue-provider=repo`：`docs/issues/README.md`
+- 测试 runbook 任务：`docs/test/RUNBOOK_TEMPLATE.md`
+- 手动工作流、多任务交接、review 或 lint：读取对应 prompt / guide
 
 ## 执行约束
 
 - 非简单任务先按 `.agents/PLANS.md` 与 `.agents/plans/TEMPLATE.md` 创建或更新计划。
 - 实现型计划必须写真实代码入口、输入装配、组件职责、关键时序、错误处理和恢复路径。
 - 不要用 harness 控制流替代业务实现架构或数据流说明。
-- 项目级机械约束需要登记到 `docs/harness/project-constraints.md`；没有可执行命令或 gate 时，不要标记为 `enforced`。
+- 项目真实约束写在 `AGENTS.md`；能机械执行的规则落实到项目 Makefile、lint 或 gate，没有执行入口时不要宣称已强制。
 - 测试或自测文档使用 `docs/test/RUNBOOK_TEMPLATE.md`，只把脱敏结果摘要写入提交版文档。
 - 收口前 macOS / Linux / Git Bash 优先执行 `make harness-verify`；Windows PowerShell 执行 `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\harness\check.ps1`。
 - Bash / Git Bash 示例使用 POSIX 路径；PowerShell 示例使用 `C:\path\to\repo` 或 UNC 路径，不自动互转。
@@ -37,4 +40,4 @@ alwaysApply: true
 - repo 是主执行真相。
 - PR / MR 是次级代码叙事面。
 - `.agents/state` 与 `.agents/runs` 是本地辅助运行面，不替代 Issue Tracker。
-- `.agents/skills` 是可选 repo-local 扩展，不是 base harness 必备输出。
+- `.agents/skills` 是 base harness 的 repo-local workflow 层。

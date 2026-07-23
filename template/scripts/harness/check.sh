@@ -15,9 +15,6 @@ required_files=(
   "AGENTS.md"
   "README.md"
   "docs/harness/control-plane.md"
-  "docs/harness/issue-workflow.md"
-  "docs/harness/linear.md"
-  "docs/harness/project-constraints.md"
   "docs/issues/README.md"
   "docs/issues/TEMPLATE.md"
   "docs/test/RUNBOOK_TEMPLATE.md"
@@ -53,9 +50,20 @@ for path in "${required_files[@]}"; do
   [[ -f "$path" ]] || fail "Missing required harness file: $path"
 done
 
-if [[ -f "docs/harness/prompt-templates.md" ]]; then
-  fail "Obsolete harness file should not exist anymore: docs/harness/prompt-templates.md"
-fi
+obsolete_files=(
+  "docs/harness/README.md"
+  "docs/harness/prompt-templates.md"
+  "docs/harness/issue-workflow.md"
+  "docs/harness/linear.md"
+  "docs/harness/project-constraints.md"
+  ".agents/prompts/loop-codex.md"
+  ".agents/prompts/loop-automation.md"
+  ".agents/prompts/maintenance-loop.md"
+)
+
+for path in "${obsolete_files[@]}"; do
+  [[ ! -e "$path" ]] || fail "Obsolete harness file should not exist anymore: $path"
+done
 
 required_skill_frontmatter=(
   ".agents/skills/issue-goal-prompt/SKILL.md|name: issue-goal-prompt"
@@ -162,9 +170,6 @@ fi
 optional_mode_files=(
   ".agents/prompts/orchestrator-thread.md"
   ".agents/prompts/issue-standard-workflow.md"
-  ".agents/prompts/loop-codex.md"
-  ".agents/prompts/loop-automation.md"
-  ".agents/prompts/maintenance-loop.md"
   ".agents/guides/code-review.md"
   ".agents/guides/linter.md"
 )

@@ -5,18 +5,19 @@ Mode: full
 | 项目 | 内容 |
 | --- | --- |
 | 文档定位 | 标准 issue workflow 手册与高频 Prompt 模板 |
-| 适用范围 | 当前仓库的单卡推进、开发前准备、verify / review / mr_prep / 收口场景 |
+| 适用范围 | 当前仓库的单卡推进、开发前准备、verify / review / closeout，以及按授权进入的 PR / MR 交付场景 |
 | 主要载体 | `.agents/prompts/` + `docs/harness/` + `.agents/PLANS.md` + 仓库代码 |
-| 关联文档 | `AGENTS.md`、`docs/harness/control-plane.md`、`docs/harness/linear.md`、`.agents/prompts/orchestrator-thread.md`、`.agents/prompts/loop-codex.md`、`.agents/prompts/loop-automation.md`、`.agents/guides/code-review.md`、`.agents/PLANS.md` |
+| 关联文档 | `AGENTS.md`、`docs/harness/control-plane.md`、`.agents/prompts/orchestrator-thread.md`、`.agents/guides/code-review.md`、`.agents/PLANS.md` |
 
 固定规则：
 
 - 本文是 `.agents/prompts/` 的使用手册，不是新的控制面真相源。
 - 若本文与 `AGENTS.md`、`docs/harness/*`、`.agents/PLANS.md` 冲突，以后者为准。
-- `loop-codex.md` 负责交互式 loop 的短 contract；`loop-automation.md` 负责无人值守 loop 的自动化语义。
 - `orchestrator-thread.md` 负责主 thread / child thread / worktree thread / subagent 编排模板。
 - 能从仓库与 issue 真相自行定位的输入，先自行探索，不要反问用户。
 - 阶段反馈、收口结果、`recovery_point`、`next_action` 默认写回 Issue Tracker。
+- 默认主线是 `collect + gate -> freeze + slice -> implement -> verify -> review -> closeout`。
+- `dispatch / integrate / post-integration verify` 是 fan-out 或其他 integration event 才进入的条件分支；`pr_prep / merge` 是获得授权后才进入的可选交付阶段。
 
 ## 0. 占位符约定
 
@@ -45,7 +46,7 @@ Mode: full
 
 1. 复杂任务默认先建或更新 `.agents/plans/*`，再进入实现。
 2. 任何实现都必须先冻结 Included / Excluded / Acceptance Matrix / Write Scope Limit。
-3. `verify / review / mr_prep` 是独立 checkpoint，不属于 `implement` 的隐含附属动作。
+3. `verify / review / closeout` 是默认独立 checkpoint；`pr_prep / merge` 仅在可选交付阶段成为独立 checkpoint。
 4. 发现当前卡过大、依赖未清或 write scope 失控时，先回到 plan-only，不继续硬做。
 5. 若存在 `.agents/guides/code-review.md`，review 口径先按其中要求执行。
 6. 若仓库启用了 PR / MR，它是次级代码叙事面，不替代 Issue Tracker 的协作真相。
@@ -80,31 +81,11 @@ Mode: full
     - 单卡多 thread 使用 `single-issue`
     - 可写 child thread 必须有 `write_lease`
     - 子 thread 不默认归档，完成后标题加 `【完成】`
-14. 集成后验证是最终 repo truth：
+14. 集成后验证是条件式最终 repo truth：
     - 子 thread 验证只是输入证据
-    - 主 thread integrate 后必须执行 post-integration verify
+    - 只有发生 integration event 时才进入 integrate；进入后必须执行 post-integration verify
+    - 单仓单写入者且没有 integration event 时，第一次 verify 就是权威验证，不增加第二次 verify 阶段
     - required live E2E 未执行时，不得进入 `verified / ready-for-merge / done`
-
-## 1.1 Optional Superpowers Skill Hooks
-
-固定规则：
-
-- Superpowers 只作为阶段辅助，不替代本文、`.agents/PLANS.md`、`docs/harness/*` 或 Issue Tracker truth。
-- 实施计划统一写入 `.agents/plans/`；不采用 Superpowers 默认计划目录作为仓库计划真相。
-- skill 输出必须折回当前计划或 issue 的 `Verify Summary`、`Review Summary`、`Writeback Summary`、`Issue Tracker Actions`。
-- 若 Superpowers 不可用，继续按本仓库 harness loop 执行。
-
-阶段提示：
-
-- `collect / gate`：需求未冻结、需要澄清设计或方案取舍时，可考虑 `superpowers:brainstorming`。
-- `freeze / slice`：写实施计划时，可考虑 `superpowers:writing-plans`，但路径与结构服从 `.agents/PLANS.md`。
-- `implement`：行为变更、bugfix 或重构可考虑 `superpowers:test-driven-development`。
-- `implement`：任务独立且 subagent 可用时可考虑 `superpowers:subagent-driven-development`；否则使用普通 inline loop。
-- `dispatch / integrate`：多 thread、worktree thread 或 subagent 编排时，先使用 `.agents/prompts/orchestrator-thread.md`；Superpowers subagent 只作为短生命周期执行资源。
-- `verify`：声明完成、通过或可收口前，可考虑 `superpowers:verification-before-completion`。
-- `verify` 失败或异常排查：可考虑 `superpowers:systematic-debugging`，先定位根因再修。
-- `review`：重大改动或 merge 前可考虑 `superpowers:requesting-code-review`，并把结论归并到 `blocking_findings`。
-- `pr_prep / merge`：分支收口可参考 `superpowers:finishing-a-development-branch`，但 merge 优先级仍服从本仓库规则。
 
 ## 2. 常用 Prompt 模板
 
@@ -115,52 +96,6 @@ Mode: full
 先基于当前仓库、相关文档和 issue 上下文判断这张卡目前处于什么阶段，
 再给出下一步最合适的动作。
 如果当前信息不足以直接进入开发，优先先做范围分析和计划准备，不要直接扩大范围。
-```
-
-### 2.1.0 启动 root goal / 多 thread 编排
-
-```text
-围绕 <ROOT-GOAL 或 ROOT-ISSUE> 启动 <ORCHESTRATION-MODE>。
-先读取 Issue Tracker、repo docs、active plan、已有 thread / branch / run 状态。
-如果需要多 thread / worktree / subagent 编排，先读 `.agents/prompts/orchestrator-thread.md` 并生成主 thread Goal Prompt。
-
-必须输出：
-- root_goal
-- orchestration_mode
-- mode
-- goal_state
-- goal_unit_roster
-- active_master_issue / active_execution_issue
-- child thread / subagent dispatch 建议
-- write_lease 表
-- waiting_on / next_check / recovery_point / next_action
-```
-
-### 2.1.0.1 子 thread handoff
-
-```text
-为 <ISSUE-ID> 创建或发送 <THREAD-ROLE> child thread handoff。
-先确认该 thread 是只读、可写 worktree thread，还是短期 subagent。
-如果会写代码、文档或配置，必须登记 <WRITE-LEASE>。
-
-handoff 必须包含：
-- Thread Title: <issue-id> <role> [short-scope]
-- branch / worktree
-- read_scope / write_scope / excluded_scope
-- verification commands
-- stop conditions
-- fixed Thread Status comment template
-- done rule: 不归档，完成后等待主 thread 加 `【完成】` 标识
-```
-
-### 2.1.0.2 子 thread ready 后集成
-
-```text
-围绕 <ISSUE-ID> 集成子 thread 输出。
-先读取子 thread 的 Thread Status comment、branch/worktree、write_lease 和验证摘要。
-检查 diff 是否落在 write_scope 且未触碰 excluded_scope。
-review 通过后进入 integrate；集成后必须重新执行 post-integration verify。
-若 required live E2E 未执行，停止在 blocked / manual-gate，不得标记 verified / done。
 ```
 
 ### 2.1.1 从设计文档 / runbook / 需求文档创建 issue inventory
@@ -271,7 +206,7 @@ Additional constraints: <CONSTRAINTS>
    - blocking_findings
    - Residual Risks
    - Suggested Next Step
-4. 若存在 blocking findings，不进入 mr_prep / merge。
+4. 若存在 blocking findings，不进入 closeout 中的可选交付阶段。
 ```
 
 固定要求：
@@ -287,7 +222,7 @@ Additional constraints: <CONSTRAINTS>
 优先修正 blocking findings，再按约定范围处理其他 findings；
 修正后重新执行 verify -> review；
 保持冻结范围不变；
-未重新通过 review 前，不进入 mr_prep / merge。
+未重新通过 review 前，不进入 closeout 中的可选交付阶段。
 ```
 
 ### 2.6 Findings 先给我 review，再决定修改
@@ -486,8 +421,7 @@ Constraints: <CONSTRAINTS>
 - 需要先只看 findings、不自动修改时，先用“Verify + Review Gate（只出结论与 findings，不修改）”，再按需要选择两个 findings follow-up 模板之一。
 - 需要生成或执行 `docs/test/*` runbook，优先用 `2.7 测试文档生成 / 执行 / 结果回写`。
 - 需要同步外部接口目录或外部系统条目，优先用 `2.8 外部接口目录 / 外部系统同步验收 (external-sync)`。
-- 需要交互式 loop 入口时，优先改用 `.agents/prompts/loop-codex.md`。
-- 需要无人值守 / 自动推进时，优先改用 `.agents/prompts/loop-automation.md`。
+- 多 thread、独立任务或并行写入统一使用 `.agents/prompts/orchestrator-thread.md`。
 - 做本地 review 前，默认先读取 `.agents/guides/code-review.md`（若存在）。
 
 ## 4. 自适应 Review 与验证证据复用
@@ -497,5 +431,6 @@ Constraints: <CONSTRAINTS>
 - 多仓、多可写 lease、branch / worktree 集成、安全或公开 contract、schema / 数据、并发 / 幂等 / 重试 / 业务状态机、release / 生产 / 不可逆副作用、required live E2E、full-auto、自动 merge 或风险未知时使用 `strict`。
 - 未提供 `review_policy` 的旧调用按 `strict` 处理。
 - 验证后记录 `evidence_id`、有序命令和结果、`execution_session_id`、验证类型、时间与仓库路径。验证类型为 `deterministic-local`、`environment-dependent` 或 `live`。
-- 只有同一 session、同一快照、同一命令顺序的单仓单写入者 `deterministic-local` 证据才可在 post-integration verify 标记为 `reused`；strict、环境依赖、live、多仓、多 lease 或任何不确定情况都重跑。
+- 没有 integration event 时，只有同一 session、同一快照、同一命令顺序的单仓单写入者 `deterministic-local` 证据才可沿用到 closeout；strict、环境依赖、live、多仓、多 lease、发生 integration event 或任何不确定情况都重跑。
+- 发生 integration event 时必须执行 post-integration verify，不得把子 thread 或集成前证据直接标记为最终通过。
 - required live E2E 不可复用，未执行时继续停在既有 manual gate。
