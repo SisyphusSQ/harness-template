@@ -38,8 +38,6 @@
 必须先读取：
 - <ABSOLUTE-REPO-PATH>/AGENTS.md
 - <ABSOLUTE-REPO-PATH>/docs/harness/control-plane.md
-- <ABSOLUTE-REPO-PATH>/docs/harness/issue-workflow.md
-- <ABSOLUTE-REPO-PATH>/<ACTIVE-ISSUE-PROFILE-DOC>
 - <ABSOLUTE-REPO-PATH>/.agents/PLANS.md
 - <ABSOLUTE-REPO-PATH>/.agents/plans/TEMPLATE.md
 - <ABSOLUTE-REPO-PATH>/.agents/prompts/issue-standard-workflow.md（如存在）
@@ -70,13 +68,12 @@ Harness 要求：
      - 组件职责与代码落点
      - 关键执行时序
      - 停止 / 错误 / 恢复
+   - 关键对象片段（对应 `Reference Snippets`）
    - 具体步骤（对应 `Concrete Steps`）
    - 验证和验收（对应 `Validation and Acceptance`）
-   - Harness 控制面（对应 `Harness Control Plane`）
-   - 验证摘要（对应 `Verify Summary`）
    - 评审摘要（对应 `Review Summary`）
-   - 回写摘要（对应 `Writeback Summary`）
-   - 结果（对应 `Outcomes`）
+   - 结果与复盘（对应 `Outcomes & Retrospective`）
+   共享状态、验证摘要、writeback 和 optional delivery 结果写入 Issue Tracker 或 `.agents/runs/`，不要复制进计划。
 5. 如果任务信息不足以冻结范围，先停在 plan-only，不开始实现。
 6. 如果发现范围过大、依赖缺失或写入范围失控，先回写阻塞项，不硬做。
 
@@ -110,21 +107,25 @@ Live E2E 要求：
 验证证据与复用：
 - 成功验证后的 `verification_summary` 必须记录 `evidence_id`、Required Verification Commands 的有序命令和结果、`execution_session_id`、验证类型、执行时间和仓库路径。
 - 验证类型只能是 `deterministic-local` / `environment-dependent` / `live`。
-- 仅当单仓、单写入者、无 branch merge / rebase / cherry-pick / 冲突处理 / integration fix、当前 `evidence_id` 和命令顺序完全一致、`execution_session_id` 未变化、证据均为 `deterministic-local`，且没有未执行的 required live E2E 时，才可在 post-integration verify 复用。
-- 多仓、多 lease、`review_policy=strict`、`environment-dependent`、`live` 或任何无法确认的情况一律重跑。
-- 复用时仍进入 post-integration verify，并记录 `post_integration_verify_summary.status`: `reused` 与对应 `evidence_id`。
+- 默认主线使用 `collect + gate -> freeze + slice -> implement -> verify -> review -> closeout`。
+- 仅当单仓、单写入者、没有 integration event、当前 `evidence_id` 和命令顺序完全一致、`execution_session_id` 未变化、证据均为 `deterministic-local`，且没有未执行的 required live E2E 时，验证结果才可直接沿用到 closeout，不再制造第二次 verify 阶段。
+- 多仓、多 lease、`review_policy=strict`、`environment-dependent`、`live`、快照或 session 变化以及任何无法确认的情况一律重跑。
+- 存在可写 lease、branch / worktree 集成或其他 integration event 时，必须执行 `integrate -> post-integration verify` 并记录 `post_integration_verify_summary.status`: `executed`；不得复用集成前证据替代。
+- `pr_prep -> merge` 只在当前交付目标包含 PR / MR 且获得用户或仓库规则授权时进入。
 
 任务系统回写：
 完成或阻塞时，给任务 <ISSUE-ID> 追加评论，或写入仓库任务回写日志，至少包含：
 - verification_summary
 - review_summary，其中明确 `review_policy`、`subagent_review_required`、`review_owner`
-- integration_summary
-- post_integration_verify_summary
 - writeback_summary
 - live_e2e_status
 - residual_risks
 - recovery_point
 - next_action
+
+条件回写：
+- 进入 integration 分支时补 integration_summary、post_integration_verify_summary。
+- 进入可选交付阶段时补 pr_prep_summary、merge_summary。
 
 停止条件：
 - 任务系统 / 仓库真相冲突且无法自行判断

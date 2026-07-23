@@ -73,9 +73,6 @@ $requiredFiles = @(
     "AGENTS.md",
     "README.md",
     "docs/harness/control-plane.md",
-    "docs/harness/issue-workflow.md",
-    "docs/harness/linear.md",
-    "docs/harness/project-constraints.md",
     "docs/issues/README.md",
     "docs/issues/TEMPLATE.md",
     "docs/test/RUNBOOK_TEMPLATE.md",
@@ -110,6 +107,22 @@ $requiredFiles = @(
 foreach ($path in $requiredFiles) {
     if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
         Fail -Message "Missing required harness file: $path"
+    }
+}
+
+$obsoleteFiles = @(
+    "docs/harness/README.md",
+    "docs/harness/prompt-templates.md",
+    "docs/harness/issue-workflow.md",
+    "docs/harness/linear.md",
+    "docs/harness/project-constraints.md",
+    ".agents/prompts/loop-codex.md",
+    ".agents/prompts/loop-automation.md",
+    ".agents/prompts/maintenance-loop.md"
+)
+foreach ($path in $obsoleteFiles) {
+    if (Test-Path -LiteralPath $path) {
+        Fail -Message "Obsolete harness file should not exist anymore: $path"
     }
 }
 
@@ -216,9 +229,6 @@ if (Test-Path -LiteralPath ".cursor/rules/harness.mdc" -PathType Leaf) {
 $optionalModeFiles = @(
     ".agents/prompts/orchestrator-thread.md",
     ".agents/prompts/issue-standard-workflow.md",
-    ".agents/prompts/loop-codex.md",
-    ".agents/prompts/loop-automation.md",
-    ".agents/prompts/maintenance-loop.md",
     ".agents/guides/code-review.md",
     ".agents/guides/linter.md"
 )

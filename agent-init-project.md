@@ -1,301 +1,139 @@
-# Agent 初始化整个项目入口
+# Agent 初始化项目
 
-本文件是给 agent 使用的总入口，用于把当前 harness 维护源完整初始化到一个目标仓库中。
+本文件是 agent 使用的执行入口。它负责调用 base initializer，并补充特定 agent adapter 与 prompts / guides。
 
-它承担两件事：
+## 输入
 
-1. 执行手册
-2. 可直接复制给 agent 的完整 Prompt 模板
+开始前确认：
 
-固定规则：
-
-- 本文件位于当前 harness 维护源根目录，不属于目标项目模板，不会被初始化脚本复制到目标仓库
-- `init_harness_project.sh` 与 `init_harness_project.ps1` 只负责 base harness
-- `sources/agent_adapters/` 是按 agent 类型补充的适配层，不属于 base harness
-- `.agents/skills/` 是 base harness 默认 repo-local workflow 层，由初始化脚本生成
-- `.agents/prompts/` 与 `.agents/guides/` 由 agent 在 base harness 完成后补齐
-
-## 1. 执行手册
-
-### 1.1 初始化前需要收集的输入
-
-在开始前，agent 需要确认：
-
-- 当前 harness 维护源绝对路径（下文记作 `<HARNESS_ROOT>`）
-- 目标仓库绝对路径
+- Harness 根目录与目标仓库的绝对路径
 - 项目名称
-- 技术栈：`go` / `python` / `java` / `c` / `go-node` / `python-node` / `java-node` / `c-node` / `java-c` / `java-c-node`
-- provider：`neutral` / `github` / `gitlab`
-- issue provider：`linear` / `github` / `gitlab` / `repo` / `other`，默认 `linear`
+- 技术栈：`go`、`python`、`java`、`c` 及仓库支持的组合栈
+- merge provider：`neutral`、`github`、`gitlab`
+- issue provider：`linear`、`github`、`gitlab`、`repo`、`other`
 - issue prefix
-- 初始化 agent 类型：`codex` / `cursor` / `other`
-- agent 扩展层模式：
-  - `full`（默认，完整可执行模板）
-  - `placeholder`（显式轻量模式）
+- agent 类型：`codex`、`cursor`、`other`
+- 扩展模式：默认 `full`；只有用户明确要求轻量占位时使用 `placeholder`
 
-若上述信息有缺口：
+能从仓库和用户指令确认的输入先自行读取；会改变项目语义且无法可靠判断的输入再询问。
 
-- 能从仓库路径、现有文件、用户指令里推断的，先自行探索
-- 只有用户明确要求轻量初始化时才使用 `placeholder`；若用户未明确选择，默认 `full`
+## 执行顺序
 
-### 1.2 固定执行顺序
+### 1. 读取目标仓规则和工作区
 
-1. 先执行 base harness 初始化脚本  
-   macOS / Linux / Git Bash 命令形如：
+- 读取适用的 `AGENTS.md`。
+- 检查 Git 状态和已有文件。
+- 保留用户改动，不 reset、restore 或覆盖。
+- 初始化脚本会写入目标仓；执行前说明目标路径和覆盖边界。
 
-   ```bash
-   bash <HARNESS_ROOT>/scripts/init_harness_project.sh \
-     --target /abs/path/to/repo \
-     --project-name NAME \
-     --stack go|python|java|c|go-node|python-node|java-node|c-node|java-c|java-c-node \
-     --provider neutral|github|gitlab \
-     --issue-provider linear|github|gitlab|repo|other \
-     --issue-prefix PREFIX
-   ```
+### 2. 执行 base initializer
 
-   Windows PowerShell 命令形如：
+macOS、Linux、Git Bash：
 
-   ```powershell
-   powershell -NoProfile -ExecutionPolicy Bypass -File <HARNESS_ROOT>\scripts\init_harness_project.ps1 `
-     -Target C:\path\to\repo `
-     -ProjectName NAME `
-     -Stack go|python|java|c|go-node|python-node|java-node|c-node|java-c|java-c-node `
-     -Provider neutral|github|gitlab `
-     -IssueProvider linear|github|gitlab|repo|other `
-     -IssuePrefix PREFIX
-   ```
+```bash
+bash <HARNESS_ROOT>/scripts/init_harness_project.sh \
+  --target /abs/path/to/repo \
+  --project-name NAME \
+  --stack STACK \
+  --provider PROVIDER \
+  --issue-provider ISSUE_PROVIDER \
+  --issue-prefix PREFIX
+```
 
-   路径规则固定：Bash / Git Bash 使用 `/abs/path` 或 `/c/path`；PowerShell 使用 `C:\path\to\repo` 或 `\\server\share\repo`；两个入口不互相转换路径。
+Windows PowerShell：
 
-2. 确认 base harness 初始化成功，至少包含：
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File <HARNESS_ROOT>\scripts\init_harness_project.ps1 `
+  -Target C:\path\to\repo `
+  -ProjectName NAME `
+  -Stack STACK `
+  -Provider PROVIDER `
+  -IssueProvider ISSUE_PROVIDER `
+  -IssuePrefix PREFIX
+```
 
-   - `docs/harness/control-plane.md`
-   - `docs/harness/issue-workflow.md`
-   - `docs/harness/linear.md`
-   - `docs/harness/project-constraints.md`
-   - `docs/issues/README.md`
-   - `docs/issues/TEMPLATE.md`
-   - `docs/test/RUNBOOK_TEMPLATE.md`
-   - `.agents/PLANS.md`
-   - `.agents/plans/TEMPLATE.md`
-   - `.agents/plans/EXAMPLE-implementation.md`
-   - `.agents/skills/issue-goal-prompt/SKILL.md`
-   - `.agents/skills/project-plan-archive/SKILL.md`
-   - `.agents/skills/project-version-release/SKILL.md`
-   - `.agents/skills/test-runbook/SKILL.md`
-   - `.agents/state/TEMPLATE.md`
-   - `.agents/runs/TEMPLATE.md`
-   - `scripts/harness/check.sh`
-   - `scripts/harness/common.sh`
-   - `scripts/harness/review_gate.sh`
-   - `scripts/harness/evidence.sh`
-   - `scripts/harness/check.ps1`
-   - `scripts/harness/common.ps1`
-   - `scripts/harness/review_gate.ps1`
-   - `scripts/harness/evidence.ps1`
+Bash 使用 POSIX 路径；PowerShell 使用 Windows 或 UNC 路径，不互相转换。
 
-   同时确认当前 base harness 的计划 contract 已经可读出：
+脚本完成后至少确认：
 
-   - `.agents/PLANS.md` 明确 plan 可以继续使用 `## Architecture / Data Flow`，也可以使用推荐标题 `## 0. 现有架构回顾与核心设计决策`
-   - `TEMPLATE.md` 已切到“实现优先”骨架，正文默认按
-     `0. 现有架构回顾与核心设计决策 -> 1..N 改动面 -> 数据流可视化 -> 关键设计决策摘要 -> 与现有代码的关系`
-   - `EXAMPLE-implementation.md` 是官方质量标杆，可直接对照风格和密度
-   - 实现骨架需要补齐
-     `真实入口与触发 / 输入装配与边界校验 / 组件职责与代码落点 / 关键执行时序 / 停止 / 错误 / 恢复`
-   - `Concrete Steps` 需要拆成 `### 实现步骤` 与 `### 验证与收口步骤`
-   - `review_gate.sh` / `review_gate.ps1` 会对 plan 做结构型轻量 lint，而不只检查 `blocking_findings`
-   - `Reference Snippets` 不能是空块或纯占位内容
-   - `组件职责与代码落点` 至少要有一条真实模块 / 路径 / 类型记录
-   - `docs/harness/project-constraints.md` 是项目级机械约束登记入口，不能把只有文档约束的规则写成 `enforced`
-   - `docs/test/RUNBOOK_TEMPLATE.md` 能作为测试 runbook、执行副作用、清理结果和结果回写模板
-   - `.agents/skills/` 已包含 `issue-goal-prompt`、`project-plan-archive`、`project-version-release`、`test-runbook` 四个默认 workflow skill
+- `AGENTS.md`、业务占位 `README.md`
+- `docs/harness/control-plane.md`
+- `docs/issues/`、`docs/test/RUNBOOK_TEMPLATE.md`
+- `.agents/PLANS.md`、plans、skills、state 和 runs 模板
+- `scripts/harness/` 的 Bash 与 PowerShell gate
 
-3. 在 base harness 完成后，按初始化 agent 类型补充 adapter：
+初始化后把项目真实 build、test、lint、live E2E、禁止范围和发布入口写入 `AGENTS.md` 的“项目约束”，不要新建 constraints 登记文件。
 
-   - 若 agent 类型是 `cursor`，复制：
-     - `sources/agent_adapters/cursor/.`
-   - 复制后确认目标仓库存在 `.cursor/rules/harness.mdc`
-   - 确认 Cursor rule 使用中文 `description`、中文正文和 `alwaysApply: true`
-   - 若 agent 类型是 `codex` 或 `other`，不生成 `.cursor/`
-   - Cursor adapter 不依赖 `.agents/prompts/` 的 `placeholder` / `full` 模式
+### 3. 按 agent 类型补 adapter
 
-4. 确定 agent 扩展层模式：
+- `cursor`：复制 `sources/agent_adapters/cursor/.`，确认 `.cursor/rules/harness.mdc` 存在且 `alwaysApply: true`。
+- `codex` / `other`：不生成 Cursor adapter。
 
-   - 默认使用 `full`
-   - 只有用户明确要求“轻量 / 占位 / 暂不铺开 prompt 模板”时，才使用 `placeholder`
-   - 复制：
-     - `sources/agent_extensions/shared/.`
-     - `sources/agent_extensions/{placeholder|full}/.`
+### 4. 补 prompts 与 guides
 
-5. 扩展层补齐后，确认目标仓库存在：
-
-   - `.agents/prompts/README.md`
-   - `.agents/prompts/orchestrator-thread.md`
-   - `.agents/prompts/issue-standard-workflow.md`
-   - `.agents/prompts/loop-codex.md`
-   - `.agents/prompts/loop-automation.md`
-   - `.agents/prompts/maintenance-loop.md`
-   - `.agents/guides/code-review.md`
-   - `.agents/guides/linter.md`
-
-6. 对 7 个 mode-sensitive 文件检查：
-
-   - 都带 `Mode: placeholder` 或 `Mode: full`
-   - mode 必须一致
-
-7. 额外确认控制面文档里已经能看出 truth split：
-
-   - `docs/harness/control-plane.md` 能读出：
-     - `Issue Tracker 是主协作真相`
-     - `repo 是主执行真相`
-   - `docs/harness/issue-workflow.md` 能读出：
-     - 运行反馈默认写回 Issue Tracker
-     - `recovery_point` / `next_action` 默认落 Issue Tracker
-   - `docs/harness/linear.md` 能读出它只是 Linear profile / migration note
-   - `docs/issues/TEMPLATE.md` 能读出 repo issue 固定字段和 `writeback_log`
-   - `docs/harness/project-constraints.md` 能读出：
-     - 状态枚举和分类枚举
-     - `maintenance_candidate`、`rule_promotion_candidate`、`human_decision_required`
-     - `project-check` 挂载协议
-     - 没有可执行命令或 gate 时不得假装 `enforced`
-   - `.agents/prompts/maintenance-loop.md` 能读出：
-     - 默认 mode 是 `report-only`
-     - 只有用户显式指定才进入 `issue-create / safe-fix / rule-promotion`
-     - API contract、schema、安全策略和业务行为不能自动修
-   - `.agents/prompts/orchestrator-thread.md` 能读出：
-     - `goal-orchestration`
-     - `write_lease`
-     - `Current State`
-     - `Thread Status`
-     - post-integration verify
-     - 子 thread 不默认归档，完成后标题加 `【完成】`
-   - `.agents/state/TEMPLATE.md` 与 `.agents/runs/TEMPLATE.md` 能读出：
-     - 它们是本地辅助运行面
-     - 不替代 Issue Tracker
-   - `docs/test/RUNBOOK_TEMPLATE.md` 能读出：
-     - 测试文档默认是可执行 runbook
-     - 提交版文档维护结果摘要
-     - 未执行步骤不得写成已通过
-   - `.agents/PLANS.md` 与 `.agents/plans/TEMPLATE.md` 能读出：
-     - 计划必须显式写实现逻辑骨架
-     - 不能用 harness 控制流替代 `Architecture / Data Flow`
-   - `.agents/plans/EXAMPLE-implementation.md` 能作为实现型 plan 的参考范式
-
-8. 最后进入目标仓库执行：
-
-   ```bash
-   make harness-verify
-   ```
-
-   Windows PowerShell 环境不要求安装 `make`，可执行：
-
-   ```powershell
-   powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\harness\check.ps1
-   ```
-
-### 1.3 何时应停止并报告
-
-遇到以下情况应先停下，不要继续硬做：
-
-- 目标路径不是绝对路径
-- 无法判断技术栈
-- 用户对扩展层模式没有明确选择且你不能合理默认
-- base harness 初始化失败
-- Cursor adapter 补齐后 `.cursor/rules/harness.mdc` 缺少 `alwaysApply: true` 或关键导航入口
-- 扩展层补齐后出现半套文件或 mode 混用
-
-此时应向用户明确报告：
-
-- 当前停在哪一步
-- 缺了什么输入或哪一步失败
-- 下一步需要用户补什么信息
-
-## 2. 可直接复制的完整 Prompt 模板
+复制：
 
 ```text
-使用前先把 `<HARNESS_ROOT>` 替换为当前 harness 维护源的绝对路径。
+sources/agent_extensions/shared/.
+sources/agent_extensions/{full|placeholder}/.
+```
 
-你要把 `<HARNESS_ROOT>` 这套维护源完整初始化到目标仓库。
+目标文件固定为：
 
-执行要求：
-1. 先只做 base harness 初始化，不要直接补 prompts / guides。
-2. 使用：
-   - `<HARNESS_ROOT>/scripts/init_harness_project.sh`
-   - Windows PowerShell 可改用 `<HARNESS_ROOT>\scripts\init_harness_project.ps1`
-3. 初始化前先确认这些输入：
-   - 目标仓库绝对路径
-   - 项目名称
-   - 技术栈：go / python / java / c / go-node / python-node / java-node / c-node / java-c / java-c-node
-   - provider：neutral / github / gitlab
-   - issue provider：linear / github / gitlab / repo / other
-   - issue prefix
-   - 初始化 agent 类型：codex / cursor / other
-4. base harness 完成后，按初始化 agent 类型补充 adapter：
-   - 如果是 cursor，复制 `<HARNESS_ROOT>/sources/agent_adapters/cursor/.`
-   - 确认 `.cursor/rules/harness.mdc` 存在
-   - 确认 `.cursor/rules/harness.mdc` 使用中文 `description`、中文正文和 `alwaysApply: true`
-   - 如果是 codex 或 other，不生成 `.cursor/`
-5. 再确定 agent 扩展层模式：
-   - 默认使用 full
-   - 只有用户明确要求轻量模式才用 placeholder
-6. 然后复制：
-   - `<HARNESS_ROOT>/sources/agent_extensions/shared/.`
-   - `<HARNESS_ROOT>/sources/agent_extensions/{placeholder|full}/.`
-7. 扩展层补齐后，必须确认以下文件全部存在：
-   - `.agents/prompts/README.md`
-   - `.agents/prompts/orchestrator-thread.md`
-   - `.agents/prompts/issue-standard-workflow.md`
-   - `.agents/prompts/loop-codex.md`
-   - `.agents/prompts/loop-automation.md`
-   - `.agents/prompts/maintenance-loop.md`
-   - `.agents/guides/code-review.md`
-   - `.agents/guides/linter.md`
-8. 对以下 7 个文件检查 mode：
-   - `.agents/prompts/orchestrator-thread.md`
-   - `.agents/prompts/issue-standard-workflow.md`
-   - `.agents/prompts/loop-codex.md`
-   - `.agents/prompts/loop-automation.md`
-   - `.agents/prompts/maintenance-loop.md`
-   - `.agents/guides/code-review.md`
-   - `.agents/guides/linter.md`
-   要求：
-   - 都带 `Mode: placeholder` 或 `Mode: full`
-   - mode 必须一致
-9. 额外确认：
-   - `docs/harness/control-plane.md` 已明确 `Issue Tracker 是主协作真相`
-   - `docs/harness/control-plane.md` 已明确 `repo 是主执行真相`
-   - `docs/harness/issue-workflow.md` 已明确运行反馈与结果回写默认写回 Issue Tracker
-   - `docs/harness/issue-workflow.md` 已明确 `Current State`、`Thread Status`、`write_lease`、post-integration verify 和 `【完成】` 标题标识
-   - `docs/harness/linear.md` 已明确它是 Linear profile / migration note
-   - `docs/issues/TEMPLATE.md` 已存在，可作为 repo issue 和 `writeback_log` 模板
-   - `docs/harness/project-constraints.md` 已存在，且明确项目级机械约束登记、状态枚举、分类枚举、`project-check` 挂载协议和不得假装 `enforced`
-   - `.agents/prompts/maintenance-loop.md` 已存在，默认 `report-only`，且只有用户显式指定时才进入 `issue-create / safe-fix / rule-promotion`
-   - `.agents/PLANS.md` 与 `.agents/plans/TEMPLATE.md` 已明确
-     `真实入口与触发 / 输入装配与边界校验 / 组件职责与代码落点 / 关键执行时序 / 停止 / 错误 / 恢复`
-   - `.agents/plans/EXAMPLE-implementation.md` 已存在，可作为质量标杆
-   - `docs/test/RUNBOOK_TEMPLATE.md` 已存在，可作为测试 runbook 和结果回写模板
-   - `.agents/skills/issue-goal-prompt/SKILL.md` 已存在，可作为 issue goal prompt workflow
-   - `.agents/skills/project-plan-archive/SKILL.md` 已存在，可作为计划归档 workflow
-   - `.agents/skills/project-version-release/SKILL.md` 已存在，可作为版本和 release 边界 workflow
-   - `.agents/skills/test-runbook/SKILL.md` 已存在，可作为测试 runbook 执行与回写 workflow
-   - `review_gate.sh` / `review_gate.ps1` 已明确会拒绝只有 harness 流程、没有实现骨架的 plan
-   - `review_gate.sh` / `review_gate.ps1` 已明确会拒绝空的 `Reference Snippets` 和空的组件职责记录
-   - `.agents/state/TEMPLATE.md` 与 `.agents/runs/TEMPLATE.md` 已明确它们只是本地辅助运行面
-   - 如果生成了 `.cursor/rules/harness.mdc`，它已明确读取 harness 入口并要求 `make harness-verify`
-10. 最后在目标仓库执行 `make harness-verify`；Windows PowerShell 可执行 `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\harness\check.ps1`。这是目标仓日常 harness 检查，不替代项目自身验证命令。
+```text
+.agents/prompts/README.md
+.agents/prompts/issue-standard-workflow.md
+.agents/prompts/orchestrator-thread.md
+.agents/guides/code-review.md
+.agents/guides/linter.md
+```
 
-输出要求：
-1. 先说明当前在做 base harness、agent adapter 还是 agent 扩展层
-2. 若需要用户选择扩展层模式，先问，不要自己乱猜
-3. 完成后明确列出：
-   - base harness 是否完成
-   - Cursor adapter 是否按 agent 类型处理
-   - 扩展层是否补齐
-   - 当前使用的是 full 还是显式轻量 placeholder
-   - `PLANS.md / TEMPLATE.md / EXAMPLE-implementation.md` 三层关系是否已经可读
-   - `docs/test/RUNBOOK_TEMPLATE.md` 是否已经就位
-   - `docs/harness/project-constraints.md` 是否已经就位并提醒使用者后续按项目真实规则补齐
-   - truth split 是否已经在 control-plane / issue-workflow 中可读
-   - 最终验证是否通过
-4. 若失败，明确指出失败步骤、报错和下一步建议
+四个 mode-sensitive 文件必须使用同一个 `Mode: full|placeholder`；Prompt README 不带 Mode。
+
+### 5. 验证
+
+在目标仓运行：
+
+```bash
+make harness-verify
+```
+
+PowerShell 可直接运行：
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\harness\check.ps1
+```
+
+随后执行项目自身 build、test、lint 和任务要求的 live / integration 验证。
+
+## 停止条件
+
+遇到以下情况停止并报告：
+
+- 目标路径不是对应平台的绝对路径
+- 技术栈或 provider 无法可靠判断
+- 工作区现有改动会被覆盖
+- base initializer 失败
+- extension 只复制了一部分或混用了 Mode
+- 目标仓 Harness gate 失败
+
+报告当前步骤、准确错误、已产生的副作用和安全恢复入口。
+
+## 可复制 Prompt
+
+```text
+把 <HARNESS_ROOT> 的 Harness 初始化到目标仓库。
+
+先读取目标仓 AGENTS.md 和 Git 状态，保留已有改动；说明脚本将写入的目标路径。
+确认项目名称、技术栈、merge provider、issue provider、issue prefix 和 agent 类型。
+
+1. 调用对应平台的 init_harness_project 脚本完成 base 初始化。
+2. 把真实项目约束写入目标仓 AGENTS.md；项目 README 只保留业务说明。
+3. Cursor 项目按需复制 cursor adapter。
+4. 默认复制 shared + full agent extensions；只有明确要求轻量时使用 placeholder。
+5. prompts 只应包含 README.md、issue-standard-workflow.md、orchestrator-thread.md。
+6. 运行 make harness-verify 或 PowerShell check.ps1，再运行项目自身验证。
+
+不要 reset/restore 用户改动，不创建额外 constraints 文档，不恢复已删除的通用 loop prompt。
+最终报告初始化目录、Mode、验证证据与未执行项。
 ```

@@ -78,6 +78,12 @@ function Validate-TargetPath {
 $obsoleteManagedFiles = @(
     "docs/harness/README.md",
     "docs/harness/prompt-templates.md",
+    "docs/harness/issue-workflow.md",
+    "docs/harness/linear.md",
+    "docs/harness/project-constraints.md",
+    ".agents/prompts/loop-codex.md",
+    ".agents/prompts/loop-automation.md",
+    ".agents/prompts/maintenance-loop.md",
     ".agents/mappings/reference-mapping.yaml",
     ".agents/mappings/knowledge-writeback-mapping.example.yaml",
     "scripts/harness/merge_gate.sh",
@@ -212,8 +218,6 @@ function Postprocess-TextFiles {
         ".agents/state/TEMPLATE.md",
         ".agents/runs/TEMPLATE.md",
         "docs/harness/control-plane.md",
-        "docs/harness/issue-workflow.md",
-        "docs/harness/linear.md",
         "docs/issues/README.md",
         "docs/issues/TEMPLATE.md"
     )
@@ -286,9 +290,6 @@ $managedFiles = @(
     ".agents/state/TEMPLATE.md",
     ".agents/runs/TEMPLATE.md",
     "docs/harness/control-plane.md",
-    "docs/harness/issue-workflow.md",
-    "docs/harness/linear.md",
-    "docs/harness/project-constraints.md",
     "docs/issues/README.md",
     "docs/issues/TEMPLATE.md",
     "docs/test/RUNBOOK_TEMPLATE.md",
@@ -334,9 +335,9 @@ Log "provider: $Provider"
 Log "issue provider: $IssueProvider"
 Log "next steps:"
 Log "  1. inspect .gitignore and add repo-specific local files"
-Log "  2. read docs\harness\, docs\issues\, and docs\test\RUNBOOK_TEMPLATE.md"
-Log "  3. fill docs\harness\project-constraints.md with repo-specific mechanical constraints"
-Log "  4. update README and AGENTS with real project context"
+Log "  2. read docs\harness\control-plane.md, docs\issues\, and docs\test\RUNBOOK_TEMPLATE.md"
+Log "  3. fill AGENTS.md with repo-specific build, test, lint, live E2E, and release constraints"
+Log "  4. keep README focused on project business context"
 Log "  5. review default .agents\skills\ workflow guidance"
 Log "  6. create the first plan in .agents\plans\"
 Log "  7. run powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\harness\check.ps1"

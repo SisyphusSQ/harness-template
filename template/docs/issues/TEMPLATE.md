@@ -70,8 +70,15 @@
 - `title_marker_pending`:
 - `blockers`:
 - `residual_risks`:
-- `post_integration_verify_summary`:
 - `goal_level_verification_summary`:
+
+## 条件字段（按需）
+
+- `integration_summary`: 仅存在可写 lease、branch / worktree 集成或其他 integration event 时填写
+- `post_integration_verify_summary`: 仅进入 integration 分支时填写
+- `optional_delivery`: `not_requested` / `manual` / `pr_prep` / `merged`
+- `pr_mr_summary`: 仅进入可选交付阶段时填写
+- `merge_summary`: 仅进入可选交付阶段时填写
 
 ## Thread Status Log
 
@@ -106,8 +113,8 @@
 - `result`:
 - `verification_summary`:
 - `review_summary`:
-- `integration_summary`:
-- `post_integration_verify_summary`:
 - `writeback_summary`:
 - `residual_risks`:
 - `next_action`:
+
+若本轮进入 integration 或可选交付条件分支，再从上方“条件字段”补充对应摘要。

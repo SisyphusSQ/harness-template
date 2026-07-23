@@ -74,14 +74,22 @@ Invoke-PowerShellScriptProcess `
     -ScriptPath (Join-Path $TemplateRoot "scripts/harness/check.ps1") `
     -FailureMessage "target runtime check failed"
 
+$TemplateReadme = [System.IO.File]::ReadAllText((Join-Path $TemplateRoot "README.md"), [System.Text.Encoding]::UTF8)
+if ($TemplateReadme -match '(?i)harness|control-plane|\.agents/') {
+    throw "harness source verify: template/README.md must stay business-only and contain no harness guidance"
+}
+
 Assert-SourcePatterns -Path (Join-Path $TemplateRoot "docs/harness/control-plane.md") -Patterns @(
-    "collect -> gate -> freeze -> slice -> dispatch -> implement -> verify -> review -> integrate -> verify -> writeback -> pr_prep -> merge -> notify",
+    "collect + gate -> freeze + slice -> implement -> verify -> review -> closeout",
+    '`dispatch` 只在需要多 thread / worktree / subagent fan-out 时进入',
+    '`integrate -> post-integration verify` 只在存在可写 lease、branch / worktree 集成或其他 integration event 时进入',
+    '`pr_prep -> merge` 只在当前交付目标包含 PR / MR 且用户或仓库规则已授权时进入',
     "Issue Tracker 是主协作真相",
     "write_lease",
     "Current State",
     "Thread Status",
     "post-integration verify",
-    "Maintenance Loop",
+    "Linear 字段映射",
     ".agents/PLANS.md",
     "Review Policy Contract",
     '`review_policy`: `standard` / `strict`',
@@ -100,41 +108,16 @@ Assert-SourcePatterns -Path (Join-Path $TemplateRoot "docs/harness/control-plane
     "任何无法确认的情况默认重跑"
 )
 
-Assert-SourcePatterns -Path (Join-Path $TemplateRoot "docs/harness/issue-workflow.md") -Patterns @(
-    "Orchestration Contract",
-    "Current State Comment Contract",
-    "Thread Status Comment Contract",
-    "Write Lease Contract",
-    "Post-Integration Verify Contract",
-    "current_issue_state",
-    "recovery_point",
-    "next_action"
+$ObsoleteTemplateDocs = @(
+    "docs/harness/issue-workflow.md",
+    "docs/harness/linear.md",
+    "docs/harness/project-constraints.md"
 )
-
-Assert-SourcePatterns -Path (Join-Path $TemplateRoot "docs/harness/project-constraints.md") -Patterns @(
-    "Project Mechanical Constraints",
-    "状态枚举",
-    "分类枚举",
-    "enforced",
-    "not_applicable",
-    "security",
-    "cross-repo",
-    "Maintenance Tag",
-    "rule_promotion_candidate",
-    "human_decision_required",
-    "project-check"
-)
-
-Assert-SourcePatterns -Path (Join-Path $TemplateRoot "docs/harness/linear.md") -Patterns @(
-    "Linear Profile",
-    "current_issue_state",
-    "Current State",
-    "Thread Status",
-    "write_lease",
-    "post-integration verify",
-    "recovery_point",
-    "next_action"
-)
+foreach ($RelativePath in $ObsoleteTemplateDocs) {
+    if (Test-Path -LiteralPath (Join-Path $TemplateRoot $RelativePath)) {
+        throw "harness source verify: obsolete template document still exists: $RelativePath"
+    }
+}
 
 Assert-SourcePatterns -Path (Join-Path $TemplateRoot "docs/test/RUNBOOK_TEMPLATE.md") -Patterns @(
     "Test Runbook Template",
@@ -149,14 +132,14 @@ Assert-SourcePatterns -Path (Join-Path $TemplateRoot "docs/test/RUNBOOK_TEMPLATE
 )
 
 Assert-SourcePatterns -Path (Join-Path $TemplateRoot ".agents/PLANS.md") -Patterns @(
-    "计划文档最小结构",
+    "最小结构",
     "真实入口与触发",
     "输入装配与边界校验",
     "组件职责与代码落点",
     "关键执行时序",
     "停止 / 错误 / 恢复",
     "Reference Snippets",
-    "Mermaid 使用规则"
+    "不要在 plan 复制整套控制面"
 )
 
 Assert-SourcePatterns -Path (Join-Path $TemplateRoot ".agents/plans/TEMPLATE.md") -Patterns @(
@@ -169,6 +152,7 @@ Assert-SourcePatterns -Path (Join-Path $TemplateRoot ".agents/plans/TEMPLATE.md"
     "## Reference Snippets",
     "### 实现步骤",
     "### 验证与收口步骤",
+    "## Review Summary",
     "## Outcomes & Retrospective"
 )
 
@@ -188,7 +172,7 @@ Assert-SourcePatterns -Path (Join-Path $TemplateRoot ".agents/skills/issue-goal-
     "review_owner: subagent",
     '`evidence_id`',
     '`execution_session_id`',
-    '`post_integration_verify_summary.status`: `reused`'
+    '`post_integration_verify_summary.status`: `executed`'
 )
 
 Assert-SourcePatterns -Path (Join-Path $TemplateRoot "scripts/harness/common.ps1") -Patterns @(
@@ -213,6 +197,7 @@ Assert-SourcePatterns -Path (Join-Path $TemplateRoot "scripts/harness/evidence.p
 
 $FullRoot = Join-Path $RepoRoot "sources/agent_extensions/full"
 $PlaceholderRoot = Join-Path $RepoRoot "sources/agent_extensions/placeholder"
+$SharedRoot = Join-Path $RepoRoot "sources/agent_extensions/shared"
 $FullFiles = Get-ChildItem -LiteralPath $FullRoot -File -Recurse | ForEach-Object {
     $_.FullName.Substring($FullRoot.Length).TrimStart([IO.Path]::DirectorySeparatorChar).Replace("\", "/")
 } | Sort-Object
@@ -223,6 +208,12 @@ $PlaceholderFiles = Get-ChildItem -LiteralPath $PlaceholderRoot -File -Recurse |
 if (Compare-Object -ReferenceObject $FullFiles -DifferenceObject $PlaceholderFiles) {
     throw "harness source verify: full and placeholder extension bundles have different file sets"
 }
+
+Assert-SourcePatterns -Path (Join-Path $SharedRoot ".agents/prompts/README.md") -Patterns @(
+    "issue-standard-workflow.md",
+    "orchestrator-thread.md",
+    "日常自然语言协作不需要额外的 loop prompt"
+)
 
 foreach ($RelativePath in $FullFiles) {
     Assert-SourcePatterns -Path (Join-Path $FullRoot $RelativePath) -Patterns @("Mode: full")
@@ -236,24 +227,13 @@ foreach ($ModeRoot in @($FullRoot, $PlaceholderRoot)) {
         "evidence_id",
         "deterministic-local",
         "environment-dependent",
-        "reused"
-    )
-    Assert-SourcePatterns -Path (Join-Path $ModeRoot ".agents/prompts/loop-codex.md") -Patterns @(
-        "review_policy",
-        "subagent_review_required",
-        "evidence_id",
-        "required live E2E"
-    )
-    Assert-SourcePatterns -Path (Join-Path $ModeRoot ".agents/prompts/loop-automation.md") -Patterns @(
-        "review_policy",
-        "evidence_id",
-        "任何无法确认的情况默认重跑"
+        "发生 integration event"
     )
     Assert-SourcePatterns -Path (Join-Path $ModeRoot ".agents/prompts/orchestrator-thread.md") -Patterns @(
-        "review_policy",
-        "subagent_review_required",
+        "Review policy",
+        "write_lease",
         "post_integration_verify_summary.status",
-        "reused"
+        "executed"
     )
     Assert-SourcePatterns -Path (Join-Path $ModeRoot ".agents/guides/code-review.md") -Patterns @(
         "Review Policy",
@@ -265,23 +245,21 @@ foreach ($ModeRoot in @($FullRoot, $PlaceholderRoot)) {
 }
 
 Assert-SourcePatterns -Path (Join-Path $FullRoot ".agents/prompts/orchestrator-thread.md") -Patterns @(
-    "goal-orchestration",
+    "Handoff 模板",
     "write_lease",
     "Current State",
     "Thread Status",
-    "post-integration verify",
-    "waiting_on_child"
+    "post-integration verify"
 )
-Assert-SourcePatterns -Path (Join-Path $FullRoot ".agents/prompts/maintenance-loop.md") -Patterns @(
-    "report-only",
-    "issue-create",
-    "safe-fix",
-    "rule-promotion",
-    "Maintenance Findings",
-    "Verification Plan",
-    "Residual Risks",
-    "Next Action"
-)
+
+foreach ($ModeRoot in @($FullRoot, $PlaceholderRoot)) {
+    foreach ($ObsoletePrompt in @("loop-codex.md", "loop-automation.md", "maintenance-loop.md")) {
+        $Path = Join-Path $ModeRoot ".agents/prompts/$ObsoletePrompt"
+        if (Test-Path -LiteralPath $Path) {
+            throw "harness source verify: obsolete prompt still exists: $Path"
+        }
+    }
+}
 
 $ValidPlan = Join-Path $TemplateRoot ".agents/plans/EXAMPLE-implementation.md"
 $ReviewGate = Join-Path $TemplateRoot "scripts/harness/review_gate.ps1"
