@@ -1,83 +1,38 @@
-# Run Summary Template
+# Run Summary
 
-本文件是本地辅助运行面模板，用于记录一次批次执行的结果面，服务审计、回放和最终收口。
+本目录保存本地运行摘要、原始输出索引和恢复所需的最小事实。真实运行文件默认不提交。
 
-固定规则：
-
-- `Issue Tracker` 仍是主协作真相
-- `.agents/runs/` 只记录本地批次结果摘要，不替代 Issue Tracker 回写
-- 本地结果与协作状态冲突时，以 `Issue Tracker` 为准；本地文件用于补充执行细节
+## Metadata
 
 - `run_id`:
-- `batch_id`:
-- `mode`:
-- `orchestration_mode`:
-- `root_goal`:
-- `root_issue`:
-- `goal_state`:
-- `goal_unit_roster`:
-- `master_issue`:
-- `execution_issue`:
 - `issue_provider`: __ISSUE_PROVIDER__
-- `result`:
-- `master_status`:
-- `stop_scope`:
-- `verification_summary`:
-- `review_summary`:
-- `goal_level_verification_summary`:
-- `writeback_summary`:
-- `residual_risks`:
-- `followups`:
-- `owner_agents`:
-- `delegation_summary`:
-- `thread_summary`:
-- `write_lease_summary`:
-- `waiting_on`:
-- `next_check`:
-- `issue_writeback`:
-- `sanitized_artifacts`:
+- `issue_id`:
+- `started_at`:
+- `finished_at`:
+- `working_directory`:
 
-## 条件字段（按需）
+## Scope
 
-- `integration_summary`: 仅存在可写 lease、branch / worktree 集成或其他 integration event 时填写
-- `post_integration_verify_summary`: 仅进入 integration 分支时填写
-- `optional_delivery`: `not_requested` / `manual` / `pr_prep` / `merged`
-- `pr_mr_summary`: 仅进入可选交付阶段时填写
-- `merge_summary`: 仅进入可选交付阶段时填写
+- 目标：
+- 允许副作用：
+- 实际副作用：
 
-## PR / MR Draft（按需）
+## Commands
 
-- `title`:
-- `body_sections`:
-- `verification`:
-- `residual_risks`:
+| 顺序 | 命令 | 结果 | 摘要 |
+| --- | --- | --- | --- |
+| 1 |  | 未执行 |  |
 
-## Thread Orchestration（按需）
+## Result
 
-- `main_thread`:
-- `child_threads`:
-- `completed_threads`:
-- `title_marker_pending`:
-- `active_write_leases`:
-- `integrated_write_leases`:
-- `released_write_leases`:
-- `blocked_write_leases`:
-- `integration_owner`:
-- `post_integration_verify_required`:
-- `live_e2e_required`:
+- 结论：`未执行`
+- 关键证据：
+- 清理结果：
+- 未解决问题：
+- 恢复点：
+- 下一步：
 
-## Goal Closeout（按需）
+## Artifact Boundary
 
-- `active_master_issue`:
-- `active_execution_issue`:
-- `completed_units`:
-- `deferred_units`:
-- `blocked_units`:
-- `goal_next_action`:
-
-## Local Closeout（按需）
-
-- `merge_commit`:
-- `local_branch_status`:
-- `remote_status`:
-- `cleanup_summary`:
+- 提交版只保留脱敏摘要。
+- 凭据、Cookie、完整 URL、数据库连接信息和原始输出保留在受控本地位置，不写入本文件。

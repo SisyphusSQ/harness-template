@@ -10,7 +10,7 @@ tmp/
 temp/
 **/output/
 
-# Harness local auxiliary run surfaces
+# Project-local runtime summaries and execution records
 .agents/state/*
 !.agents/state/TEMPLATE.md
 .agents/runs/*

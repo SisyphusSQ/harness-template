@@ -1,120 +1,52 @@
-# Repo Issue: <title>
+# Repo Issue: <标题>
 
 - `issue_id`:
 - `status`: Todo
-- `kind`: Requirement Clarification / Project / Master Issue / Execution Issue
+- `kind`: Requirement / Project / Bug / Maintenance
 - `issue_provider`: repo
 - `created_at`:
 - `updated_at`:
 
 ## Goal
 
-- `goal`:
-- `success_criteria`:
+- 目标：
+- 成功标准：
 
 ## Scope
 
-- `included`:
-- `excluded`:
+### Included
 
-## Acceptance Matrix
+-
 
-- `acceptance_matrix`:
+### Excluded
 
-| 类别 | 口径 |
-| --- | --- |
-| 构建 |  |
-| 测试 |  |
-| review |  |
-| writeback |  |
+-
 
-## Execution Contract
+## Acceptance
 
-- `stop_when`:
-- `write_scope_limit`:
-- `verification_commands`:
-- `rollback_unit`:
-- `dependencies_blockers`:
-- `follow_up_candidates`:
+| 类别 | 口径 | 结果 |
+| --- | --- | --- |
+| 功能 |  | 未执行 |
+| 测试 |  | 未执行 |
+| 文档 / 回写 |  | 未执行 |
+
+## Verification
+
+- 命令：
+- 前置条件：
+- 预期结果：
 
 ## Recovery
 
-- `current_issue_state`:
-- `recovery_point`:
-- `next_action`:
-
-## Orchestration
-
-- `orchestration_mode`:
-- `mode`:
-- `root_goal`:
-- `root_issue`:
-- `goal_state`:
-- `goal_unit_roster`:
-- `main_thread`:
-- `threads`:
-- `active_write_leases`:
-- `recent_write_leases`:
-- `branch_refs`:
-- `worktree_refs`:
-- `verification_policy`:
-- `waiting_on`:
-- `next_check`:
-
-## Current State
-
-由主 thread 维护当前快照；冲突时以本 issue 的最新 `Current State` 和 repo 当前执行事实为准。
-
-- `current_phase`:
-- `current_state`:
-- `title_marker_pending`:
-- `blockers`:
-- `residual_risks`:
-- `goal_level_verification_summary`:
-
-## 条件字段（按需）
-
-- `integration_summary`: 仅存在可写 lease、branch / worktree 集成或其他 integration event 时填写
-- `post_integration_verify_summary`: 仅进入 integration 分支时填写
-- `optional_delivery`: `not_requested` / `manual` / `pr_prep` / `merged`
-- `pr_mr_summary`: 仅进入可选交付阶段时填写
-- `merge_summary`: 仅进入可选交付阶段时填写
-
-## Thread Status Log
-
-追加子 thread milestone/status 记录。子 thread 完成后标题应加 `【完成】`，但该标识不替代 issue 状态。
-
-### <YYYY-MM-DD HH:MM> - Thread Status
-
-- `event`:
-- `thread_id`:
-- `thread_title`:
-- `role`:
-- `lease_id`:
-- `lease_state_requested`:
-- `phase`:
-- `branch`:
-- `worktree`:
-- `changed_files`:
-- `verification_summary`:
-- `review_summary`:
-- `blockers`:
-- `residual_risks`:
-- `requested_action`:
+- 停止条件：
+- 恢复点：
+- 下一步：
 
 ## Writeback Log
 
-- `writeback_log`:
+### <YYYY-MM-DD HH:MM> - <阶段>
 
-追加最新记录到最上方或按时间顺序维护，但每条记录必须可用于恢复当前 issue 状态。
-
-### <YYYY-MM-DD HH:MM> - <phase>
-
-- `result`:
-- `verification_summary`:
-- `review_summary`:
-- `writeback_summary`:
-- `residual_risks`:
-- `next_action`:
-
-若本轮进入 integration 或可选交付条件分支，再从上方“条件字段”补充对应摘要。
+- 结果：
+- 验证摘要：
+- 残余风险：
+- 下一步：

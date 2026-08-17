@@ -1,27 +1,28 @@
-# Harness 初始化 SOP
+# 项目初始化 SOP
 
-本 SOP 面向人工操作和 Harness 维护者。Agent 执行入口见 `agent-init-project.md`。
+本 SOP 面向人工操作和初始化器维护者。Agent 执行入口见 `agent-init-project.md`。
 
 ## 1. 目标
 
-初始化后，业务项目获得：
+初始化后，业务项目获得一套轻量、可选的协作基础：
 
-- 根级 `AGENTS.md` 和不含 Harness 信息的业务 `README.md`
-- 单一 `docs/harness/control-plane.md`
-- 计划、状态、运行摘要和四个 repo-local skills
-- 本地 Issue 与测试 runbook 模板
-- Bash / PowerShell Harness gate
-- agent 驱动场景下的两个 Prompt 与两份 guide
+- 根级 `AGENTS.md` 和业务 `README.md` 占位
+- `.agents/PLANS.md` 与按需计划模板
+- `.agents/state/`、`.agents/runs/` 的本地记录模板
+- `template/.agents/skills/` 中的全部 skills
+- `docs/test/RUNBOOK_TEMPLATE.md`
+- 默认保留 `issue_provider=linear` 元数据
 
-不再生成：
+不再默认生成：
 
 ```text
-docs/harness/issue-workflow.md
-docs/harness/linear.md
-docs/harness/project-constraints.md
-.agents/prompts/loop-codex.md
-.agents/prompts/loop-automation.md
-.agents/prompts/maintenance-loop.md
+Makefile
+docs/harness/
+scripts/harness/
+.agents/prompts/
+.agents/guides/
+agent adapter
+强制状态机、review gate、evidence gate 或 orchestrator loop
 ```
 
 ## 2. 初始化参数
@@ -29,11 +30,11 @@ docs/harness/project-constraints.md
 | 参数 | 允许值 |
 | --- | --- |
 | stack | `go`、`python`、`java`、`c` 及脚本列出的组合栈 |
-| provider | `neutral`、`github`、`gitlab` |
-| issue provider | `linear`、`github`、`gitlab`、`repo`、`other` |
-| extension mode | `full`，或用户明确要求时使用 `placeholder` |
+| issue provider | `linear`（默认）、`github`、`gitlab`、`repo`、`other` |
+| issue prefix | 可选字符串 |
+| force | 显式允许覆盖现有 managed 文件，并清理声明过的旧初始化产物 |
 
-目标路径必须是对应平台的绝对路径。已有目标文件默认不覆盖；确认覆盖时显式使用 `--force` / `-Force`。
+目标路径必须是对应平台的绝对路径。已有目标文件默认不覆盖；不要把 `--force` 用于未检查的业务仓库。
 
 ## 3. Base 初始化
 
@@ -44,7 +45,6 @@ bash scripts/init_harness_project.sh \
   --target /abs/path/to/repo \
   --project-name NAME \
   --stack go \
-  --provider neutral \
   --issue-provider linear \
   --issue-prefix ISSUE
 ```
@@ -56,78 +56,35 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\init_harness_proje
   -Target C:\path\to\repo `
   -ProjectName NAME `
   -Stack go `
-  -Provider neutral `
   -IssueProvider linear `
   -IssuePrefix ISSUE
 ```
 
 初始化器负责：
 
-- 复制 `template/` 的 managed files
+- 复制 `template/` 的 managed files，包括模板中的全部 skills
 - 按技术栈拼装 `.gitignore`
-- 替换 project、provider、issue provider 和 issue prefix 占位符
-- 清理已声明废弃的 managed files（仅 force 模式）
-- 设置 shell 脚本可执行位
-- 运行目标仓 Harness check
+- 替换项目名、issue provider 和 issue prefix 占位符
+- 仅在 force 模式下清理已声明的旧 Harness managed 文件
+- `issue_provider=repo` 时复制 `docs/issues/`
 
 初始化器不负责：
 
 - 推断业务 build / test / lint 命令
 - 创建 PR / MR、提交或推送
 - 写入外部 Issue Tracker
-- 执行项目 live E2E
-- 复制特定 agent adapter 与 extensions
+- 执行项目测试、live E2E 或部署
+- 安装 agent adapter、prompts、guides 或目标仓 gate
 
-## 4. Agent 扩展层
+## 4. 初始化后补齐
 
-Cursor adapter 按需复制：
+1. 保留或补充业务 README，不写初始化器教程。
+2. 在 `AGENTS.md` 写入真实项目结构、build、test、lint、integration / live E2E、禁止范围和发布入口。
+3. 复杂任务才创建 `.agents/plans/YYYY-MM-DD-<slug>.md`。
+4. 需要本地恢复信息或命令摘要时，写入 `.agents/state/` 或 `.agents/runs/`；默认不提交真实运行记录。
+5. `issue_provider=repo` 时使用 `docs/issues/TEMPLATE.md`；其他 provider 不生成仓库内 Issue 文档。
 
-```text
-sources/agent_adapters/cursor/.
-```
-
-Prompt 与 guide 复制：
-
-```text
-sources/agent_extensions/shared/.
-sources/agent_extensions/full/.
-```
-
-只有用户明确要求轻量占位时，把 `full` 换成 `placeholder`。
-
-扩展层最终文件：
-
-```text
-.agents/prompts/README.md
-.agents/prompts/issue-standard-workflow.md
-.agents/prompts/orchestrator-thread.md
-.agents/guides/code-review.md
-.agents/guides/linter.md
-```
-
-## 5. 初始化后补齐
-
-1. 保留或补充业务 README，不写 Harness 教程。
-2. 在 `AGENTS.md` 填写真实项目结构、build、test、lint、live E2E、禁止范围和发布入口。
-3. 确认 `docs/harness/control-plane.md` 中 provider 已替换。
-4. 若 issue provider 为 `repo`，使用 `docs/issues/TEMPLATE.md`。
-5. 保留 `.agents/PLANS.md`、plans 示例、skills、state/runs 模板。
-6. 使用手动逐阶段流程时读 `issue-standard-workflow.md`；发生独立任务或并行交接时读 `orchestrator-thread.md`。
-
-## 6. 验证
-
-目标仓：
-
-```bash
-make harness-verify
-git diff --check
-```
-
-PowerShell：
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\harness\check.ps1
-```
+## 5. 验证
 
 源仓维护后：
 
@@ -135,35 +92,26 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\harness\check.ps1
 make verify
 ```
 
-源仓完整回归必须覆盖：
+目标仓：按目标项目 `AGENTS.md` 中的真实命令验证。必须区分初始化器检查、项目本地验证、外部环境验证和未执行项；不要用初始化完成替代项目验证。
 
-- source contract
-- Bash / PowerShell 初始化器静态一致性
-- full / placeholder 文件集合与 Mode
-- fresh target 初始化和目标仓 check
-- review gate 与 evidence helper 正反例
-- 已删除文件不再生成或被引用
+没有 PowerShell runtime 时，只能记录 Bash 实跑与 PowerShell 静态检查，不能声称双平台实跑通过。
 
-没有 PowerShell runtime 时，只能记录 Bash 实跑与 PowerShell 静态一致性。
+## 6. 验收清单
 
-## 7. 验收清单
-
-- `README.md` 没有 Harness 说明
-- `AGENTS.md` 包含 Harness 入口和项目真实约束
-- `docs/harness/` 只有 `control-plane.md`
-- `.agents/prompts/` 只有 README 和两个 Prompt
-- `.agents/` 的 plans、skills、state、runs、guides 均保留
-- 旧 Harness 文档与通用 loop prompt 不存在
-- extension Mode 一致
-- 目标仓 Harness gate 与项目自身验证分别报告
+- 默认 issue provider 是 `linear`
+- 模板中的全部 skills 已复制到目标 `.agents/skills/`
+- `.agents/PLANS.md`、plans、state、runs 和 `docs/test/` 已生成
+- `issue_provider=repo` 才生成 `docs/issues/`
+- 默认没有 `Makefile`、`docs/harness/`、`scripts/harness/`、prompts、guides 或 agent adapter
+- 生成文件不含未替换的项目占位符
 - 用户现有文件和未提交改动未被静默覆盖
+- 目标项目的真实验证与初始化器验证分别报告
 
-## 8. 常见错误
+## 7. 常见错误
 
-- 把 Harness 介绍写回项目 README
-- 删除状态机、Done Gate 或 required live E2E 边界
-- 删除 `.agents` 的 plans、skills、state、runs 或 guides
-- 在多个文档重复定义同一状态字段
-- 用通用 automation / maintenance prompt 替代具体 runbook
+- 继续把默认输出当作 Harness 控制面
+- 把外部 Issue provider 元数据误认为已经写入 Issue
+- 删除 `.agents` 的 plans、skills、state 或 runs 辅助面
+- 未检查工作区就使用 force
 - 只更新 Bash，不同步 PowerShell 和契约测试
-- 没有 PowerShell runtime却声称双平台实跑通过
+- 没有 PowerShell runtime 却声称双平台实跑通过

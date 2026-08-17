@@ -1,75 +1,48 @@
-# Harness 初始化基线
+# Agent 项目初始化基线
 
-本仓库维护一套可初始化到业务项目的 Harness。目标是提供稳定的计划、状态、验证和交接入口，不把业务仓库铺成规则文档仓。
+本仓库提供一个极简的 Agent 项目初始化器。默认只写入项目协作真正需要的入口、计划、状态/运行记录模板、repo-local skills 和测试 runbook；不会把 Harness 控制面、状态机或 gate 流程带进目标项目。
 
 ## 维护源
 
-- `template/`：脚本初始化的 base harness
+- `template/`：初始化器复制的唯一项目模板；其中的全部 skills 会同步到目标项目
 - `scripts/init_harness_project.sh` / `.ps1`：Bash 与 PowerShell 初始化入口
-- `sources/gitignore/`：按技术栈拼装的 `.gitignore` 片段
-- `sources/agent_adapters/`：Cursor 等特定 agent 的适配层
-- `sources/agent_extensions/`：agent 驱动初始化时补充的 prompts 与 guides
-- `agent-init-project.md`：agent 执行入口
+- `sources/gitignore/`：按技术栈拼装 `.gitignore` 的片段
+- `sources/agent_adapters/`、`sources/agent_extensions/`：保留的历史/按需源，不属于默认初始化输出
+- `agent-init-project.md`：Agent 执行入口
 - `init-harness-project-sop.md`：维护者与人工操作 SOP
 
 ## 初始化后的默认目录
 
-脚本先生成 base harness；agent 驱动初始化再补 prompts、guides 和按需 adapter。
-
 ```text
 repo/
 ├── AGENTS.md
-├── README.md                       # 只保留业务说明
-├── Makefile
+├── README.md                       # 业务说明占位
 ├── .gitignore
 ├── .agents/
-│   ├── PLANS.md
+│   ├── PLANS.md                    # 按需计划说明
 │   ├── plans/
 │   │   ├── TEMPLATE.md
 │   │   └── EXAMPLE-implementation.md
-│   ├── prompts/
-│   │   ├── README.md
-│   │   ├── issue-standard-workflow.md
-│   │   └── orchestrator-thread.md
-│   ├── guides/
-│   │   ├── code-review.md
-│   │   └── linter.md
-│   ├── runs/TEMPLATE.md
-│   ├── state/TEMPLATE.md
-│   └── skills/
+│   ├── state/TEMPLATE.md           # 真实状态文件默认留在本地
+│   ├── runs/TEMPLATE.md            # 真实运行摘要默认留在本地
+│   └── skills/                     # template/ 下的全部 skills
 │       ├── issue-goal-prompt/
 │       ├── project-plan-archive/
 │       ├── project-version-release/
 │       └── test-runbook/
-├── docs/
-│   ├── harness/control-plane.md
-│   ├── issues/
-│   │   ├── README.md
-│   │   └── TEMPLATE.md
-│   └── test/RUNBOOK_TEMPLATE.md
-└── scripts/harness/
-    ├── check.sh
-    ├── common.sh
-    ├── evidence.sh
-    ├── review_gate.sh
-    ├── check.ps1
-    ├── common.ps1
-    ├── evidence.ps1
-    └── review_gate.ps1
+└── docs/
+    └── test/RUNBOOK_TEMPLATE.md
 ```
 
-## 规则归属
+当 `issue_provider=repo` 时，额外生成 `docs/issues/README.md` 和 `docs/issues/TEMPLATE.md`。默认 `issue_provider` 是 `linear`，但初始化器不会主动调用或写入外部 Issue 系统。
 
-- `AGENTS.md`：Agent 入口、项目真实约束和验证命令
-- `docs/harness/control-plane.md`：唯一 Harness 控制面、Issue 状态机与 provider 映射
-- `.agents/PLANS.md`：计划协议
-- `.agents/prompts/issue-standard-workflow.md`：手动逐阶段执行
-- `.agents/prompts/orchestrator-thread.md`：独立任务与主子任务交接
-- `.agents/guides/`：review 和 lint 专项说明
-- `docs/issues/`：`issue-provider=repo` 时的共享 Issue 载体
-- `docs/test/`：测试 runbook 与脱敏结果摘要
+默认不会生成以下内容：
 
-项目 README 不承载 Harness 说明。通用交互 loop、automation loop 和 maintenance loop 不进入默认产物；自动化与维护规则跟随具体 automation、skill 或项目 runbook。
+- `Makefile`
+- `docs/harness/`
+- `scripts/harness/`
+- `.agents/prompts/`、`.agents/guides/` 和 agent adapter
+- 强制性的 issue 状态机、review gate、evidence gate 或 orchestrator loop
 
 ## 使用方式
 
@@ -80,8 +53,6 @@ bash scripts/init_harness_project.sh \
   --target /abs/path/to/repo \
   --project-name NAME \
   --stack go \
-  --provider neutral \
-  --issue-provider linear \
   --issue-prefix ISSUE
 ```
 
@@ -92,17 +63,25 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\init_harness_proje
   -Target C:\path\to\repo `
   -ProjectName NAME `
   -Stack go `
-  -Provider neutral `
-  -IssueProvider linear `
   -IssuePrefix ISSUE
 ```
 
-Agent 驱动初始化继续按 [agent-init-project.md](agent-init-project.md) 补充 adapter 和 extensions。
+需要仓库内 Issue 记录时显式指定：
+
+```bash
+bash scripts/init_harness_project.sh \
+  --target /abs/path/to/repo \
+  --project-name NAME \
+  --stack go \
+  --issue-provider repo
+```
+
+已有目标文件默认不会覆盖；确认要更新旧初始化产物时使用 `--force` / `-Force`。旧版本声明过的 Harness 文件只会在 force 模式下清理，未声明的业务文件不会被处理。
 
 ## 验证边界
 
-- 源仓执行 `make verify` 或 `bash scripts/verify_harness_source.sh`；Windows 可运行 `scripts/verify_harness_source.ps1`。这些入口验证模板、初始化器、Bash/PowerShell 对齐、扩展源和 fresh init。
-- 目标仓执行 `make harness-verify`，只验证 Harness 运行时关键不变量；仍需运行项目自身 build、test、lint 和 required live E2E。
-- 没有 PowerShell runtime 时只能报告 Bash 实跑与 PowerShell 静态一致性，不能宣称 PowerShell 已运行通过。
+- 源仓运行 `make verify`，检查模板、初始化器、契约和 fresh target 初始化。
+- 目标仓只运行项目自身约定的 build、test、lint、integration 或 live E2E；本初始化器不再安装或执行目标仓 Harness gate。
+- 没有 PowerShell runtime 时，源仓验证只能报告 Bash 实跑与 PowerShell 静态检查结果，不能宣称 PowerShell 已实跑通过。
 
-修改 `template/`、初始化器或 `sources/agent_extensions/` 后必须运行源仓完整回归。
+修改 `template/`、初始化器或 `.gitignore` 源片段后运行 `make verify`。

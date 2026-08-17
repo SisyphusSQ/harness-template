@@ -1,6 +1,6 @@
-# Agent 扩展层维护源
+# 旧版 Agent 扩展层维护源
 
-这些文件只在 agent 驱动初始化时复制，不属于 base initializer 的 managed files。
+这些文件仅用于兼容已有项目，不属于当前 base initializer 的 managed files。新项目默认不复制 prompts、guides 或 agent adapter；如确实需要旧版扩展，必须由用户显式选择并自行确认它与当前项目约束兼容。
 
 ```text
 sources/agent_extensions/
@@ -30,4 +30,4 @@ sources/agent_extensions/
 - 其余四个文件必须带一致的 `Mode: full|placeholder`。
 - 普通交互、automation 和 maintenance 不再各维护一份通用 loop prompt。
 - thread tools 是 Codex 专用能力；其他 agent 仍可复用 Handoff 字段和共享状态契约。
-- 扩展内容与 `AGENTS.md`、`docs/harness/control-plane.md` 或 `.agents/PLANS.md` 冲突时，以后三者为准。
+- 旧版扩展与目标项目 `AGENTS.md`、`.agents/PLANS.md` 或当前项目约束冲突时，以目标项目现状和用户明确要求为准。
