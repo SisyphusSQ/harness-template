@@ -1,20 +1,12 @@
 # Repo Issues
 
-本目录用于 `issue-provider=repo` 的仓库内 issue 存储。没有 Linear、GitHub Issues、GitLab Issues 或其它外部工具时，仓库 issue 就是提交版 Issue Tracker。
+本目录仅在 `issue_provider=repo` 时使用，作为没有外部 Issue 系统时的提交版任务记录。
 
 固定规则：
 
-- 新 issue 从 `docs/issues/TEMPLATE.md` 复制并填写。
-- 文件名建议使用 `YYYY-MM-DD-<slug>.md` 或 `<ISSUE_PREFIX>-<number>-<slug>.md`。
-- 每个 issue 必须保留 `issue_id`、`status`、`kind`、`goal`、`included`、`excluded`、`acceptance_matrix`、`stop_when`、`verification_commands`、`recovery_point`、`next_action`、`writeback_log`。
-- `.agents/state/` 和 `.agents/runs/` 可以补充本地恢复与审计细节，但不替代本目录中的 issue 真相。
+- 新 Issue 从 `TEMPLATE.md` 复制并填写；
+- 每个 Issue 保留稳定编号、状态、目标、范围、验收、验证和下一步；
+- 本目录记录协作摘要，不保存凭据、Cookie、完整连接串或原始敏感输出；
+- `.agents/state/` 和 `.agents/runs/` 只保存本地辅助记录，不替代本目录的 Issue 真相。
 
-推荐状态：
-
-- `Backlog`
-- `Todo`
-- `In Progress`
-- `In Review`
-- `Done`
-- `Canceled`
-- `Blocked`
+推荐状态：`Backlog`、`Todo`、`In Progress`、`In Review`、`Done`、`Canceled`、`Blocked`。
