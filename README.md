@@ -1,87 +1,70 @@
 # Agent 项目初始化基线
 
-本仓库提供一个极简的 Agent 项目初始化器。默认只写入项目协作真正需要的入口、计划、状态/运行记录模板、repo-local skills 和测试 runbook；不会把 Harness 控制面、状态机或 gate 流程带进目标项目。
+v0.7.0 提供按需协作的项目入口。默认生成 9 个文件：项目规则、业务 README 占位、计划/恢复/运行记录模板、测试 runbook 和 .gitignore。四个通用技能单独维护、按需使用。
 
-## 维护源
+## 使用
 
-- `template/`：初始化器复制的唯一项目模板；其中的全部 skills 会同步到目标项目
-- `scripts/init_harness_project.sh` / `.ps1`：Bash 与 PowerShell 初始化入口
-- `sources/gitignore/`：按技术栈拼装 `.gitignore` 的片段
-- `sources/agent_adapters/`、`sources/agent_extensions/`：保留的历史/按需源，不属于默认初始化输出
-- `agent-init-project.md`：Agent 执行入口
-- `init-harness-project-sop.md`：维护者与人工操作 SOP
+需要 Python 3.10+，不需要安装第三方 Python 包。Bash 和 PowerShell 共用同一份初始化实现。
 
-## 初始化后的默认目录
+```bash
+bash scripts/init_harness_project.sh \
+  --target /abs/path/to/repo --project-name NAME --stack go
+```
+
+```powershell
+.\scripts\init_harness_project.ps1 -Target C:\path\to\repo -ProjectName NAME -Stack go
+```
+
+也可直接运行 `python3 scripts/init_harness_project.py`，参数与 Bash 相同。
+
+- 默认只创建缺失文件，保留已有 README、AGENTS、计划和技能。相同输入可重复执行。
+- .gitignore 只更新标记块，原有规则保留；首次生成的标记块放在原有规则之前，保留用户规则的优先级。
+- `--dry-run` / `-DryRun` 显示实际 create、update、keep-existing、unchanged 操作，不创建目录或文件。
+- 需要替换文件时显式指定 `--overwrite .agents/plans/TEMPLATE.md` / `-Overwrite .agents/plans/TEMPLATE.md`；先审阅该文件，不能用此参数覆盖输出范围之外的文件。
+- `--force` / `-Force` 已取消并会报错。初始化不会删除任何旧版文件，包括 Makefile。迁移见 [v0.7 迁移说明](docs/migration-v0.7.md)。
+
+## 默认目录
 
 ```text
 repo/
 ├── AGENTS.md
-├── README.md                       # 业务说明占位
+├── README.md
 ├── .gitignore
 ├── .agents/
-│   ├── PLANS.md                    # 按需计划说明
-│   ├── plans/
-│   │   ├── TEMPLATE.md
-│   │   └── EXAMPLE-implementation.md
-│   ├── state/TEMPLATE.md           # 真实状态文件默认留在本地
-│   ├── runs/TEMPLATE.md            # 真实运行摘要默认留在本地
-│   └── skills/                     # template/ 下的全部 skills
-│       ├── issue-goal-prompt/
-│       ├── project-plan-archive/
-│       ├── project-version-release/
-│       └── test-runbook/
-└── docs/
-    └── test/RUNBOOK_TEMPLATE.md
+│   ├── PLANS.md
+│   ├── plans/TEMPLATE.md
+│   ├── plans/EXAMPLE-implementation.md
+│   ├── state/TEMPLATE.md
+│   └── runs/TEMPLATE.md
+└── docs/test/RUNBOOK_TEMPLATE.md
 ```
 
-当 `issue_provider=repo` 时，额外生成 `docs/issues/README.md` 和 `docs/issues/TEMPLATE.md`。默认 `issue_provider` 是 `linear`，但初始化器不会主动调用或写入外部 Issue 系统。
+计划只用于复杂任务；state/runs 只在恢复或追溯需要时写入，不要求每个任务重复维护。初始化后由 Agent 结合仓库补齐真实入口、命令和约束，未知项保持明确，不能把模板生成当成业务验证。
 
-默认不会生成以下内容：
+默认 issue provider 是 `linear`，仅写元数据，不访问外部系统。`--issue-provider repo` 额外生成 docs/issues/。已有文件被保留时，其原有 provider、项目名和约束也保留；切换 provider 要审阅并更新相应文档。
 
-- `Makefile`
-- `docs/harness/`
-- `scripts/harness/`
-- `.agents/prompts/`、`.agents/guides/` 和 agent adapter
-- 强制性的 issue 状态机、review gate、evidence gate 或 orchestrator loop
+## 可选技能
 
-## 使用方式
+[project-workflows](plugins/project-workflows/README.md) 包含目标提示词、计划归档、版本发布、测试 runbook 四个技能，可作为共享插件使用。初始化器不会安装插件或修改本机设置。
 
-macOS、Linux 或 Git Bash：
+只在目标仓确实需要独立副本时选择技能：
 
 ```bash
 bash scripts/init_harness_project.sh \
-  --target /abs/path/to/repo \
-  --project-name NAME \
-  --stack go \
-  --issue-prefix ISSUE
+  --target /abs/path/to/repo --project-name NAME --stack go \
+  --skill test-runbook --skill project-plan-archive
 ```
 
-Windows PowerShell：
+PowerShell 对应 `-Skill test-runbook,project-plan-archive`。技能脚本可以从插件目录或 repo-local 副本执行，目标仓库通过 `--repo` 指定；源仓测试不会复制到业务项目。
 
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\init_harness_project.ps1 `
-  -Target C:\path\to\repo `
-  -ProjectName NAME `
-  -Stack go `
-  -IssuePrefix ISSUE
-```
+## 维护与验证
 
-需要仓库内 Issue 记录时显式指定：
+- `template/`：默认项目模板，目录自动发现，不重复维护文件清单。
+- `sources/gitignore/`：按技术栈拼装的规则片段。
+- `scripts/init_harness_project.py`：唯一初始化实现；.sh/.ps1 只传递参数。
+- `plugins/project-workflows/`：可选技能包。
+- [Agent 执行入口](agent-init-project.md)、[维护 SOP](init-harness-project-sop.md)。
 
-```bash
-bash scripts/init_harness_project.sh \
-  --target /abs/path/to/repo \
-  --project-name NAME \
-  --stack go \
-  --issue-provider repo
-```
+开发阶段运行 `make verify`；Windows 可运行 `python scripts/verify_harness_source.py`。验证使用临时目录、本地 Git 仓库和 Python 标准库，覆盖初始化、保留/覆盖边界、技能副本、归档和版本文件操作。发现 PowerShell runtime 时实跑其包装入口；否则明确报告 NOT_RUN。不访问业务服务、数据库或 Issue Tracker。
 
-已有目标文件默认不会覆盖；确认要更新旧初始化产物时使用 `--force` / `-Force`。旧版本声明过的 Harness 文件只会在 force 模式下清理，未声明的业务文件不会被处理。
-
-## 验证边界
-
-- 源仓运行 `make verify`，检查模板、初始化器、契约和 fresh target 初始化。
-- 目标仓只运行项目自身约定的 build、test、lint、integration 或 live E2E；本初始化器不再安装或执行目标仓 Harness gate。
-- 没有 PowerShell runtime 时，源仓验证只能报告 Bash 实跑与 PowerShell 静态检查结果，不能宣称 PowerShell 已实跑通过。
-
-修改 `template/`、初始化器或 `.gitignore` 源片段后运行 `make verify`。
+旧控制面与 adapter 源不再参与维护；需要历史参考时查看 [v0.6.0](https://github.com/SisyphusSQ/harness-template/tree/v0.6.0)。发布记录见 [CHANGELOG](CHANGELOG.md)。

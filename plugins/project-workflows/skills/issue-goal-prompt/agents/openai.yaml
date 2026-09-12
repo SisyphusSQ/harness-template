@@ -1,0 +1,6 @@
+interface:
+  display_name: "任务目标提示词"
+  short_description: "明确请求时生成任务交接提示词"
+  default_prompt: "使用 $issue-goal-prompt 完成当前明确要求的工作，复用已有授权与有效验证结果。"
+policy:
+  allow_implicit_invocation: false
