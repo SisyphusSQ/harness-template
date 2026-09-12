@@ -1,38 +1,20 @@
-# Run Summary
+# 本地运行记录索引
 
-本目录保存本地运行摘要、原始输出索引和恢复所需的最小事实。真实运行文件默认不提交。
+真实运行文件默认不提交。保留恢复和追溯所需的命令及原始输出索引，验收结论引用 runbook 或项目记录。
 
-## Metadata
+- run_id:
+- issue_provider: __ISSUE_PROVIDER__
+- issue_id:
+- started_at:
+- finished_at:
+- 目标与实际副作用：
 
-- `run_id`:
-- `issue_provider`: __ISSUE_PROVIDER__
-- `issue_id`:
-- `started_at`:
-- `finished_at`:
-- `working_directory`:
+| 命令或动作 | 结果 | 受控本地输出位置 |
+| --- | --- | --- |
+|  | 未执行 |  |
 
-## Scope
+- 结果摘要 / runbook 入口：
+- 清理状态：
+- 未解决事项与恢复点：
 
-- 目标：
-- 允许副作用：
-- 实际副作用：
-
-## Commands
-
-| 顺序 | 命令 | 结果 | 摘要 |
-| --- | --- | --- | --- |
-| 1 |  | 未执行 |  |
-
-## Result
-
-- 结论：`未执行`
-- 关键证据：
-- 清理结果：
-- 未解决问题：
-- 恢复点：
-- 下一步：
-
-## Artifact Boundary
-
-- 提交版只保留脱敏摘要。
-- 凭据、Cookie、完整 URL、数据库连接信息和原始输出保留在受控本地位置，不写入本文件。
+原始敏感输出按项目规则保存；共享或提交时只保留脱敏摘要，不能包含凭据、Cookie、连接串或私有临时地址。

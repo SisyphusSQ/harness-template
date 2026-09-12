@@ -1,0 +1,6 @@
+interface:
+  display_name: "计划归档"
+  short_description: "核对完成证据后归档并修复引用"
+  default_prompt: "使用 $project-plan-archive 完成当前明确要求的工作，复用已有授权与有效验证结果。"
+policy:
+  allow_implicit_invocation: false

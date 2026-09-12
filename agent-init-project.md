@@ -1,111 +1,22 @@
 # Agent 初始化项目
 
-本文件是 Agent 使用的执行入口。它调用极简项目初始化器，把模板中的通用协作能力同步到目标仓库，不安装 Harness 控制面或强制流程。
+先读取目标仓适用的 AGENTS.md、Git 状态和现有文件，从代码和用户请求确认项目名称、技术栈、issue provider 与目标绝对路径。已有授权持续有效；只询问无法可靠判断且会改变结果的输入。
 
-## 输入
+## 执行
 
-开始前确认：
+1. 说明目标目录、预期创建或更新的文件和副作用。
+2. 使用 Bash、PowerShell 包装入口或 Python 核心；默认保留已有文件，可先使用 --dry-run 审阅输出。
+3. 只有需要仓库独立技能副本时指定 --skill。已有共享插件时优先复用，不重复安装。
+4. 从项目代码、构建配置和现有文档补齐目标 AGENTS.md 中的真实目录、build/test/lint/live 入口、权限和发布约束。不能确认的事实明确保留为待确认，不编造命令。
+5. 同一事实只维护一个权威位置：计划记录方案与进度；runbook 记录可重复执行的验证；state 只保存恢复所需差量。
+6. 按改动影响运行项目需要的验证；说明哪些只是初始化器结果、哪些是项目验证、哪些未执行。
 
-- 初始化器根目录与目标仓库的绝对路径
-- 项目名称
-- 技术栈：`go`、`python`、`java`、`c` 及脚本支持的组合栈
-- issue provider：默认 `linear`；也可指定 `github`、`gitlab`、`repo` 或 `other`
-- 可选 issue prefix
+已有文件显示 keep-existing 时不会刷新其项目名、provider 或规则；需要变化时结合当前事实编辑，或审阅后逐文件指定 --overwrite。--force 不再受支持，旧版清理由独立的 [迁移说明](docs/migration-v0.7.md) 处理。
 
-能从仓库和用户指令确认的输入先自行读取；会改变项目语义且无法可靠判断的输入再询问。
+## 授权与停止
 
-## 执行顺序
+用户当前请求、先前授权和范围限制优先于技能通用指南。已授权的本地可恢复编辑继续执行；生成文件不要求额外审批。超出授权范围的外部操作、不可逆影响或无法消解的事实冲突才需要确认。
 
-### 1. 读取目标仓规则和工作区
+遇到路径冲突、符号链接、无效参数或初始化错误时，报告准确错误、已写入的文件和恢复入口。初始化器在写入前检查所有输出路径；磁盘或权限错误仍可能使写入部分完成，重跑会保留已存在文件。
 
-- 读取适用的 `AGENTS.md`。
-- 检查 Git 状态和已有文件。
-- 保留用户改动，不 reset、restore 或静默覆盖。
-- 执行前说明目标路径、写入范围和是否使用 force。
-
-### 2. 执行初始化器
-
-macOS、Linux、Git Bash：
-
-```bash
-bash <INIT_ROOT>/scripts/init_harness_project.sh \
-  --target /abs/path/to/repo \
-  --project-name NAME \
-  --stack STACK \
-  --issue-provider linear \
-  --issue-prefix PREFIX
-```
-
-Windows PowerShell：
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File <INIT_ROOT>\scripts\init_harness_project.ps1 `
-  -Target C:\path\to\repo `
-  -ProjectName NAME `
-  -Stack STACK `
-  -IssueProvider linear `
-  -IssuePrefix PREFIX
-```
-
-默认初始化内容是：
-
-- `AGENTS.md` 与业务 `README.md` 占位
-- `.agents/PLANS.md`、`plans/`、`state/`、`runs/`
-- `template/.agents/skills/` 下的全部 skills 及其辅助文件
-- `docs/test/RUNBOOK_TEMPLATE.md`
-- `issue_provider=repo` 时的 `docs/issues/`
-- 按技术栈生成的 `.gitignore`
-
-默认不生成 `docs/harness/`、`scripts/harness/`、Harness prompts/guides、Makefile、agent adapter 或强制 gate。初始化器也不会连接外部 Issue 系统、提交、推送或运行目标项目验证。
-
-### 3. 初始化后补项目事实
-
-在目标 `AGENTS.md` 中补充真实的：
-
-- 项目结构和开发入口
-- build、test、lint、integration / live E2E 命令
-- 必须遵守的安全、权限、数据和发布边界
-- 失败恢复与清理方式
-
-复杂任务按需在 `.agents/plans/` 创建计划；需要本地状态或运行摘要时使用 `.agents/state/` 与 `.agents/runs/`。这三类文件是辅助面，不会自动组成强制状态机。
-
-### 4. 验证
-
-源仓维护时运行：
-
-```bash
-make verify
-```
-
-目标仓不再有统一 Harness check；按目标项目 `AGENTS.md` 中的真实命令验证，并分别报告未执行项和外部依赖。
-
-## 停止条件
-
-遇到以下情况停止并报告：
-
-- 目标路径不是对应平台的绝对路径
-- 技术栈或 issue provider 无法可靠判断
-- 工作区现有文件会被覆盖且没有显式 force
-- 初始化器失败
-- 目标仓存在旧版声明的 managed Harness 文件，但未获准使用 force 清理
-
-报告当前步骤、准确错误、已产生的副作用和安全恢复入口。
-
-## 可复制 Prompt
-
-```text
-把 <INIT_ROOT> 的项目初始化模板同步到目标仓库。
-
-先读取目标仓 AGENTS.md 和 Git 状态，保留已有改动；说明脚本将写入的目标路径和覆盖边界。
-确认项目名称、技术栈、issue provider（默认 linear）和 issue prefix。
-
-1. 调用对应平台的 init_harness_project 脚本。
-2. 确认模板中的全部 skills、.agents/PLANS.md、plans、state、runs 和 docs/test 已同步。
-3. 把真实项目约束补入目标 AGENTS.md；项目 README 只保留业务说明。
-4. 仅当 issue provider 为 repo 时使用 docs/issues/ 模板。
-5. 不生成 Harness 控制面、scripts/harness、prompts/guides、Makefile 或强制 gate。
-6. 按目标项目真实命令执行需要的验证；不要把初始化完成写成项目测试通过。
-
-不要 reset/restore 用户改动，不连接外部 Issue 系统，不创建额外 constraints 文档。
-最终报告初始化目录、实际生成的文件、验证证据与未执行项。
-```
+本入口不自动提交、推送、部署或写入 Issue Tracker。任务另有明确交付授权时按该授权完成。

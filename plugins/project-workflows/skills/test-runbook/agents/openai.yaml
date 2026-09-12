@@ -1,0 +1,4 @@
+interface:
+  display_name: "验证 Runbook"
+  short_description: "可复现的集成和恢复验证"
+  default_prompt: "使用 $test-runbook 完成当前明确要求的工作，复用已有授权与有效验证结果。"

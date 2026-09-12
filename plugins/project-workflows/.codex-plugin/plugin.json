@@ -1,0 +1,20 @@
+{
+  "name": "project-workflows",
+  "version": "0.7.0",
+  "description": "按需使用的目标提示词、计划归档、版本记录与验证 runbook",
+  "author": {
+    "name": "SisyphusSQ"
+  },
+  "repository": "https://github.com/SisyphusSQ/harness-template",
+  "license": "MIT",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "项目协作工具",
+    "shortDescription": "按需使用，尊重项目事实与已有授权",
+    "longDescription": "为跨项目工作提供可选技能，支持共享插件和仓库独立副本。",
+    "developerName": "SisyphusSQ",
+    "category": "Productivity",
+    "capabilities": [],
+    "defaultPrompt": "按项目现有约定处理当前任务。"
+  }
+}
